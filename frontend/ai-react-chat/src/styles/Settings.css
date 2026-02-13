@@ -1,0 +1,89 @@
+.settings-container {
+  display: flex;
+  height: 90vh;
+  background-color: #121212;
+  color: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+/* Sidebar */
+.settings-sidebar {
+  width: 240px;
+  background-color: #1c1c1c;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #ccc;
+}
+
+.settings-sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.settings-sidebar li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.settings-sidebar li:hover {
+  background-color: #2a2a2a;
+}
+
+.settings-sidebar li.active {
+  background-color: #2f2f2f;
+  color: #00b4d8;
+}
+
+/* Main content */
+.settings-content {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.settings-section h3 {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #2f2f2f;
+  padding-bottom: 8px;
+}
+
+.setting-item {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.setting-item label {
+  color: #ccc;
+}
+
+.setting-item select {
+  background: #1c1c1c;
+  border: 1px solid #333;
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.setting-item select:hover {
+  border-color: #00b4d8;
+}

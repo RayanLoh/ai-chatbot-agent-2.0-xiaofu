@@ -1,0 +1,25 @@
+.footer {
+  height: 32px;
+  background: #1a1a1a;
+  border-top: 1px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.footer-text {
+  color: #666;
+  font-weight: 500;
+}
+
+.footer-text-highlight {
+  color: #007aff;
+  font-weight: 700;
+  background: linear-gradient(135deg, #007aff, #00d2ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

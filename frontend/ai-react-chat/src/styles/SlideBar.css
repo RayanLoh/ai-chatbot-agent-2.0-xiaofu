@@ -1,0 +1,209 @@
+.sidebar {
+  width: 280px;
+  background-color: #1f1f1f;
+  color: white;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.3s ease;
+  z-index: 100;
+  border-right: 1px solid #333;
+}
+
+.sidebar.closed {
+  transform: translateX(-100%);
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+.search-box {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background: #222;
+  color: white;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.search-box input:focus {
+  border-color: #007aff;
+  outline: none;
+}
+
+.conversation-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  height: calc(100% - 70px); /* 减去header高度 */
+  box-sizing: border-box;
+}
+
+.conversation-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  background: #222;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.conversation-item:hover {
+  background: #2a2a2a;
+}
+
+.conversation-item.active {
+  background: #2c3e50;
+}
+
+.conversation-content {
+  flex: 1;
+  min-width: 0; /* 防止文本溢出 */
+  display: flex;
+  flex-direction: column;
+}
+
+.conversation-title {
+  font-weight: 500;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 15px;
+  color: #e0e0e0;
+  padding-right: 8px;
+  flex: 1;
+}
+
+.conversation-item.active .conversation-title {
+  color: #fff;
+  font-weight: 600;
+}
+
+.conversation-info {
+  font-size: 11px;
+  color: #888;
+  display: flex;
+  gap: 8px;
+}
+
+.conversation-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  align-items: center;
+}
+
+.conversation-item:hover .conversation-actions {
+  opacity: 1;
+}
+
+.edit-btn,
+.delete-btn {
+  padding: 2px 4px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  background: transparent;
+  color: #888;
+  transition: all 0.2s;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-btn {
+  color: #b8c3cc;
+}
+
+.edit-btn:hover {
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.1);
+}
+
+.delete-btn {
+  color: #d1a0a0;
+}
+
+.delete-btn:hover {
+  color: #ff4545;
+  background: rgba(255, 69, 69, 0.1);
+}
+
+/* 编辑标题的输入框样式 */
+.conversation-content input {
+  width: 100%;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #007aff;
+  background: #222;
+  color: white;
+}
+
+.conversation-content input:focus {
+  outline: none;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-bottom: 1px solid #333;
+  background: #1f1f1f;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 70px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.new-chat-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 6px 8px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+  width: 32px;
+  height: 32px;
+}
+
+.new-chat-btn:hover {
+  color: #007aff;
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.new-chat-btn:active {
+  transform: scale(0.95);
+}
+
+.new-chat-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.5);
+}

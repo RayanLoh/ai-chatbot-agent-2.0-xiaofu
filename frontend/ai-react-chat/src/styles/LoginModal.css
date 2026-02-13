@@ -1,0 +1,96 @@
+/* 半透明背景覆盖全屏 */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5); /* 半透明黑背景 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(3px); /* 轻微模糊 */
+  animation: fadeIn 0.3s ease;
+  z-index: 999;
+}
+
+/* 弹窗主体 */
+.login-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 30px 40px;
+  width: 350px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  animation: slideUp 0.3s ease;
+}
+
+/* 标题 */
+.login-modal h3 {
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  color: #222;
+}
+
+/* Google 登录按钮区 */
+div[role="button"] {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+/* GitHub 登录按钮 */
+.github-login {
+  width: 100%;
+  background: #24292e;
+  color: white;
+  border: none;
+  padding: 10px 0;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.github-login:hover {
+  background: #333;
+}
+
+/* 关闭按钮 */
+.close-btn {
+  margin-top: 20px;
+  background: #f3f3f3;
+  color: #333;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.close-btn:hover {
+  background: #e0e0e0;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
