@@ -154,6 +154,7 @@ button.stop:hover {
 
 .sidebar.closed {
   width: 0;
+  transition: width 0.3s ease;
 }
 
 .sidebar-header {
@@ -184,8 +185,10 @@ button.stop:hover {
 }
 
 .chat-container.sidebar-closed {
-  padding-left: 40px;
-  padding-right: 40px;
+  padding-left: 20px;
+  padding-right: 20px;
+  width: 100%;
+  transition: all 0.3s ease;
 }
 
 /* Header 里的 menu 按钮 */
@@ -243,6 +246,11 @@ button.stop:hover {
 
   .chat-container {
     padding: 12px;
+    width: 100%;
+    overflow: hidden;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   .chat-container.sidebar-closed {
@@ -255,6 +263,9 @@ button.stop:hover {
     height: calc(100vh - 140px);
     height: calc(100svh - 140px);
     border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
 
   .msg {
@@ -270,6 +281,8 @@ button.stop:hover {
     height: auto;
     min-height: 56px;
     border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   input {
@@ -286,13 +299,18 @@ button.stop:hover {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: transparent;
     z-index: 999;
-    backdrop-filter: blur(2px);
+    pointer-events: none;
   }
 
   .sidebar-overlay.visible {
     display: block;
+    pointer-events: auto;
+    left: 320px;
+    right: 0;
+    bottom: 120px;
+    top: 0;
   }
 
   /* 在桌面端强制隐藏 overlay */
