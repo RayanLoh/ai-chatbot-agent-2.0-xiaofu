@@ -501,3 +501,26 @@ button.stop:hover {
     scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
   }
 }
+
+/* 优化小芙回复中的 Markdown 样式 */
+.msg.bot h1, .msg.bot h2, .msg.bot h3 {
+  margin-top: 5px;
+  margin-bottom: 10px;
+  color: #007aff; /* 给标题加个漂亮的蓝色 */
+}
+
+.msg.bot p {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.msg.bot ul, .msg.bot ol {
+  margin-left: 20px;
+  margin-bottom: 10px;
+}
+
+.msg.bot code {
+  background: #444;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
