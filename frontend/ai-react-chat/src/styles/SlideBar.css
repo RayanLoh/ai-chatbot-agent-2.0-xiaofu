@@ -6,10 +6,11 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  transition: transform 0.3s ease;
+  transition: width 0.3s ease, opacity 0.3s ease;
   z-index: 100;
   border-right: 1px solid #333;
-  transition: transform 0.3s ease;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .sidebar.closed {
@@ -17,6 +18,7 @@
   margin-left: 0;
   border-right: none;
   transform: none;
+  opacity: 0;
 }
 
 .sidebar.open {
@@ -210,4 +212,30 @@
 .new-chat-btn:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed; /* 手机端浮动在聊天框上方 */
+    left: 0;
+    top: 60px; /* Header高度 */
+    bottom: 0;
+    width: 280px;
+    z-index: 1000;
+    transition: transform 0.3s ease; /* 手机端位移更顺滑 */
+  }
+
+  .sidebar.closed {
+    width: 280px; /* 保持物理宽度 */
+    transform: translateX(-100%); /* 但移出屏幕外 */
+    opacity: 1;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .chat-container {
+    width: 100%; /* 手机端聊天框永远满屏 */
+  }
 }

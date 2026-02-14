@@ -9,12 +9,13 @@ import "./index.css";
 
 // 优先使用 Vite 环境变量，回退到本地代理
 let API_BASE = (import.meta.env.VITE_API_BASE || "/api").trim();
+const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 768;
 
 function App() {
   const [messages, setMessages] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [conversationId, setConversationId] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile());
 
   const [isMounted, setIsMounted] = useState(false);
   const [GoogleProvider, setGoogleProvider] = useState(null);
@@ -67,6 +68,20 @@ function App() {
       }
     }
   }, []);
+
+  useEffect(() => {
+  const handleResize = () => {
+    // 窗口缩小时自动关闭，窗口放大时自动开启
+    if (window.innerWidth <= 768) {
+      setIsSidebarOpen(false);
+    } else {
+      setIsSidebarOpen(true);
+    }
+  };
+
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
 
   useEffect(() => {
     if (isMounted && messages.length > 0) {
