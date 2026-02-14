@@ -524,3 +524,28 @@ button.stop:hover {
   padding: 2px 4px;
   border-radius: 4px;
 }
+
+.msg.bot table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 10px 0;
+  background: #2a2a2a;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.msg.bot th, .msg.bot td {
+  border: 1px solid #444;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.msg.bot th {
+  background-color: #007aff;
+  color: white;
+  font-weight: 600;
+}
+
+.msg.bot tr:nth-child(even) {
+  background-color: #222;
+}

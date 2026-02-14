@@ -7,6 +7,7 @@ import Footer from "./component/Footer";
 import Settings from "./component/Settings";
 import "./index.css";
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // 优先使用 Vite 环境变量，回退到本地代理
 let API_BASE = (import.meta.env.VITE_API_BASE || "/api").trim();
@@ -294,7 +295,9 @@ const createNewChat = async () => {
                 <div key={i} className={`msg ${m.sender} ${m.isLoading ? 'loading' : ''}`}>
                   {/* 核心修复：如果是 AI (bot)，使用 ReactMarkdown 解析；如果是用户，保留原样 */}
                   {m.sender === "bot" ? (
-                    <ReactMarkdown>{m.text}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {m.text}
+                    </ReactMarkdown>
                   ) : (
                     <pre>{m.text}</pre>
                   )}
