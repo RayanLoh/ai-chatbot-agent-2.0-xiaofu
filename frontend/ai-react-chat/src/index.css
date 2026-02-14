@@ -87,6 +87,20 @@ html, body {
     line-height: 1.5;
 }
 
+/* 加载动画 */
+@keyframes dotBounce {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.msg.loading {
+  animation: dotBounce 1.4s infinite;
+}
+
 .input-box {
   display: flex;
   gap: 12px;

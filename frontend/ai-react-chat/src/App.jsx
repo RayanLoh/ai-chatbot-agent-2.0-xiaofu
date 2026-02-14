@@ -117,19 +117,6 @@ function App() {
     return <div className="app-root" suppressHydrationWarning={true}></div>;
   }
 
-  // 👇 新增：保存 API URL
-  const handleSaveApiUrl = () => {
-    const url = tempApiUrl.trim();
-    if (!url) {
-      alert('请输入有效的 URL');
-      return;
-    }
-    setApiBase(url);
-    API_BASE = url;
-    localStorage.setItem('apiBase', url);
-    alert('✅ API URL 已更新！');
-  };
-
   const stopGenerating = async () => {
     // 中止本地请求
     if (abortControllerRef.current) {
@@ -162,7 +149,7 @@ const sendMessage = async () => {
   setIsGenerating(true);
 
   // 2. 预留一个 AI 的位置，初始显示“三粒点”
-  setMessages(prev => [...prev, { sender: "bot", text: "..." }]);
+  setMessages(prev => [...prev, { sender: "bot", text: "I'm Thinking", isLoading: true }]);
 
   try {
     const response = await fetch(`${API_BASE}/generate`, {
@@ -303,8 +290,8 @@ const createNewChat = async () => {
         <div className={`chat-container ${isSidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
           <div className="messages">
             {messages.map((m, i) => (
-              <div key={i} className={`msg ${m.sender}`}>
-                <pre>{m.text}</pre>
+              <div key={i} className={`msg ${m.sender} ${m.isLoading ? 'loading' : ''}`}>
+                <pre>{m.isLoading ? `${m.text}...` : m.text}</pre>
               </div>
             ))}
             <div ref={messagesEndRef} />
