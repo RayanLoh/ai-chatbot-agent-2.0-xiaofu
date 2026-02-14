@@ -506,7 +506,7 @@ button.stop:hover {
 .msg.bot h1, .msg.bot h2, .msg.bot h3 {
   margin-top: 5px;
   margin-bottom: 10px;
-  color: #007aff; /* 给标题加个漂亮的蓝色 */
+  color: #00ffd9; /* 给标题加个漂亮的蓝色 */
 }
 
 .msg.bot p {
