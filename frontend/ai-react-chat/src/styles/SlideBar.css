@@ -9,14 +9,18 @@
   transition: transform 0.3s ease;
   z-index: 100;
   border-right: 1px solid #333;
+  transition: transform 0.3s ease;
 }
 
 .sidebar.closed {
-  transform: translateX(-100%);
+  width: 0;
+  margin-left: 0;
+  border-right: none;
+  transform: none;
 }
 
 .sidebar.open {
-  transform: translateX(0);
+  width: 280px;
 }
 
 .search-box {

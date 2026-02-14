@@ -225,6 +225,9 @@ button.stop:hover {
     position: relative;
     height: calc(100vh - 50px);
     height: calc(100svh - 50px);
+    width: 100%;
+    display: flex;
+    overflow: hidden;
   }
 
   .sidebar {
@@ -233,7 +236,7 @@ button.stop:hover {
     top: 0;
     bottom: 0;
     background: #1a1a1a;
-    z-index: 1000;
+    z-index: 1002;
     width: 100%;
     max-width: 320px;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
@@ -247,10 +250,12 @@ button.stop:hover {
   .chat-container {
     padding: 12px;
     width: 100%;
+    height: 100%;
     overflow: hidden;
     flex: 1;
     display: flex;
     flex-direction: column;
+    position: relative;
   }
 
   .chat-container.sidebar-closed {
@@ -258,21 +263,24 @@ button.stop:hover {
   }
 
   .messages {
-    padding: 12px;
+    padding: 8px;
     margin-bottom: 12px;
-    height: calc(100vh - 140px);
-    height: calc(100svh - 140px);
-    border-radius: 8px;
+    flex: 1;
+    min-height: 0;
+    border-radius: 6px;
     width: 100%;
     box-sizing: border-box;
+    overflow-y: auto;
     overflow-x: hidden;
   }
 
   .msg {
-    max-width: 90%;
+    max-width: 95%;
     padding: 10px 12px;
     margin: 6px 0;
-    font-size: 15px;
+    font-size: 14px;
+    word-break: break-word;
+    word-wrap: break-word;
   }
 
   .input-box {
@@ -283,6 +291,8 @@ button.stop:hover {
     border-radius: 8px;
     width: 100%;
     box-sizing: border-box;
+    position: relative;
+    z-index: 1001; /* sit above overlay so input remains clickable */
   }
 
   input {
@@ -306,11 +316,14 @@ button.stop:hover {
 
   .sidebar-overlay.visible {
     display: block;
+    /* Full-screen overlay but sidebar sits above it (higher z-index)
+       so overlay won't block sidebar/search. Keep pointer-events
+       so clicking messages area closes the sidebar. */
     pointer-events: auto;
-    left: 320px;
+    left: 0;
     right: 0;
-    bottom: 120px;
     top: 0;
+    bottom: 0;
   }
 
   /* 在桌面端强制隐藏 overlay */
