@@ -22,7 +22,6 @@ function App() {
   
   // 👇 新增：API URL 状态
   const [apiBase, setApiBase] = useState(API_BASE);
-  const [showApiModal, setShowApiModal] = useState(false);
   const [tempApiUrl, setTempApiUrl] = useState(apiBase);
 
   const inputRef = useRef(null);
@@ -113,7 +112,6 @@ function App() {
     setApiBase(url);
     API_BASE = url;
     localStorage.setItem('apiBase', url);
-    setShowApiModal(false);
     alert('✅ API URL 已更新！');
   };
 
@@ -273,7 +271,6 @@ const createNewChat = async () => {
     <div className="app-container">
       <Header 
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-        onShowApiModal={() => setShowApiModal(true)}
       />
       <div className="main-container">
         <div className={`sidebar-overlay ${isSidebarOpen ? 'visible' : ''}`} onClick={() => setIsSidebarOpen(false)} />
@@ -327,37 +324,6 @@ const createNewChat = async () => {
     </Routes>
   );
 
-  // 👇 模态框组件
-  const ApiModal = () => (
-    <div className={`api-modal-overlay ${!showApiModal ? 'hidden' : ''}`}>
-      <div className="api-modal-content">
-        <h2>Renew Colab Backend URL</h2>
-        <p>After each Colab restart, copy the new ngrok URL and paste it below.</p>
-        <input
-          type="text"
-          className="api-modal-input"
-          value={tempApiUrl}
-          onChange={(e) => setTempApiUrl(e.target.value)}
-          placeholder="https://xxx-xxx-xxx.ngrok-free.dev"
-        />
-        <div className="api-modal-actions">
-          <button
-            className="api-modal-btn api-modal-btn-cancel"
-            onClick={() => setShowApiModal(false)}
-          >
-            Cancel
-          </button>
-          <button
-            className="api-modal-btn api-modal-btn-save"
-            onClick={handleSaveApiUrl}
-          >
-            Save
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="app-root" suppressHydrationWarning={true}>
       {GoogleProvider ? (
@@ -365,7 +331,6 @@ const createNewChat = async () => {
       ) : (
         routesContent
       )}
-      <ApiModal />
     </div>
   );
 }
