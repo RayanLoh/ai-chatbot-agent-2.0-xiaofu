@@ -159,9 +159,12 @@ const sendMessage = async () => {
   try {
     const response = await fetch(`${apiBase}/generate`, {
       method: "POST",
+      headers: { 
+        "Content-Type": "application/json"  // 🔥 必须加上这一行！
+      },
       body: JSON.stringify({ 
         prompt: msg, 
-        conversation_id: conversationId 
+        conversation_id: conversationId || null // 👈 增加容错，确保 ID 不为 undefined
       }),
     });
 
