@@ -1,7 +1,9 @@
 .header {
   height: 52px;
-  background: #1a1a1a;
-  border-bottom: 1px solid #333;
+  background: linear-gradient(135deg, rgba(255, 245, 240, 0.85), rgba(240, 230, 225, 0.8));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(212, 168, 241, 0.2);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -9,6 +11,13 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 2px 15px rgba(200, 130, 200, 0.08);
+}
+
+.dark-theme .header {
+  background: linear-gradient(135deg, rgba(40, 40, 45, 0.85), rgba(35, 35, 40, 0.8));
+  border-bottom-color: rgba(150, 120, 180, 0.2);
+  box-shadow: 0 2px 15px rgba(80, 50, 120, 0.15);
 }
 
 .logo {
@@ -21,11 +30,15 @@
 }
 
 .logo-text {
-  color: #ffffff;
+  color: #2a2a2a;
+}
+
+.dark-theme .logo-text {
+  color: #e0e0e0;
 }
 
 .logo-text-highlight {
-  background: linear-gradient(135deg, #007aff, #00d2ff);
+  background: linear-gradient(135deg, #c273d4, #9968c8);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -54,13 +67,21 @@
 }
 
 .menu-btn:hover {
-  color: #007aff;
-  background: rgba(255, 255, 255, 0.1); /* 小小 hover 效果 */
-  border-radius: 6px;
+  color: #c273d4;
+  background: rgba(200, 130, 200, 0.15);
+  border-radius: 8px;
 }
+
+.dark-theme .menu-btn {
+  color: #d0d0d0;
+}
+
+.dark-theme .menu-btn:hover {
+  color: #e0a0d0;
+  background: rgba(180, 100, 150, 0.2);
 .menu-btn:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.5);
+  box-shadow: 0 0 0 2px rgba(200, 130, 200, 0.3);
 }
 
 .profile-img {
@@ -69,8 +90,13 @@
   border-radius: 50%;
   object-fit: cover;
   cursor: pointer;
-  border: 1px solid #444;
+  border: 1.5px solid rgba(200, 130, 200, 0.3);
+  box-shadow: 0 2px 8px rgba(200, 130, 200, 0.15);
 }
+
+.dark-theme .profile-img {
+  border-color: rgba(180, 100, 150, 0.4);
+  box-shadow: 0 2px 8px rgba(180, 100, 150, 0.2);
 
 .more-btn {
   background: none;
@@ -83,18 +109,21 @@
 }
 
 .more-btn:hover {
-  background: #222;
+  background: rgba(200, 130, 200, 0.1);
 }
 
+.dark-theme .more-btn:hover {
+  background: rgba(180, 100, 150, 0.15);
+
 .icon {
-  color: #eee;
+  color: #4a4a4a;
   cursor: pointer;
 }
 
 .menu-dots {
   background: none;
   border: none;
-  color: #eee;
+  color: #4a4a4a;
   cursor: pointer;
 }
 
@@ -112,6 +141,11 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
+.dark-theme .dropdown-menu {
+  background: #2a2a30;
+  border-color: #404050;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+
 .dropdown-menu button {
   background: none;
   border: none;
@@ -125,6 +159,9 @@
 .dropdown-menu button:hover {
   background: #333;
 }
+
+.dark-theme .dropdown-menu button:hover {
+  background: #3a3a45;
 
 .ngrok-btn {
   background: none;
@@ -143,4 +180,43 @@
 .ngrok-btn:hover {
   color: #007aff;
   background: rgba(0, 122, 255, 0.1);
+}
+
+.theme-btn {
+  background: linear-gradient(135deg, rgba(194, 115, 212, 0.2), rgba(152, 104, 200, 0.2));
+  border: 1px solid rgba(194, 115, 212, 0.3);
+  color: #4a4a4a;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(194, 115, 212, 0.1);
+}
+
+.theme-btn:hover {
+  background: linear-gradient(135deg, rgba(194, 115, 212, 0.35), rgba(152, 104, 200, 0.35));
+  border-color: rgba(194, 115, 212, 0.5);
+  box-shadow: 0 4px 12px rgba(194, 115, 212, 0.2);
+  transform: scale(1.05);
+}
+
+.theme-btn:active {
+  transform: scale(0.98);
+}
+
+.dark-theme .theme-btn {
+  background: linear-gradient(135deg, rgba(180, 100, 150, 0.25), rgba(150, 90, 130, 0.25));
+  border-color: rgba(180, 100, 150, 0.4);
+  color: #d0d0d0;
+  box-shadow: 0 2px 8px rgba(180, 100, 150, 0.15);
+}
+
+.dark-theme .theme-btn:hover {
+  background: linear-gradient(135deg, rgba(200, 120, 160, 0.4), rgba(170, 100, 140, 0.4));
+  border-color: rgba(200, 120, 160, 0.5);
+  box-shadow: 0 4px 12px rgba(200, 120, 160, 0.25);
 }

@@ -1,7 +1,9 @@
 .footer {
   height: 32px;
-  background: #1a1a1a;
-  border-top: 1px solid #333;
+  background: linear-gradient(135deg, rgba(255, 245, 240, 0.8), rgba(240, 230, 225, 0.75));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(212, 168, 241, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11,18 +13,37 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  box-shadow: 0 -2px 15px rgba(200, 130, 200, 0.08);
 }
 
 .footer-text {
-  color: #666;
+  color: #6a6a6a;
   font-weight: 500;
 }
 
 .footer-text-highlight {
-  color: #007aff;
+  color: #c273d4;
   font-weight: 700;
-  background: linear-gradient(135deg, #007aff, #00d2ff);
+  background: linear-gradient(135deg, #c273d4, #9968c8);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* ============ Dark Theme for Footer ============ */
+.dark-theme .footer {
+  background: linear-gradient(135deg, rgba(40, 40, 45, 0.8), rgba(35, 35, 40, 0.75));
+  border-top-color: rgba(150, 120, 180, 0.2);
+  box-shadow: 0 -2px 15px rgba(80, 50, 120, 0.15);
+}
+
+.dark-theme .footer-text {
+  color: #a0a0a0;
+}
+
+.dark-theme .footer-text-highlight {
+  color: transparent;
+  background: linear-gradient(135deg, #d4a0d4, #c898d8);
+  -webkit-background-clip: text;
+  background-clip: text;
 }

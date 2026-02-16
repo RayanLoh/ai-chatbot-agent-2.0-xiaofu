@@ -1,27 +1,31 @@
 .settings-container {
   display: flex;
   height: 90vh;
-  background-color: #121212;
-  color: #fff;
+  background: linear-gradient(135deg, #faf6f1 0%, #f3e9e3 50%, #ede0d9 100%);
+  color: #2a2a2a;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 32px rgba(200, 130, 200, 0.15);
 }
 
 /* Sidebar */
 .settings-sidebar {
   width: 240px;
-  background-color: #1c1c1c;
+  background: linear-gradient(135deg, rgba(255, 245, 240, 0.85), rgba(240, 230, 225, 0.8));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(212, 168, 241, 0.2);
   padding: 20px;
   display: flex;
   flex-direction: column;
+  box-shadow: 2px 0 15px rgba(200, 130, 200, 0.1);
 }
 
 .sidebar-title {
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 15px;
-  color: #ccc;
+  color: #6b5566;
 }
 
 .settings-sidebar ul {
@@ -37,16 +41,19 @@
   margin-bottom: 6px;
   border-radius: 10px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  color: #4a4a4a;
 }
 
 .settings-sidebar li:hover {
-  background-color: #2a2a2a;
+  background-color: rgba(200, 130, 200, 0.1);
+  color: #9968c8;
 }
 
 .settings-sidebar li.active {
-  background-color: #2f2f2f;
-  color: #00b4d8;
+  background: linear-gradient(135deg, rgba(200, 130, 200, 0.2), rgba(152, 200, 220, 0.15));
+  color: #c273d4;
+  border: 1px solid rgba(200, 130, 200, 0.2);
 }
 
 /* Main content */
@@ -59,8 +66,9 @@
 .settings-section h3 {
   font-size: 1.2rem;
   margin-bottom: 20px;
-  border-bottom: 1px solid #2f2f2f;
+  border-bottom: 1px solid rgba(212, 168, 241, 0.2);
   padding-bottom: 8px;
+  color: #6b5566;
 }
 
 .setting-item {
@@ -71,19 +79,26 @@
 }
 
 .setting-item label {
-  color: #ccc;
+  color: #4a4a4a;
 }
 
 .setting-item select {
-  background: #1c1c1c;
-  border: 1px solid #333;
-  color: #fff;
-  border-radius: 8px;
-  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(212, 168, 241, 0.3);
+  color: #2a2a2a;
+  border-radius: 10px;
+  padding: 8px 12px;
   outline: none;
-  transition: border 0.2s;
+  transition: all 0.3s ease;
+  font-weight: 500;
 }
 
 .setting-item select:hover {
-  border-color: #00b4d8;
+  border-color: rgba(200, 130, 200, 0.5);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.setting-item select:focus {
+  border-color: rgba(200, 130, 200, 0.7);
+  box-shadow: 0 0 12px rgba(200, 130, 200, 0.2);
 }

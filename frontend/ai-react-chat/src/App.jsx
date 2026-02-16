@@ -25,6 +25,12 @@ function App() {
   const [isMounted, setIsMounted] = useState(false);
   const [GoogleProvider, setGoogleProvider] = useState(null);
   const [isClient, setIsClient] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') || 'light';
+    }
+    return 'light';
+  });
   
   // 👇 新增：API URL 状态
   const [apiBase, setApiBase] = useState(API_BASE);
@@ -117,6 +123,13 @@ function App() {
     setIsClient(true);
   }, []);
 
+  // 主题切换函数
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+  };
+
   // 只在客户端完全加载后才渲染完整内容
   if (!isMounted || !isClient) {
     return <div className="app-root" suppressHydrationWarning={true}></div>;
@@ -138,7 +151,7 @@ function App() {
         }
       });
     } catch (error) {
-      console.error("调用 stop 接口失败:", error);
+      console.error("Failed to stop generation:", error);
     }
     
     setIsGenerating(false);
@@ -242,7 +255,7 @@ const createNewChat = async () => {
       localStorage.setItem('lastMessages', JSON.stringify(data.messages || []));
     } catch (error) {
       console.error("Failed to load conversation:", error);
-      setMessages(prev => [...prev, { sender: "bot", text: `❌ 加载对话失败: ${error.message}` }]);
+      setMessages(prev => [...prev, { sender: "bot", text: `❌ failed to load conversation: ${error.message}` }]);
     }
   };
 
@@ -276,6 +289,8 @@ const createNewChat = async () => {
     <div className="app-container">
       <Header 
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        theme={theme}
+        onThemeToggle={toggleTheme}
       />
       <div className="main-container">
         <div className={`sidebar-overlay ${isSidebarOpen ? 'visible' : ''}`} onClick={() => setIsSidebarOpen(false)} />
@@ -352,7 +367,7 @@ const createNewChat = async () => {
   );
 
   return (
-    <div className="app-root" suppressHydrationWarning={true}>
+    <div className={`app-root ${theme}-theme`} suppressHydrationWarning={true}>
       {GoogleProvider ? (
         <GoogleProvider clientId={clientId}>{routesContent}</GoogleProvider>
       ) : (

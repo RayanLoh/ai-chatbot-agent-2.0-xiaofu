@@ -17,8 +17,7 @@ const getApiBase = () => {
 const getAuthHeader = () => {
   const token = localStorage.getItem('auth_token');
   return {
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-    'ngrok-skip-browser-warning': '69420'
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
   };
 };
 
