@@ -10,7 +10,10 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 // 优先使用 Vite 环境变量，回退到本地代理
-let API_BASE = (import.meta.env.VITE_API_BASE || "/api").trim();
+let API_BASE = (import.meta.env.VITE_API_BASE || "").trim();
+if (API_BASE && !API_BASE.startsWith('http')) {
+    API_BASE = `https://${API_BASE}`; // 自动补齐 https
+}
 const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 768;
 
 function App() {
@@ -154,12 +157,8 @@ const sendMessage = async () => {
   setMessages(prev => [...prev, { sender: "bot", text: "I'm Thinking", isLoading: true }]);
 
   try {
-    const response = await fetch(`${API_BASE}/generate`, {
+    const response = await fetch(`${apiBase}/generate`, {
       method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "69420" 
-      },
       body: JSON.stringify({ 
         prompt: msg, 
         conversation_id: conversationId 
@@ -181,14 +180,14 @@ const sendMessage = async () => {
 
       if (data.conversation_id) setConversationId(data.conversation_id);
     } else {
-      throw new Error("没拿到 AI 的回复内容");
+      throw new Error("Didn't receive the AI's response.");
     }
   } catch (error) {
-    console.error("前端报错:", error);
+    console.error("Front-end error:", error);
     // 如果失败了，把三粒点改成报错信息
     setMessages(prev => {
       const updated = [...prev];
-      updated[updated.length - 1] = { sender: "bot", text: "哎呀，连接断开了...诶嘿？" };
+      updated[updated.length - 1] = { sender: "bot", text: "Oops, the connection dropped... Ei-Heh?" };
       return updated;
     });
   } finally {
@@ -205,7 +204,7 @@ const createNewChat = async () => {
         "Content-Type": "application/json",
         "ngrok-skip-browser-warning": "69420"
       },
-      body: JSON.stringify({ title: "新对话" })
+      body: JSON.stringify({ title: "new conversation" })
     });
     
     const data = await response.json();
@@ -217,9 +216,9 @@ const createNewChat = async () => {
     localStorage.setItem('lastConversationId', newConvId);
     
     if (window.innerWidth <= 768) setIsSidebarOpen(false);
-    console.log("新对话已创建:", newConvId);
+    console.log("New conversation created:", newConvId);
   } catch (error) {
-    console.error("创建对话失败:", error);
+    console.error("Failed to create new conversation:", error);
     // 本地回退
     setMessages([]);
     setConversationId(null);
@@ -231,7 +230,7 @@ const createNewChat = async () => {
       const response = await fetch(`${apiBase}/conversations/${id}`, {
         headers: { "ngrok-skip-browser-warning": "69420" }
       });
-      if (!response.ok) throw new Error('获取对话失败');
+      if (!response.ok) throw new Error('Failed to load conversation');
       
       const data = await response.json();
       setMessages(data.messages || []);
@@ -239,22 +238,21 @@ const createNewChat = async () => {
       localStorage.setItem('lastConversationId', data.id);
       localStorage.setItem('lastMessages', JSON.stringify(data.messages || []));
     } catch (error) {
-      console.error("加载对话失败:", error);
+      console.error("Failed to load conversation:", error);
       setMessages(prev => [...prev, { sender: "bot", text: `❌ 加载对话失败: ${error.message}` }]);
     }
   };
 
   // 👇 新增：删除对话函数
   const handleDeleteConversation = async (id) => {
-    if (!window.confirm('确定要删除这个对话吗？')) return;
+    if (!window.confirm('Are you sure you want to delete this conversation?')) return;
     
     try {
       const response = await fetch(`${apiBase}/conversations/${id}`, {
         method: "DELETE",
-        headers: { "ngrok-skip-browser-warning": "69420" }
       });
       
-      if (!response.ok) throw new Error('删除失败');
+      if (!response.ok) throw new Error('Failed to delete conversation');
       
       // 如果删除的是当前对话，创建新对话
       if (conversationId === id) {
@@ -266,8 +264,8 @@ const createNewChat = async () => {
         }
       }
     } catch (error) {
-      console.error("删除对话失败:", error);
-      alert('删除失败: ' + error.message);
+      console.error("Failed to delete conversation:", error);
+      alert('Failed to delete conversation: ' + error.message);
     }
   };
 
