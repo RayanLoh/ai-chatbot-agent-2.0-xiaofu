@@ -43,13 +43,17 @@ html, body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 20px;
   background: #222;
-  border-radius: 12px;
-  margin-bottom: 16px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 16px;
+  width: 100%;
+  box-sizing: border-box;
   overflow-y: auto;
+  overflow-x: hidden;
   min-height: 0;
   height: calc(100% - 80px); /* 减去输入框高度 */
+  box-shadow: 0 0 15px rgba(212, 168, 241, 0.4);
 }
 
 .msg {
@@ -57,8 +61,11 @@ html, body {
   padding: 12px 16px;
   margin: 8px 0;
   border-radius: 16px;
-  line-height: 1.6;
+  line-height: 1.3;
   letter-spacing: 0.3px;
+  font-size: 14px;
+  word-break: break-word;
+  word-wrap: break-word;
 }
 
 .msg pre {
@@ -84,7 +91,13 @@ html, body {
 
 .msg.bot, .msg.user {
     white-space: pre-wrap;
-    line-height: 1.5;
+    line-height: 1.3;
+    font-size: 15px;
+}
+
+.msg.user {
+  background: linear-gradient(135deg, #8835ae, #2525d4); /* 你喜欢的亮蓝色 */
+  border-radius: 20px 20px 4px 20px;
 }
 
 /* 加载动画 */
@@ -277,27 +290,6 @@ button.stop:hover {
     padding: 12px;
   }
 
-  .messages {
-    padding: 8px;
-    margin-bottom: 12px;
-    flex: 1;
-    min-height: 0;
-    border-radius: 6px;
-    width: 100%;
-    box-sizing: border-box;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-
-  .msg {
-    max-width: 95%;
-    padding: 10px 12px;
-    margin: 6px 0;
-    font-size: 14px;
-    word-break: break-word;
-    word-wrap: break-word;
-  }
-
   .input-box {
     padding: 12px;
     gap: 8px;
@@ -393,104 +385,6 @@ button.stop:hover {
   }
 }
 
-/* ============= 模态框样式 ============= */
-.api-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-.api-modal-overlay.hidden {
-  display: none;
-}
-
-.api-modal-content {
-  background: #1a1a1a;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  max-width: 500px;
-  width: 90%;
-  border: 1px solid #333;
-}
-
-.api-modal-content h2 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 18px;
-  color: white;
-}
-
-.api-modal-content p {
-  font-size: 12px;
-  color: #999;
-  margin: 0 0 20px 0;
-}
-
-.api-modal-input {
-  width: 100%;
-  padding: 10px;
-  font-size: 14px;
-  border: 1px solid #333;
-  border-radius: 4px;
-  background: #222;
-  color: white;
-  box-sizing: border-box;
-  margin-bottom: 15px;
-  transition: border-color 0.2s;
-}
-
-.api-modal-input:focus {
-  outline: none;
-  border-color: #007aff;
-}
-
-.api-modal-input::placeholder {
-  color: #666;
-}
-
-.api-modal-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-.api-modal-btn {
-  padding: 10px 20px;
-  cursor: pointer;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.api-modal-btn-cancel {
-  background: #333;
-  color: white;
-  border: 1px solid #444;
-}
-
-.api-modal-btn-cancel:hover {
-  background: #444;
-}
-
-.api-modal-btn-save {
-  background: #007aff;
-  color: white;
-}
-
-.api-modal-btn-save:hover {
-  background: #0066d6;
-}
-
 /* 针对 Firefox */
 * {
   scrollbar-width: thin;
@@ -506,7 +400,14 @@ button.stop:hover {
 .msg.bot h1, .msg.bot h2, .msg.bot h3 {
   margin-top: 5px;
   margin-bottom: 10px;
-  color: #00ffd9; /* 给标题加个漂亮的蓝色 */
+  color: #10574c; /* 给标题加个漂亮的蓝色 */
+  font-weight: bold;
+}
+
+.msg.bot {
+  background: linear-gradient(135deg, #e5baf4cf, #ab7efff3);
+  border-radius: 20px 20px 20px 4px;
+  color: #000000;
 }
 
 .msg.bot p {
@@ -548,4 +449,25 @@ button.stop:hover {
 
 .msg.bot tr:nth-child(even) {
   background-color: #222;
+}
+
+/* 针对 AI 回复里的代码块容器 */
+.msg.bot .code-block-wrapper pre {
+  background-color: #1e1e1e !important; /* 深度黑色背景 */
+  color: #aadcce; /* 浅黄色代码字 */
+  padding: 16px;
+  border-radius: 8px;
+  margin: 10px 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-x: auto; /* 允许横向滚动 */
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* 针对 AI 回复里的行内代码（如 `sudo`） */
+.msg.bot .inline-code {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  color: #ff79c6 !important; /* 二次元亮粉色 */
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-family: monospace;
 }

@@ -292,18 +292,33 @@ const createNewChat = async () => {
         />
         <div className={`chat-container ${isSidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
           <div className="messages">
-              {messages.map((m, i) => (
-                <div key={i} className={`msg ${m.sender} ${m.isLoading ? 'loading' : ''}`}>
-                  {/* 核心修复：如果是 AI (bot)，使用 ReactMarkdown 解析；如果是用户，保留原样 */}
-                  {m.sender === "bot" ? (
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {m.text}
-                    </ReactMarkdown>
-                  ) : (
-                    <pre>{m.text}</pre>
-                  )}
-                </div>
-              ))}
+            {messages.map((m, i) => (
+              <div key={i} className={`msg ${m.sender} ${m.isLoading ? 'loading' : ''}`}>
+                {m.sender === "bot" ? (
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      // 1. 自定义多行代码块的容器
+                      pre: ({ node, ...props }) => (
+                        <div className="code-block-wrapper">
+                          <pre {...props} />
+                        </div>
+                      ),
+                      // 2. 自定义代码文字
+                      code: ({ node, inline, ...props }) => (
+                        inline 
+                          ? <code className="inline-code" {...props} /> 
+                          : <code className="block-code" {...props} />
+                      )
+                    }}
+                  >
+                    {m.text}
+                  </ReactMarkdown>
+                ) : (
+                  <pre>{m.text}</pre>
+                )}
+              </div>
+            ))}
             <div ref={messagesEndRef} />
           </div>
           <div className="input-box">

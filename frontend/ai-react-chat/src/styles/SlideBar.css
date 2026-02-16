@@ -1,6 +1,8 @@
 .sidebar {
   width: 280px;
   background-color: #1f1f1f;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
   color: white;
   height: 100%;
   display: flex;
@@ -9,6 +11,8 @@
   transition: width 0.3s ease, opacity 0.3s ease;
   z-index: 100;
   border-right: 1px solid #333;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
   overflow: hidden;
   flex-shrink: 0;
 }
