@@ -1,37 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MoreVertical } from "lucide-react";
-import { jwtDecode } from "jwt-decode";
-import LoginModal from "./LoginModal";
 import "../styles/Profile.css";
 import { useNavigate } from "react-router-dom";
 
-function Profile() {
-  const navigate = useNavigate(); // ✅ 移到最上面（所有 Hook 前）
+function Profile({ user, isLoggedIn, onLogout, onLogin }) {
+  const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [isClient, setIsClient] = useState(false);
   const menuRef = useRef(null);
 
-  // 确保只在客户端执行 localStorage 读取
-  useEffect(() => {
-    setIsClient(true);
-    const token = localStorage.getItem("auth_token");
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        setUser(decoded);
-        setIsLoggedIn(true);
-      } catch (e) {
-        console.error("Invalid token:", e);
-        localStorage.removeItem("auth_token");
-      }
-    }
-  }, []);
-
-  // 点击外部关闭菜单
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -42,25 +19,49 @@ function Profile() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("auth_token");
-    setIsLoggedIn(false);
-    setUser(null);
+  const handleLogoutClick = () => {
+    onLogout();
     setMenuOpen(false);
   };
 
-  // ✅ 这一行放到 Hooks 之后才 return
-  if (!isClient) return null;
-
+  // 获取用户头像，优先级：picture > avatar_url
+  const getUserAvatar = () => {
+    if (!user) {
+      console.warn("No user data");
+      return "/default-avatar.svg";
+    }
+    
+    const avatar = user.picture || user.avatar_url;
+    console.log("Getting avatar for user:", {
+      name: user.name,
+      hasPicture: !!user.picture,
+      hasAvatarUrl: !!user.avatar_url,
+      selectedAvatar: avatar,
+    });
+    
+    return avatar || "/default-avatar.svg";
+  };
+  
   return (
     <div className="profile" ref={menuRef}>
       {isLoggedIn ? (
         <>
           <img
-            src={user?.picture || "/default-avatar.png"}
+            src={getUserAvatar()}
             alt="profile"
             className="profile-icon"
             onClick={() => setMenuOpen(!menuOpen)}
+            crossOrigin="anonymous"
+            referrerPolicy="no-referrer"
+            onLoad={(e) => {
+              console.log("✅ Avatar image loaded successfully:", e.target.src);
+            }}
+            onError={(e) => {
+              console.warn("❌ Avatar image failed to load:", e.target.src);
+              console.warn("Error details:", e);
+              // 使用 SVG 数据 URI 作为备用
+              e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23e0e0e0'/%3E%3Ccircle cx='50' cy='35' r='15' fill='%23999'/%3E%3Cpath d='M 20 80 Q 20 60 50 60 Q 80 60 80 80' fill='%23999'/%3E%3C/svg%3E";
+            }}
           />
           <MoreVertical
             className="menu-dots"
@@ -71,26 +72,14 @@ function Profile() {
             <div className="dropdown-menu">
               <p style={{ margin: "5px 0", fontWeight: "bold" }}>{user?.name}</p>
               <button onClick={() => navigate("/settings")}>Settings</button>
-              <button onClick={handleLogout}>Logout</button>
+              <button onClick={handleLogoutClick}>Logout</button>
             </div>
           )}
         </>
       ) : (
-        <button className="login-btn" onClick={() => setShowLoginModal(true)}>
+        <button className="login-btn" onClick={onLogin}>
           Login
         </button>
-      )}
-
-      {showLoginModal && (
-        <LoginModal
-          onClose={() => setShowLoginModal(false)}
-          onLoginSuccess={(decoded, token) => {
-            localStorage.setItem("auth_token", token);
-            setUser(decoded);
-            setIsLoggedIn(true);
-            setShowLoginModal(false);
-          }}
-        />
       )}
     </div>
   );

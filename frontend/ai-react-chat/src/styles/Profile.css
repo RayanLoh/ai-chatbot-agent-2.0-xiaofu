@@ -60,22 +60,43 @@
 }
 
 /* 登录按钮 */
-.login-btn {
+button.login-btn {
   background: linear-gradient(135deg, rgba(200, 130, 200, 0.9), rgba(175, 120, 200, 0.85));
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 10px;
-  padding: 8px 16px;
-  font-size: 14px;
+  padding: 0 16px;
+  height: 40px; /* 统一高度为 40px */
+  font-size: 16px; /* 和其他图标按钮保持视觉协调 */
   cursor: pointer;
   font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 10px rgba(200, 130, 200, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(200, 130, 200, 0.2);
+  box-sizing: border-box;
 }
 
-.login-btn:hover {
+button.login-btn:hover {
   background: linear-gradient(135deg, rgba(200, 130, 200, 1), rgba(175, 120, 200, 0.95));
-  box-shadow: 0 4px 15px rgba(200, 130, 200, 0.3);
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(200, 130, 200, 0.3);
+}
+
+button.login-btn:active {
+  transform: scale(0.95);
+}
+
+.dark-theme button.login-btn {
+  background: linear-gradient(135deg, rgba(180, 100, 150, 0.8), rgba(160, 90, 140, 0.8));
+  border-color: rgba(180, 130, 200, 0.4);
+  box-shadow: 0 4px 15px rgba(180, 100, 150, 0.25);
+}
+
+.dark-theme button.login-btn:hover {
+  background: linear-gradient(135deg, rgba(200, 120, 170, 0.9), rgba(180, 110, 160, 0.9));
+  box-shadow: 0 6px 20px rgba(180, 100, 150, 0.35);
 }
 
 /* 登录模态框 */

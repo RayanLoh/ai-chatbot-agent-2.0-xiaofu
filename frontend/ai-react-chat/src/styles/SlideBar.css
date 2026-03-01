@@ -32,10 +32,12 @@
 .search-box {
   flex: 1;
   min-width: 0;
+  margin-bottom: 0 !important; /* 强制覆盖 index.css 里的 12px margin-bottom */
 }
 
 .search-box input {
   width: 100%;
+  height: 40px; /* 统一高度 */
   padding: 8px 12px;
   border-radius: 10px;
   border: 1px solid rgba(212, 168, 241, 0.3);
@@ -57,12 +59,71 @@
   box-shadow: 0 0 12px rgba(200, 130, 200, 0.2);
 }
 
+/* ========== Sidebar Header ========== */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(212, 168, 241, 0.2);
+  background: linear-gradient(135deg, rgba(255, 245, 240, 0.8), rgba(240, 230, 225, 0.75));
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: auto;
+  min-height: 50px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
 .conversation-list {
   flex: 1;
   overflow-y: auto;
   padding: 12px;
-  height: calc(100% - 70px); /* 减去header高度 */
+  height: calc(100% - 50px);
   box-sizing: border-box;
+}
+
+/* ⏳ Loading 状态样式 */
+.loading-conversations {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #8a8a8a;
+  font-size: 14px;
+  gap: 12px;
+}
+
+.loading-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  animation: pulseAndSpin 2s ease-in-out infinite;
+  box-shadow: 0 4px 15px rgba(200, 130, 200, 0.3);
+}
+
+@keyframes pulseAndSpin {
+  0% {
+    transform: scale(0.9) rotate(0deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1) rotate(180deg);
+    opacity: 1;
+    box-shadow: 0 6px 20px rgba(200, 130, 200, 0.5);
+  }
+  100% {
+    transform: scale(0.9) rotate(360deg);
+    opacity: 0.8;
+  }
+}
+
+.dark-theme .loading-conversations {
+  color: #a0a0a0;
 }
 
 .conversation-item {
@@ -184,50 +245,32 @@
   background: rgba(255, 255, 255, 0.8);
 }
 
-.sidebar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
-  border-bottom: 1px solid rgba(212, 168, 241, 0.2);
-  background: linear-gradient(135deg, rgba(255, 245, 240, 0.8), rgba(240, 230, 225, 0.75));
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  height: 70px;
-  box-sizing: border-box;
-  flex-shrink: 0;
-}
-
-.new-chat-btn {
-  background: none;
-  border: none;
-  color: #494e7e;
-  font-size: 16px;
+button.new-chat-btn {
+  font-size: 20px;
   cursor: pointer;
-  padding: 6px 8px;
+  padding: 0;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 10px;
   transition: all 0.2s ease;
   margin-left: 8px;
-  width: 32px;
-  height: 32px;
+  width: 40px;      /* 统一宽度 */
+  min-width: 40px;  /* 覆盖 index.css 里的 min-width: 70px */
+  height: 40px;     /* 和 search-box input 高度保持完全一致 */
+  box-sizing: border-box;
 }
 
-.new-chat-btn:hover {
-  color: #9968c8;
-  background: rgba(200, 130, 200, 0.15);
+button.new-chat-btn:hover {
   transform: scale(1.05);
 }
 
-.new-chat-btn:active {
+button.new-chat-btn:active {
   transform: scale(0.95);
 }
 
-.new-chat-btn:focus {
+button.new-chat-btn:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(200, 130, 200, 0.3);
 }
@@ -291,16 +334,6 @@
   color: #e0e0e0;
 }
 
-.dark-theme .new-chat-btn {
-  background: linear-gradient(135deg, rgba(180, 100, 150, 0.7), rgba(160, 90, 140, 0.7));
-  border-color: rgba(180, 100, 150, 0.4);
-  color: #f0d0e0;
-}
-
-.dark-theme .new-chat-btn:hover {
-  background: linear-gradient(135deg, rgba(200, 120, 170, 0.8), rgba(180, 110, 160, 0.8));
-}
-
 .dark-theme .conversation-item {
   background: rgba(50, 50, 60, 0.5);
   border-color: rgba(150, 120, 180, 0.15);
@@ -315,6 +348,15 @@
 .dark-theme .conversation-item.active {
   background: linear-gradient(135deg, rgba(150, 100, 180, 0.5), rgba(130, 90, 160, 0.45));
   border-color: rgba(150, 120, 180, 0.4);
+}
+
+.dark-theme .conversation-title {
+  color: #e0e0e0;
+}
+
+.dark-theme .conversation-item.active .conversation-title {
+  color: #ffffff;
+  font-weight: 700;
 }
 
 .dark-theme .conversation-item-text {

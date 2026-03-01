@@ -1,31 +1,32 @@
 .settings-container {
   display: flex;
-  height: 90vh;
-  background: linear-gradient(135deg, #faf6f1 0%, #f3e9e3 50%, #ede0d9 100%);
-  color: #2a2a2a;
+  flex: 1;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(200, 130, 200, 0.15);
+  box-shadow: 0 8px 32px var(--shadow-pink);
 }
 
 /* Sidebar */
 .settings-sidebar {
   width: 240px;
-  background: linear-gradient(135deg, rgba(255, 245, 240, 0.85), rgba(240, 230, 225, 0.8));
+  background: var(--bg-secondary);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-right: 1px solid rgba(212, 168, 241, 0.2);
+  border-right: 1px solid var(--border-light);
   padding: 20px;
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 15px rgba(200, 130, 200, 0.1);
+  box-shadow: 2px 0 15px var(--shadow-pink);
 }
 
 .sidebar-title {
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 15px;
-  color: #6b5566;
+  color: var(--text-primary);
+  opacity: 0.8;
 }
 
 .settings-sidebar ul {
@@ -42,18 +43,21 @@
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #4a4a4a;
+  color: var(--text-primary);
+  opacity: 0.7;
 }
 
 .settings-sidebar li:hover {
-  background-color: rgba(200, 130, 200, 0.1);
-  color: #9968c8;
+  background-color: rgba(200, 130, 200, 0.15);
+  color: var(--text-primary);
+  opacity: 1;
 }
 
 .settings-sidebar li.active {
-  background: linear-gradient(135deg, rgba(200, 130, 200, 0.2), rgba(152, 200, 220, 0.15));
-  color: #c273d4;
-  border: 1px solid rgba(200, 130, 200, 0.2);
+  background: rgba(200, 130, 200, 0.2);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  opacity: 1;
 }
 
 /* Main content */
@@ -61,14 +65,15 @@
   flex: 1;
   padding: 30px;
   overflow-y: auto;
+  background: var(--bg-primary);
 }
 
 .settings-section h3 {
   font-size: 1.2rem;
   margin-bottom: 20px;
-  border-bottom: 1px solid rgba(212, 168, 241, 0.2);
+  border-bottom: 1px solid var(--border-light);
   padding-bottom: 8px;
-  color: #6b5566;
+  color: var(--text-primary);
 }
 
 .setting-item {
@@ -79,13 +84,14 @@
 }
 
 .setting-item label {
-  color: #4a4a4a;
+  color: var(--text-primary);
+  opacity: 0.9;
 }
 
 .setting-item select {
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(212, 168, 241, 0.3);
-  color: #2a2a2a;
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
   border-radius: 10px;
   padding: 8px 12px;
   outline: none;
@@ -94,11 +100,67 @@
 }
 
 .setting-item select:hover {
-  border-color: rgba(200, 130, 200, 0.5);
-  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--border-color);
+  background: var(--bg-secondary);
 }
 
 .setting-item select:focus {
-  border-color: rgba(200, 130, 200, 0.7);
-  box-shadow: 0 0 12px rgba(200, 130, 200, 0.2);
+  border-color: rgba(200, 130, 200, 0.5);
+  box-shadow: 0 0 0 2px rgba(200, 130, 200, 0.1);
+}
+
+/* Settings page container with theme support */
+.settings-page-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition:0.3s ease, color 0.3s ease;
+  position: relative; /* For positioning the close button */
+}
+
+/* Close button for settings page */
+.close-settings-btn {
+  position: absolute !important;
+  top: 25px !important;
+  right: 30px;
+  background: transparent !important; /* 🟢 确保背景完全透明 */
+  border: none !important;
+  cursor: pointer !important;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: none !important;
+  
+  /* 初始状态：只看得到打叉，按钮容器本身不显色 */
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+/* 针对中间那个“X”图标的样式（假设你用的是 SVG 或字体图标） */
+.close-settings-btn span, 
+.close-settings-btn i,
+.close-settings-btn svg {
+  color: var(--text-primary) !important;
+  opacity: 0.6 !important; /* 平时打叉淡淡的 */
+  transition: opacity 0.3s ease !important;
+}
+
+/* 🟢 鼠标移过去（Hover）时的动效 */
+.close-settings-btn:hover {
+  transform: rotate(180deg) scale(1.2) !important; /* 顺时针旋转 180 度并轻微放大 */
+}
+
+.close-settings-btn:hover span,
+.close-settings-btn:hover i,
+.close-settings-btn:hover svg {
+  opacity: 1 !important; /* 鼠标指着时，打叉变亮 */
+}
+
+/* 🟢 鼠标按下去（Active）时的反馈 */
+.close-settings-btn:active {
+  transform: rotate(180deg) scale(0.95) !important; /* 保持旋转角度，但轻微缩小模拟点击感 */
 }

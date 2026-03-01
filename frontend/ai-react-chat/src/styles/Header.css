@@ -1,5 +1,5 @@
 .header {
-  height: 52px;
+  height: 60px; /* 略微加高 header 以适应 40px 高度的按钮 */
   background: linear-gradient(135deg, rgba(255, 245, 240, 0.85), rgba(240, 230, 225, 0.8));
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -52,36 +52,50 @@
   position: relative;
 }
 
-.menu-btn {
-  background: none;
-  border: none;
+button.menu-btn {
+  background: linear-gradient(135deg, rgba(200, 130, 200, 0.9), rgba(175, 120, 200, 0.85));
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(200, 130, 200, 0.2);
   color: white;
-  font-size: 16px; /* 缩小字体 */
+  font-size: 20px; 
   cursor: pointer;
   margin-right: 10px;
-  padding: 4px 6px; /* 适度内边距 */
+  padding: 0;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  box-sizing: border-box;
 }
 
-.menu-btn:hover {
-  color: #c273d4;
-  background: rgba(200, 130, 200, 0.15);
-  border-radius: 8px;
+button.menu-btn:hover {
+  background: linear-gradient(135deg, rgba(200, 130, 200, 1), rgba(175, 120, 200, 0.95));
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(200, 130, 200, 0.3);
 }
 
-.dark-theme .menu-btn {
-  color: #d0d0d0;
+button.menu-btn:active {
+  transform: scale(0.95);
 }
 
-.dark-theme .menu-btn:hover {
-  color: #e0a0d0;
-  background: rgba(180, 100, 150, 0.2);
+.dark-theme button.menu-btn {
+  background: linear-gradient(135deg, rgba(180, 100, 150, 0.8), rgba(160, 90, 140, 0.8));
+  border-color: rgba(180, 130, 200, 0.4);
+  box-shadow: 0 4px 15px rgba(180, 100, 150, 0.25);
+  color: white;
 }
 
-.menu-btn:focus {
+.dark-theme button.menu-btn:hover {
+  background: linear-gradient(135deg, rgba(200, 120, 170, 0.9), rgba(180, 110, 160, 0.9));
+  box-shadow: 0 6px 20px rgba(180, 100, 150, 0.35);
+}
+
+button.menu-btn:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(200, 130, 200, 0.3);
 }
@@ -188,41 +202,39 @@
   background: rgba(0, 122, 255, 0.1);
 }
 
-.theme-btn {
-  background: linear-gradient(135deg, rgba(194, 115, 212, 0.2), rgba(152, 104, 200, 0.2));
-  border: 1px solid rgba(194, 115, 212, 0.3);
+button.theme-btn {
+  background: transparent;
+  border: none;
   color: #4a4a4a;
-  font-size: 16px;
+  font-size: 20px;
   cursor: pointer;
-  padding: 6px 8px;
-  border-radius: 8px;
+  padding: 0;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(194, 115, 212, 0.1);
+  transition: all 0.2s ease;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  box-sizing: border-box;
 }
 
-.theme-btn:hover {
-  background: linear-gradient(135deg, rgba(194, 115, 212, 0.35), rgba(152, 104, 200, 0.35));
-  border-color: rgba(194, 115, 212, 0.5);
-  box-shadow: 0 4px 12px rgba(194, 115, 212, 0.2);
+button.theme-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
   transform: scale(1.05);
 }
 
-.theme-btn:active {
-  transform: scale(0.98);
+button.theme-btn:active {
+  transform: scale(0.95);
 }
 
-.dark-theme .theme-btn {
-  background: linear-gradient(135deg, rgba(180, 100, 150, 0.25), rgba(150, 90, 130, 0.25));
-  border-color: rgba(180, 100, 150, 0.4);
-  color: #d0d0d0;
-  box-shadow: 0 2px 8px rgba(180, 100, 150, 0.15);
+.dark-theme button.theme-btn {
+  background: transparent;
+  border: none;
+  color: #e0e0e0;
 }
 
-.dark-theme .theme-btn:hover {
-  background: linear-gradient(135deg, rgba(200, 120, 160, 0.4), rgba(170, 100, 140, 0.4));
-  border-color: rgba(200, 120, 160, 0.5);
-  box-shadow: 0 4px 12px rgba(200, 120, 160, 0.25);
+.dark-theme button.theme-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
 }

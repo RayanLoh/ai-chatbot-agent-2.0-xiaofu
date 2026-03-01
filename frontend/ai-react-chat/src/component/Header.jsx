@@ -1,8 +1,9 @@
 import React from 'react';
 import '../styles/Header.css';
 import Profile from './Profile';
+import { Sun, Moon } from 'lucide-react';
 
-function Header({ onToggleSidebar, theme, onThemeToggle }) {
+function Header({ onToggleSidebar, theme, onThemeToggle, user, isLoggedIn, onLogout, onLogin }) {
   return (
     <header className="header">
       {/* 左边：侧边栏按钮 */}
@@ -19,11 +20,16 @@ function Header({ onToggleSidebar, theme, onThemeToggle }) {
         <button 
           className="theme-btn" 
           onClick={onThemeToggle}
-          title={theme === 'light' ? '切换到暗色模式' : '切换到亮色模式'}
+          title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
         >
-          {theme === 'light' ? '🌙' : '☀️'}
+          {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
         </button>
-        <Profile />
+        <Profile 
+          user={user}
+          isLoggedIn={isLoggedIn}
+          onLogout={onLogout}
+          onLogin={onLogin}
+        />
       </div>
     </header>
   );
