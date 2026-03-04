@@ -1,67 +1,34 @@
 import { useState } from 'react';
 import '../styles/SlideBar.css';
-import db from '../utils/db.js';
-import logoImg from '../assets/樱桃少女漫画版014.png'; // 引入自定义 Logo
+import logoImg from '../assets/樱桃少女漫画版014.png';
 
 // This component is now simplified to mostly display data passed via props.
-// State management for the conversation list is handled by App.jsx.
+// State management and API calls are handled by the parent App.jsx.
 
 function SlideBar({
-  apiBase,
   conversations,
   isLoading,
   onSelectConversation,
   onDeleteConversation,
   onNewChat,
+  onUpdateTitle, // New prop for handling title updates
   currentConversationId,
   isOpen,
-  loadConversations // Function passed from App.jsx to reload the list if needed
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isEditing, setIsEditing] = useState(null);
   const [editTitle, setEditTitle] = useState('');
 
-  const getAuthHeader = () => {
-    const token = localStorage.getItem('auth_token');
-    return {
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-    };
-  };
-
-  const deleteConversation = (id, e) => {
+  const handleDelete = (id, e) => {
     e.stopPropagation();
     onDeleteConversation(id);
   };
 
-  const updateTitle = async (id) => {
-    try {
-      const headers = {
-        ...getAuthHeader(),
-        'Content-Type': 'application/json'
-      };
-      const response = await fetch(`${apiBase}/conversations/${id}`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify({ title: editTitle })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      // Instead of updating local state, we ask the parent to reload the list
-      // to ensure data consistency across the app.
-      await loadConversations();
-      
-      setIsEditing(null);
-    } catch (error) {
-      console.error('Failed to update title:', error);
-      if (error.message.includes('401')) {
-        alert('Please login to update conversation titles');
-      }
-      // If the update fails, reload to ensure data consistency
-      await loadConversations();
+  const handleUpdateTitle = async (id) => {
+    if (editTitle && onUpdateTitle) {
+      await onUpdateTitle(id, editTitle);
     }
+    setIsEditing(null);
   };
 
   const filteredConversations = conversations.filter(conv => 
@@ -71,7 +38,10 @@ function SlideBar({
   const formatDate = (timestamp) => {
     if (!timestamp) return "Just now";
     try {
-      return new Date(timestamp).toLocaleString('zh-CN', {
+      const date = new Date(timestamp);
+      // Check if the date is valid before formatting
+      if (isNaN(date.getTime())) return "Invalid date";
+      return date.toLocaleString('zh-CN', {
         month: 'numeric',
         day: 'numeric',
         hour: '2-digit',
@@ -109,9 +79,6 @@ function SlideBar({
                 <div style={{padding: '12px', color: '#b00'}}>
                   <strong>无法加载对话列表：</strong>
                   <div style={{fontSize: '12px', marginTop: '6px'}}>{conv.error}</div>
-                  <div style={{fontSize: '12px', marginTop: '8px'}}>
-                    当前 API: <code style={{wordBreak: 'break-all'}}>{apiBase}</code>
-                  </div>
                 </div>
               </div>
             );
@@ -131,9 +98,10 @@ function SlideBar({
                     type="text"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    onBlur={() => updateTitle(conv.id)}
-                    onKeyPress={(e) => e.key === 'Enter' && updateTitle(conv.id)}
+                    onBlur={() => handleUpdateTitle(conv.id)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleUpdateTitle(conv.id)}
                     autoFocus
+                    onClick={(e) => e.stopPropagation()} // Prevent conversation selection while editing
                   />
                 ) : (
                   <>
@@ -141,8 +109,8 @@ function SlideBar({
                       {conv.title || 'new chat'}
                     </div>
                     <div className="conversation-info">
-                      <span>{conv.message_count} messages</span>
-                      <span>{formatDate(conv.timestamp)}</span>
+                      <span>{conv.message_count || 0} messages</span>
+                      <span>{formatDate(conv.updated_at || conv.timestamp)}</span>
                     </div>
                   </>
                 )}
@@ -151,16 +119,17 @@ function SlideBar({
               <div className="conversation-actions">
                 <button
                   className="edit-btn"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setIsEditing(conv.id);
-                    setEditTitle(conv.title || '');
+                    setEditTitle(conv.title || 'new chat');
                   }}
                 >
                   ✎
                 </button>
                 <button
                   className="delete-btn"
-                  onClick={(e) => deleteConversation(conv.id, e)}
+                  onClick={(e) => handleDelete(conv.id, e)}
                 >
                   ×
                 </button>

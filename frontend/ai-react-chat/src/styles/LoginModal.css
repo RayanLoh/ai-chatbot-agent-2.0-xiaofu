@@ -5,12 +5,10 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(200, 130, 200, 0.25);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   animation: fadeIn 0.3s ease;
   z-index: 999;
 }
@@ -18,13 +16,11 @@
 /* 弹窗主体 */
 .login-modal {
   background: linear-gradient(135deg, rgba(255, 250, 245, 0.95), rgba(240, 230, 225, 0.95));
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border-radius: 24px;
   border: 1.5px solid rgba(212, 168, 241, 0.3);
   padding: 40px 50px;
   width: 380px;
-  box-shadow: 0 20px 60px rgba(200, 130, 200, 0.25), inset 0 0 30px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   text-align: center;
   animation: slideUp 0.3s ease;
 }
@@ -40,16 +36,8 @@
   color: transparent;
 }
 
-/* Google 登录按钮区 */
-div[role="button"] {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 15px;
-}
-
-/* GitHub 登录按钮 */
-.github-login {
+/* 统一的提供商登录按钮样式 */
+.provider-login-btn {
   width: 100%;
   background: linear-gradient(135deg, rgba(200, 130, 200, 0.9), rgba(175, 120, 200, 0.85));
   color: white;
@@ -60,19 +48,82 @@ div[role="button"] {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(200, 130, 200, 0.2);
+  margin-bottom: 12px; /* 统一间距 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
 }
 
-.github-login:hover {
+.provider-login-btn:hover {
   background: linear-gradient(135deg, rgba(200, 130, 200, 1), rgba(175, 120, 200, 0.95));
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(200, 130, 200, 0.3);
+}
+
+.provider-login-btn img,
+.provider-login-btn svg {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* 禁用状态 */
+.provider-login-btn:disabled {
+  background: #f0f0f0;
+  color: #1f2937;
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  border: 1px solid #dadce0;
+}
+
+/* 🟢 确保容器是定位参考 */
+.google-auth-wrapper {
+  position: relative;
+  width: 100%;
+  height: 44px; /* 与按钮高度保持一致 */
+  margin-bottom: 12px;
+}
+
+/* 🟢 紫色按钮：让点击事件“穿透”过去 */
+.custom-google-btn {
+  pointer-events: none; /* 关键：点击会穿过它，点到下面的 Google 层 */
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  margin-bottom: 0 !important;
+}
+
+/* 🟢 官方按钮：绝对定位，变透明，填满容器 */
+#google-login-button-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.01; /* 关键：近乎透明，但保留点击判定 */
+  z-index: 2;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+/* 强制 Google Iframe 撑满 */
+#google-login-button-container iframe {
+  width: 100% !important;
+  height: 100% !important;
+  transform: scale(1.5); /* 稍微放大，确保点击区域覆盖全按钮 */
+  transform-origin: top left;
 }
 
 /* 关闭按钮 */
 .close-btn {
   margin-top: 20px;
   background: rgba(200, 130, 200, 0.15);
-  color: #6b5566;
+  color: #e24040;
   border: 1px solid rgba(200, 130, 200, 0.3);
   padding: 8px 20px;
   border-radius: 10px;
