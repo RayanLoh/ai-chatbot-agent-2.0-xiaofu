@@ -76,8 +76,8 @@ app.post('/conversations', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`后端服务器运行在 http://localhost:${PORT}`);
+  console.log(`Backend server is running at http://localhost:${PORT}`);
   if (!GEMINI_API_KEY) {
-    console.log('⚠️  警告: 未设置 GEMINI_API_KEY 环境变量');
+    console.log('⚠️ Warning: GEMINI_API_KEY environment variable is not set');
   }
 });

@@ -21,12 +21,17 @@
 }
 
 .logo {
+  position: absolute;
+  top: 50%;
+  left: 248px;
   display: flex;
   align-items: center;
   gap: 4px;
   font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.5px;
+  transform: translate(-100%, -50%);
+  z-index: 1;
 }
 
 .logo-text {
@@ -237,4 +242,17 @@ button.theme-btn:active {
 
 .dark-theme button.theme-btn:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 1024px) {
+  .logo {
+    left: 208px;
+  }
+}
+
+@media (max-width: 768px) {
+  .logo {
+    position: static;
+    transform: none;
+  }
 }

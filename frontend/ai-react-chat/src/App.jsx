@@ -1,382 +1,179 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 import SlideBar from "./component/SlideBar";
 import Header from "./component/Header";
 import Footer from "./component/Footer";
+import DynamicIsland from "./component/DynamicIsland";
 import Settings from "./component/Settings";
 import LoginModal from "./component/LoginModal";
 import "./index.css";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Maximize2, Download } from 'lucide-react';
-import * as api from './api/client';
-import { getApiBase } from './api/client';
+import { Maximize2, Download, X, Image } from 'lucide-react';
+import { buildDownloadImageUrl } from './api';
+import { useAuth } from './hooks/useAuth';
+import { useChat } from './hooks/useChat';
+import { useConversations } from './hooks/useConversations';
+import { useTheme } from './hooks/useTheme';
 
 const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 768;
 
-const apiBase = getApiBase();
-
 function App() {
-  const [messages, setMessages] = useState([]);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [conversationId, setConversationId] = useState(null);
-  const [conversations, setConversations] = useState([]);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile());
-  const [isLoadingConversations, setIsLoadingConversations] = useState(true);
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false); // New state for loading messages
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [user, setUser] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [previewImage, setPreviewImage] = useState(null);
-  const [isMounted, setIsMounted] = useState(false);
-  const [GoogleProvider, setGoogleProvider] = useState(null);
-  const [theme, setTheme] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('theme') || 'system';
-    }
-    return 'system';
+
+  const {
+    clientId,
+    GoogleProvider,
+    guestMessageCount,
+    isLoggedIn,
+    isMounted,
+    openLoginModal,
+    closeLoginModal,
+    handleLoginSuccess,
+    handleLogout,
+    showLoginModal,
+    user,
+  } = useAuth();
+
+  const {
+    theme,
+    handleThemeChange,
+    toggleTheme,
+  } = useTheme();
+
+  const {
+    conversationId,
+    setConversationId,
+    conversations,
+    messages,
+    setMessages,
+    isLoadingConversations,
+    isLoadingMessages,
+    selectConversation,
+    createNewChat,
+    loadConversations,
+    deleteConversation,
+    updateConversationTitle,
+  } = useConversations({ isLoggedIn, isMounted });
+
+  const {
+    aiModel,
+    setAiModel,
+    inputRef,
+    fileInputRef,
+    isGenerating,
+    uploadedImageUrls,
+    isUploading,
+    handleImageUpload,
+    removeUploadedImage,
+    stopGenerating,
+    sendMessage,
+  } = useChat({
+    isLoggedIn,
+    onAuthRequired: openLoginModal,
+    conversationId,
+    messages,
+    setMessages,
+    loadConversations,
+    selectConversation,
+    updateConversationTitle,
   });
-  
-  const [aiModel, setAiModel] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('aiModel') || 'models/gemini-3-flash-preview';
-    }
-    return 'models/gemini-3-flash-preview';
-  });
-  const [guestMessageCount, setGuestMessageCount] = useState(0);
 
-  const inputRef = useRef(null);
-  const messagesEndRef = useRef(null);
-  const abortControllerRef = useRef(null);
-
-  // Theme application logic
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const applyTheme = (themeName) => {
-      document.documentElement.classList.remove('light-theme', 'dark-theme');
-      document.documentElement.classList.add(`${themeName}-theme`);
-    };
-
-    let mediaQueryListener;
-
-    if (theme === 'system') {
-      const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)');
-      applyTheme(systemIsDark.matches ? 'dark' : 'light');
-      mediaQueryListener = (e) => applyTheme(e.matches ? 'dark' : 'light');
-      systemIsDark.addEventListener('change', mediaQueryListener);
-    } else {
-      applyTheme(theme);
-    }
-
-    return () => {
-      if (theme === 'system' && mediaQueryListener) {
-        window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', mediaQueryListener);
-      }
-    };
-  }, [theme]);
-
-  const handleThemeChange = (newTheme) => {
-    setTheme(newTheme);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', newTheme);
-    }
-  };
-  
-  const handleSelectConversation = useCallback(async (id) => {
-    if (id === conversationId && messages.length > 0) return; // Don't re-fetch if already selected
-    
-    setConversationId(id);
-    localStorage.setItem('lastConversationId', id);
-    setIsLoadingMessages(true);
-    setMessages([]); // Clear previous messages
-
-    try {
-      console.log(`☁️ Fetching messages for conversation ${id}...`);
-      const data = await api.getConversationMessages(id);
-      setMessages(data.messages || []);
-    } catch (error) {
-      console.error("Failed to load conversation messages:", error);
-      setMessages([{ id: `err_${Date.now()}`, sender: "bot", text: `❌ Failed to load conversation: ${error.message}` }]);
-    } finally {
-      setIsLoadingMessages(false);
-    }
-  }, []);
-
-  const createNewChat = useCallback(async (switchFocus = true) => {
-    try {
-      const newConv = await api.createConversation();
-      // Manually update the state to avoid a full reload, providing a faster UI response.
-      setConversations(prev => [newConv, ...prev]);
-
-      if (switchFocus) {
-        setMessages([]);
-        setConversationId(newConv.id);
-        localStorage.setItem('lastConversationId', newConv.id);
-        if (isMobile()) setIsSidebarOpen(false);
-      }
-      return newConv;
-    } catch (error) {
-      console.error("❌ Failed to create new conversation:", error);
-    }
-  }, []);
-
-  // Load user data and guest count on mount
-  useEffect(() => {
-    setIsMounted(true);
-    if (typeof window !== 'undefined') {
-      const count = parseInt(localStorage.getItem('guestMessageCount') || '0', 10);
-      setGuestMessageCount(count);
-      const token = localStorage.getItem('auth_token');
-      if (token) {
-        try {
-          const decoded = jwtDecode(token);
-          const storedUserData = localStorage.getItem('user_data');
-          if (storedUserData) {
-            const userData = JSON.parse(storedUserData);
-            decoded.picture = userData.picture || decoded.picture;
-            decoded.avatar_url = userData.avatar_url || decoded.avatar_url;
-          }
-          setUser(decoded);
-          setIsLoggedIn(true);
-        } catch (e) {
-          console.error("Invalid token:", e);
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('user_data');
-        }
-      }
-    }
-  }, []);
-  
-  const loadConversations = useCallback(async () => {
-      // 🟢 隐私逻辑：如果未登录，直接显示空列表并退出，不请求后端
-      if (!isLoggedIn) {
-          setIsLoadingConversations(false);
-          setConversations([]); 
-          if (!conversationId) setMessages([]);
-          return; 
-      }
-
-      setIsLoadingConversations(true);
-      try {
-          console.log('📡 [Private] Loading conversations for logged-in user...');
-          const data = await api.getConversations();
-          const validConvList = Array.isArray(data.conversations) ? data.conversations : [];
-          setConversations(validConvList);
-          // ... 后续的选择逻辑保持不变 ...
-      } catch (error) {
-          console.error('❌ Failed to load conversations:', error);
-      } finally {
-          setIsLoadingConversations(false);
-      }
-  }, [isLoggedIn, conversationId, createNewChat, handleSelectConversation]);
-
-  const handleLoginSuccess = (decoded, token) => {
-    localStorage.setItem('auth_token', token);
-    localStorage.setItem('guestMessageCount', '0');
-    localStorage.setItem('user_data', JSON.stringify({
-      picture: decoded.picture,
-      avatar_url: decoded.avatar_url,
-      name: decoded.name
-    }));
-    setUser(decoded);
-    setIsLoggedIn(true);
-    setShowLoginModal(false);
-    setConversationId(null);
-    setMessages([]);
-    loadConversations();
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_data');
-    localStorage.setItem('guestMessageCount', '0');
-    localStorage.removeItem('lastConversationId');
-    setUser(null);
-    setIsLoggedIn(false);
-    setConversations([]);
-    setMessages([]);
-    setConversationId(null);
-  };
-
-  // Initial load of conversations
-  useEffect(() => {
-    if (isMounted) {
-        loadConversations();
-    }
-  }, [isMounted, loadConversations]);
-
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const messagesContainerRef = useRef(null);
+  const hasInitializedScrollRef = useRef(false);
+  const scrollAnimationFrameRef = useRef(null);
+  const imageScrollTimeoutRef = useRef(null);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const mod = await import('@react-oauth/google');
-        setGoogleProvider(() => mod.GoogleOAuthProvider);
-      } catch (e) {
-        console.error('Provider load error:', e);
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
+    setIsSidebarOpen(!isMobile());
     const handleResize = () => setIsSidebarOpen(!isMobile());
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const scrollToBottom = (behavior = 'smooth') => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
 
-  useEffect(scrollToBottom, [messages]);
-  
-  useEffect(() => {
-    if (isMounted && typeof window !== 'undefined') {
-      localStorage.setItem('aiModel', aiModel);
+    if (scrollAnimationFrameRef.current) {
+      window.cancelAnimationFrame(scrollAnimationFrameRef.current);
+      scrollAnimationFrameRef.current = null;
     }
-  }, [aiModel, isMounted]);
 
-  const toggleTheme = () => {
-    let currentTheme = theme === 'system' 
-      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-      : theme;
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    handleThemeChange(newTheme);
-  };
+    if (behavior === 'animated') {
+      const startTop = container.scrollTop;
+      const targetTop = Math.max(container.scrollHeight - container.clientHeight, 0);
+      const distance = targetTop - startTop;
 
-  const stopGenerating = async () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    try {
-      await api.stopGeneration();
-    } catch (error) {
-      console.error("Failed to request stop generation:", error);
-    }
-    setIsGenerating(false);
-  };
-
-  const sendMessage = async () => {
-    const msg = inputRef.current.value.trim();
-    if (!msg || isGenerating) return;
-
-    if (!isLoggedIn) {
-        setShowLoginModal(true);
-        setMessages(prev => [...prev, { id: `msg_${Date.now()}_system`, sender: "bot", text: "Please log in to send a message.", isError: true, createdAt: Date.now() }]);
+      if (Math.abs(distance) < 4) {
+        container.scrollTop = targetTop;
         return;
-    }
-    
-    let currentConvId = conversationId;
-    // If guest user starts chatting without a conversation ID, create one on the fly.
-    if (!currentConvId && !isLoggedIn) {
-        const newConv = await createNewChat(false); // Don't switch focus
-        if (newConv) {
-            currentConvId = newConv.id;
-            setConversationId(newConv.id); // Set it for future messages in this session
-        }
-    }
-
-
-    const userMsgId = `msg_${Date.now()}_user`;
-    const botMsgId = `msg_${Date.now()}_bot`;
-
-    setMessages(prev => [...prev, { id: userMsgId, sender: "user", text: msg, createdAt: Date.now() }]);
-    inputRef.current.value = "";
-    setIsGenerating(true);
-
-
-    
-    setMessages(prev => [...prev, { id: botMsgId, sender: "bot", text: "I'm Thinking", isLoading: true, createdAt: Date.now() }]);
-    abortControllerRef.current = new AbortController();
-
-    try {
-      const data = await api.generateResponse(msg, currentConvId, aiModel, abortControllerRef.current.signal);
-
-      setMessages(prev => {
-        const updated = [...prev];
-        const lastMessageIndex = updated.findIndex(m => m.id === botMsgId);
-        if (lastMessageIndex !== -1) {
-          updated[lastMessageIndex] = { 
-            id: botMsgId,
-            sender: "bot", 
-            text: (data.text || '').trim(),
-            images: data.images || [],
-            createdAt: Date.now()
-          };
-        }
-        return updated;
-      });
-
-      // If a new conversation was created on the backend
-      if (data.conversation_id && currentConvId !== data.conversation_id) {
-         await loadConversations(); // Refresh list to show new conversation
-         handleSelectConversation(data.conversation_id);
       }
 
-    } catch (error) {
-      if (error.name !== 'AbortError') {
-        console.error("Front-end error:", error);
-        setMessages(prev => {
-          const updated = [...prev];
-          const lastMessageIndex = updated.findIndex(m => m.id === botMsgId);
-          if (lastMessageIndex !== -1) {
-            updated[lastMessageIndex] = { id: botMsgId, sender: "bot", text: "Oops, the connection dropped... Ei-Heh?", createdAt: Date.now() };
-          }
-          return updated;
-        });
-      }
-    } finally {
-      setIsGenerating(false);
-      abortControllerRef.current = null;
-    }
-  };
+      const duration = 420;
+      const startTime = performance.now();
+      const easeOutCubic = (progress) => 1 - Math.pow(1 - progress, 3);
 
-  const handleDeleteConversation = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this conversation?')) return;
-    
-    // Optimistically update UI
-    const originalConversations = conversations;
-    const updatedConversations = conversations.filter(conv => conv.id !== id);
-    setConversations(updatedConversations);
+      const step = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        container.scrollTop = startTop + distance * easeOutCubic(progress);
 
-    if (conversationId === id) {
-        localStorage.removeItem('lastConversationId');
-        if (updatedConversations.length > 0) {
-          handleSelectConversation(updatedConversations[0].id);
+        if (progress < 1) {
+          scrollAnimationFrameRef.current = window.requestAnimationFrame(step);
         } else {
-          createNewChat();
+          scrollAnimationFrameRef.current = null;
         }
+      };
+
+      scrollAnimationFrameRef.current = window.requestAnimationFrame(step);
+      return;
     }
 
-    try {
-      await api.deleteConversation(id);
-    } catch (error) {
-      console.error("Failed to delete conversation:", error);
-      alert('Failed to delete conversation: ' + error.message);
-      // Rollback UI on failure
-      setConversations(originalConversations);
-    }
-  };
-  
-  const handleUpdateConversationTitle = async (id, newTitle) => {
-    try {
-      await api.updateConversationTitle(id, newTitle);
-      // Refresh the list to show the new title
-      await loadConversations();
-    } catch (error) {
-      console.error("Failed to update title:", error);
-      alert('Failed to update title: ' + error.message);
-    }
+    container.scrollTo({
+      top: Math.max(container.scrollHeight - container.clientHeight, 0),
+      behavior,
+    });
   };
 
-  if (!isMounted) {
-    return <div className="app-root" suppressHydrationWarning={true}></div>;
-  }
-  
+  useEffect(() => {
+    if (isLoadingMessages || messages.length === 0) {
+      return undefined;
+    }
+
+    const behavior = hasInitializedScrollRef.current ? 'smooth' : 'animated';
+    const frameId = window.requestAnimationFrame(() => {
+      scrollToBottom(behavior);
+      hasInitializedScrollRef.current = true;
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [conversationId, isLoadingMessages, messages]);
+
+  useEffect(() => {
+    if (isLoadingMessages) {
+      hasInitializedScrollRef.current = false;
+    }
+  }, [isLoadingMessages]);
+
+  useEffect(() => () => {
+    if (scrollAnimationFrameRef.current) {
+      window.cancelAnimationFrame(scrollAnimationFrameRef.current);
+    }
+
+    if (imageScrollTimeoutRef.current) {
+      window.clearTimeout(imageScrollTimeoutRef.current);
+    }
+  }, []);
+
+  const showNewConversationHint = !isLoadingMessages && messages.length === 0;
+
 const appContent = (
   <div className="app-container">
+    <DynamicIsland />
     <Header 
       onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
       theme={theme}
@@ -384,7 +181,7 @@ const appContent = (
       user={user}
       isLoggedIn={isLoggedIn}
       onLogout={handleLogout}
-      onLogin={() => setShowLoginModal(true)}
+      onLogin={openLoginModal}
     />
     <div className="main-container">
       <div className={`sidebar-overlay ${isSidebarOpen ? 'visible' : ''}`} onClick={() => setIsSidebarOpen(false)} />
@@ -393,20 +190,49 @@ const appContent = (
         conversations={conversations}
         isLoading={isLoadingConversations}
         onSelectConversation={(id) => {
-          handleSelectConversation(id);
+          selectConversation(id);
           if (isMobile()) setIsSidebarOpen(false);
         }}
-        onDeleteConversation={handleDeleteConversation}
-        onNewChat={createNewChat}
-        onUpdateTitle={handleUpdateConversationTitle}
+        onDeleteConversation={deleteConversation}
+        onNewChat={async () => {
+          const newConversation = await createNewChat();
+          if (newConversation && isMobile()) {
+            setIsSidebarOpen(false);
+          }
+        }}
+        onUpdateTitle={updateConversationTitle}
         currentConversationId={conversationId}
         isOpen={isSidebarOpen}
       />
 
       <div className={`chat-container ${isSidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
-        <div className="messages">
+        <div
+          ref={messagesContainerRef}
+          className="messages"
+          onLoadCapture={(event) => {
+            if (typeof HTMLImageElement === 'undefined') {
+              return;
+            }
+
+            if (event.target instanceof HTMLImageElement) {
+              if (imageScrollTimeoutRef.current) {
+                window.clearTimeout(imageScrollTimeoutRef.current);
+              }
+
+              imageScrollTimeoutRef.current = window.setTimeout(() => {
+                scrollToBottom('smooth');
+                imageScrollTimeoutRef.current = null;
+              }, 80);
+            }
+          }}
+        >
           {isLoadingMessages ? (
             <div className="msg bot loading"><p>Loading messages...</p></div>
+          ) : showNewConversationHint ? (
+            <div className="empty-chat-hint">
+              <p className="empty-chat-title">Start a new conversation</p>
+              <p className="empty-chat-text">Type your message in the box below and press Send. Your new conversation will appear automatically after the first message is sent.</p>
+            </div>
           ) : (
             messages.map((m, i) => (
               <div key={m.id || i} className={`msg ${m.sender} ${m.isLoading ? 'loading' : ''}`}>
@@ -438,7 +264,7 @@ const appContent = (
                               <Maximize2 size={24} />
                             </button>
                             <a 
-                              href={`${apiBase}/download-image?url=${encodeURIComponent(imgUrl)}`}
+                              href={buildDownloadImageUrl(imgUrl)}
                               className="icon-btn"
                               title="Download Image"
                             >
@@ -450,12 +276,28 @@ const appContent = (
                     ))}
                   </>
                 ) : (
-                  <pre>{m.text}</pre>
+                  <>
+                    <pre>{m.text}</pre>
+                    {m.images && m.images.length > 0 && (
+                      <div className="user-images-container">
+                        {m.images.map((imgUrl, index) => (
+                          <div key={index} className="user-uploaded-image">
+                            <img 
+                              src={imgUrl} 
+                              alt={`User Uploaded ${index + 1}`}
+                              className="user-image"
+                              loading="lazy"
+                              onClick={() => setPreviewImage(imgUrl)}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             ))
           )}
-          <div ref={messagesEndRef} />
         </div>
 
           {previewImage && (
@@ -514,18 +356,60 @@ const appContent = (
                 }
               }}
             ></textarea>
-            {isGenerating ? (
-              <button onClick={stopGenerating} className="stop">Stop</button>
-            ) : (
-              <button onClick={sendMessage}>Send</button>
-            )}
+            <div className="input-actions">
+              <input
+                type="file"
+                ref={fileInputRef}
+                multiple
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleImageUpload}
+              />
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading || isGenerating}
+                className="upload-btn"
+                title="Upload image for AI analysis"
+              >
+                <Image size={20} />
+                {isUploading ? 'Uploading...' : 'Image'}
+              </button>
+              {isGenerating ? (
+                <button onClick={stopGenerating} className="stop">Stop</button>
+              ) : (
+                <button onClick={sendMessage}>Send</button>
+              )}
+            </div>
           </div>
+          {uploadedImageUrls.length > 0 && (
+            <div className="uploaded-images-preview">
+              <p className="uploaded-images-title">📸 Uploaded ({uploadedImageUrls.length}):</p>
+              <div className="images-grid">
+                {uploadedImageUrls.map((url, index) => (
+                  <div key={index} className="uploaded-image-item">
+                    <img 
+                      src={url} 
+                      alt={`Uploaded ${index + 1}`}
+                      onClick={() => setPreviewImage(url)}
+                    />
+                    <button 
+                      className="remove-image-btn"
+                      onClick={() => removeUploadedImage(index)}
+                      title="Remove image"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
     </div>
     <Footer />
     {showLoginModal && (
       <LoginModal
-        onClose={() => setShowLoginModal(false)}
+        onClose={closeLoginModal}
         onLoginSuccess={handleLoginSuccess}
       />
     )}
@@ -535,7 +419,7 @@ const appContent = (
   const routesContent = (
     <Routes>
       <Route path="/" element={appContent} />
-      <Route path="/settings" element={<Settings theme={theme} onThemeChange={handleThemeChange} />} />
+      <Route path="/settings" element={<><DynamicIsland /><Settings theme={theme} onThemeChange={handleThemeChange} /></>} />
     </Routes>
   );
 

@@ -1,0 +1,185 @@
+.delete-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(17, 12, 28, 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 1200;
+  transition: opacity 0.22s ease;
+}
+
+.delete-confirm-backdrop.hidden {
+  opacity: 0;
+}
+
+.delete-confirm-backdrop.visible {
+  opacity: 1;
+}
+
+.delete-confirm-modal {
+  position: relative;
+  width: min(460px, 100%);
+  overflow: hidden;
+  padding: 28px 28px 24px;
+  border-radius: 28px;
+  border: 1px solid rgba(212, 168, 241, 0.28);
+  background:
+    radial-gradient(circle at top right, rgba(255, 196, 226, 0.45), transparent 34%),
+    linear-gradient(145deg, rgba(255, 248, 244, 0.96), rgba(240, 229, 224, 0.94));
+  box-shadow:
+    0 26px 70px rgba(28, 18, 39, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  transform-origin: center;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+}
+
+.delete-confirm-modal.hidden {
+  opacity: 0;
+  transform: translateY(18px) scale(0.96);
+}
+
+.delete-confirm-modal.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.delete-confirm-orb {
+  position: absolute;
+  top: -38px;
+  right: -18px;
+  width: 128px;
+  height: 128px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 129, 129, 0.35), rgba(255, 129, 129, 0) 68%);
+  pointer-events: none;
+}
+
+.delete-confirm-eyebrow {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #b76fb4;
+}
+
+.delete-confirm-modal h3 {
+  margin: 0 0 12px;
+  padding-right: 48px;
+  font-size: 28px;
+  line-height: 1.15;
+  color: #2b2230;
+}
+
+.delete-confirm-copy {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.65;
+  color: rgba(43, 34, 48, 0.8);
+}
+
+.delete-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.delete-confirm-secondary,
+.delete-confirm-primary {
+  min-width: 136px;
+  padding: 12px 18px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+.delete-confirm-secondary {
+  border: 1px solid rgba(180, 136, 207, 0.25);
+  background: rgba(255, 255, 255, 0.58);
+  color: #6b5566;
+}
+
+.delete-confirm-primary {
+  border: 1px solid rgba(255, 120, 120, 0.16);
+  background: linear-gradient(135deg, rgba(255, 120, 120, 0.95), rgba(234, 82, 120, 0.92));
+  color: #fff7fb;
+  box-shadow: 0 10px 24px rgba(234, 82, 120, 0.25);
+}
+
+.delete-confirm-secondary:hover:not(:disabled),
+.delete-confirm-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.delete-confirm-secondary:hover:not(:disabled) {
+  box-shadow: 0 10px 24px rgba(178, 135, 198, 0.14);
+}
+
+.delete-confirm-primary:hover:not(:disabled) {
+  box-shadow: 0 14px 28px rgba(234, 82, 120, 0.32);
+}
+
+.delete-confirm-secondary:disabled,
+.delete-confirm-primary:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.dark-theme .delete-confirm-backdrop {
+  background: rgba(8, 8, 14, 0.56);
+}
+
+.dark-theme .delete-confirm-modal {
+  border-color: rgba(190, 144, 220, 0.24);
+  background:
+    radial-gradient(circle at top right, rgba(239, 110, 160, 0.22), transparent 34%),
+    linear-gradient(145deg, rgba(33, 30, 42, 0.96), rgba(24, 22, 32, 0.95));
+  box-shadow:
+    0 26px 70px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.dark-theme .delete-confirm-eyebrow {
+  color: #db96d3;
+}
+
+.dark-theme .delete-confirm-modal h3 {
+  color: #f6edf8;
+}
+
+.dark-theme .delete-confirm-copy {
+  color: rgba(246, 237, 248, 0.74);
+}
+
+.dark-theme .delete-confirm-secondary {
+  border-color: rgba(182, 141, 210, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+  color: #dccde1;
+}
+
+@media (max-width: 640px) {
+  .delete-confirm-modal {
+    padding: 24px 20px 20px;
+  }
+
+  .delete-confirm-modal h3 {
+    font-size: 24px;
+    padding-right: 24px;
+  }
+
+  .delete-confirm-actions {
+    flex-direction: column-reverse;
+  }
+
+  .delete-confirm-secondary,
+  .delete-confirm-primary {
+    width: 100%;
+  }
+}

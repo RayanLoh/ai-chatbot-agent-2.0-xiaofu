@@ -1,0 +1,375 @@
+.dynamic-island-root {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  z-index: 1400;
+  width: min(430px, calc(100vw - 24px));
+  transform: translateX(-50%);
+  pointer-events: none;
+  --dynamic-island-breath-duration: 3400ms;
+  --dynamic-island-breath-tail-delay: 220ms;
+}
+
+.dynamic-island-frame {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.dynamic-island-camera-cutout {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  z-index: 3;
+  width: 112px;
+  height: 24px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(7, 7, 10, 1), rgba(17, 17, 21, 1));
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06);
+}
+
+.dynamic-island-idle-shell,
+.dynamic-island-expanded-panel {
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(8, 8, 10, 1), rgba(4, 4, 6, 1));
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow:
+    0 24px 40px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.dynamic-island-root.breathing .dynamic-island-idle-shell {
+  position: relative;
+  background: #1a1a1a;
+  border-color: transparent;
+  overflow: hidden;
+}
+
+.dynamic-island-chase-orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 240%;
+  height: 240%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dynamic-island-chase-orbit-primary {
+  background: conic-gradient(
+    from 210deg at 50% 50%,
+    transparent 0deg,
+    transparent 270deg,
+    rgba(255, 77, 145, 0.08) 286deg,
+    rgba(255, 95, 109, 0.68) 302deg,
+    rgba(255, 183, 77, 1) 316deg,
+    rgba(110, 231, 183, 0.98) 330deg,
+    rgba(96, 165, 250, 1) 342deg,
+    rgba(173, 109, 244, 0.88) 352deg,
+    rgba(255, 77, 145, 0.14) 358deg,
+    transparent 360deg
+  );
+  filter: blur(11px) saturate(1.35) brightness(1.18);
+}
+
+.dynamic-island-chase-orbit-secondary {
+  background: conic-gradient(
+    from 206deg at 50% 50%,
+    transparent 0deg,
+    transparent 278deg,
+    rgba(255, 255, 255, 0.03) 294deg,
+    rgba(255, 145, 77, 0.4) 312deg,
+    rgba(129, 140, 248, 0.76) 332deg,
+    rgba(59, 130, 246, 0.54) 346deg,
+    rgba(255, 255, 255, 0.06) 357deg,
+    transparent 360deg
+  );
+  filter: blur(20px) saturate(1.45) brightness(1.08);
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.dynamic-island-root.breathing .dynamic-island-chase-orbit-primary {
+  animation:
+    dynamicIslandChaseSpin var(--dynamic-island-breath-duration) cubic-bezier(0.28, 0.02, 0.18, 1) 1,
+    dynamicIslandChaseFade var(--dynamic-island-breath-duration) ease-in-out 1;
+}
+
+.dynamic-island-root.breathing .dynamic-island-chase-orbit-secondary {
+  animation:
+    dynamicIslandChaseSpinSecondary var(--dynamic-island-breath-duration) cubic-bezier(0.24, 0.04, 0.16, 1) 1,
+    dynamicIslandChaseFade var(--dynamic-island-breath-duration) ease-in-out 1;
+  animation-delay: var(--dynamic-island-breath-tail-delay), 0ms;
+}
+
+.dynamic-island-idle-shell {
+  position: relative;
+  width: 154px;
+  height: 40px;
+  margin-top: 0;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 0.32s ease, transform 0.4s ease;
+}
+
+.dynamic-island-idle-border {
+  position: absolute;
+  inset: 1px; /* This creates the border thickness */
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(8, 8, 10, 1), rgba(4, 4, 6, 1));
+  z-index: 1;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -8px 18px rgba(0, 0, 0, 0.38);
+}
+
+
+.dynamic-island-idle-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.56);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  animation: idleNotificationPulse 10.8s cubic-bezier(0.35, 0, 0.25, 1) infinite;
+  pointer-events: none;
+  z-index: 2;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.12);
+}
+
+.dynamic-island-expanded-panel {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: min(410px, calc(100vw - 24px));
+  min-height: 96px;
+  padding: 18px 22px 18px;
+  opacity: 0;
+  transform: translateX(-50%) translateY(-20px) scale(0.9);
+  overflow: hidden;
+}
+
+.dynamic-island-expanded-panel::before {
+  content: '';
+  position: absolute;
+  inset: auto auto -80px 12px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.16), transparent 70%);
+  filter: blur(10px);
+}
+
+.dynamic-island-root.active .dynamic-island-idle-shell,
+.dynamic-island-root.settled .dynamic-island-idle-shell,
+.dynamic-island-root.exit .dynamic-island-idle-shell {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.82);
+}
+
+.dynamic-island-root.active .dynamic-island-idle-text,
+.dynamic-island-root.settled .dynamic-island-idle-text,
+.dynamic-island-root.exit .dynamic-island-idle-text {
+  animation-play-state: paused;
+}
+
+.dynamic-island-root.active .dynamic-island-expanded-panel {
+  animation: dynamicIslandDrop 0.56s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.dynamic-island-root.settled .dynamic-island-expanded-panel {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.dynamic-island-root.exit .dynamic-island-expanded-panel {
+  animation: dynamicIslandLift 0.34s ease forwards;
+}
+
+.dynamic-island-root.disabled {
+  opacity: 0.45;
+}
+
+.dynamic-island-icon,
+.dynamic-island-content,
+.dynamic-island-timestamp {
+  position: relative;
+  z-index: 1;
+}
+
+.dynamic-island-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(164, 164, 164, 0.12));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.dynamic-island-content {
+  flex: 1;
+  min-width: 0;
+  color: #f6f6f8;
+}
+
+.dynamic-island-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.dynamic-island-content strong {
+  display: block;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.dynamic-island-content p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.dynamic-island-timestamp {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.54);
+}
+
+@keyframes dynamicIslandDrop {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-30px) scale(0.84);
+  }
+  65% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(8px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@keyframes dynamicIslandLift {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-24px) scale(0.92);
+  }
+}
+
+@keyframes dynamicIslandChaseSpin {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-18deg) scale(0.92);
+  }
+  12% {
+    opacity: 1;
+  }
+  28% {
+    transform: translate(-50%, -50%) rotate(76deg) scale(1);
+  }
+  52% {
+    transform: translate(-50%, -50%) rotate(178deg) scale(1.06);
+  }
+  78% {
+    transform: translate(-50%, -50%) rotate(278deg) scale(0.98);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(356deg) scale(0.94);
+  }
+}
+
+@keyframes dynamicIslandChaseSpinSecondary {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.03) rotate(-36deg);
+  }
+  16% {
+    opacity: 0.8;
+  }
+  34% {
+    transform: translate(-50%, -50%) scale(1.06) rotate(58deg);
+  }
+  64% {
+    transform: translate(-50%, -50%) scale(1.01) rotate(186deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.03) rotate(334deg);
+  }
+}
+
+@keyframes dynamicIslandChaseFade {
+  0%, 100% {
+    opacity: 0;
+  }
+  12%, 74% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 0.26;
+  }
+}
+
+@keyframes idleNotificationPulse {
+  0%, 16%, 100% {
+    opacity: 0;
+  }
+  22% {
+    opacity: 0.16;
+  }
+  28%, 34% {
+    opacity: 0.62;
+  }
+  42% {
+    opacity: 0.28;
+  }
+  48% {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .dynamic-island-root {
+    top: 10px;
+    width: calc(100vw - 20px);
+  }
+
+  .dynamic-island-expanded-panel {
+    width: calc(100vw - 20px);
+    min-height: 88px;
+    padding: 18px 16px;
+  }
+
+  .dynamic-island-camera-cutout {
+    width: 96px;
+  }
+
+  .dynamic-island-idle-shell {
+    width: 136px;
+  }
+}

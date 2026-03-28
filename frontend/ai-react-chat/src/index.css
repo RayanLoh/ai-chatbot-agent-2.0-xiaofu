@@ -119,6 +119,38 @@ html, body {
   box-shadow: 0 8px 32px var(--shadow-pink), var(--inset-light);
 }
 
+.empty-chat-hint {
+  margin: auto;
+  max-width: 520px;
+  padding: 24px 28px;
+  border: 1px solid var(--border-light);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px var(--shadow-input);
+  text-align: center;
+}
+
+.empty-chat-title {
+  margin: 0 0 10px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.empty-chat-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  opacity: 0.88;
+}
+
+.dark-theme .empty-chat-hint {
+  background: rgba(35, 35, 40, 0.58);
+}
+
 .msg {
   max-width: 80%;
   padding: 12px 16px;
@@ -1097,6 +1129,159 @@ button.stop:hover {
   background: rgba(35, 35, 40, 0.8);
   border-right-color: rgba(150, 120, 180, 0.25);
   box-shadow: 2px 0 15px rgba(100, 80, 150, 0.15);
+}
+
+/* Image Upload Styles */
+.input-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(200, 150, 220, 0.7), rgba(180, 130, 200, 0.7));
+  border: 1.5px solid rgba(200, 130, 200, 0.4);
+  border-radius: 16px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.upload-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(200, 130, 200, 0.8), rgba(180, 110, 180, 0.8));
+  box-shadow: 0 4px 12px rgba(200, 130, 200, 0.25);
+  border-color: rgba(200, 130, 200, 0.6);
+}
+
+.upload-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dark-theme .upload-btn {
+  background: linear-gradient(135deg, rgba(180, 120, 200, 0.6), rgba(160, 100, 180, 0.6));
+  border-color: rgba(180, 130, 200, 0.4);
+  color: #e0e0e0;
+}
+
+.dark-theme .upload-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(180, 120, 200, 0.8), rgba(160, 100, 180, 0.8));
+  box-shadow: 0 4px 12px rgba(180, 130, 200, 0.3);
+}
+
+/* Uploaded Images Preview */
+.uploaded-images-preview {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-light);
+}
+
+.uploaded-images-title {
+  font-size: 12px;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.images-grid {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px;
+}
+
+.uploaded-image-item {
+  position: relative;
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.uploaded-image-item:hover {
+  border-color: rgba(200, 130, 200, 0.6);
+  box-shadow: 0 2px 8px rgba(200, 130, 200, 0.2);
+  transform: scale(1.05);
+}
+
+.uploaded-image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.uploaded-image-item:hover .remove-image-btn {
+  opacity: 1;
+}
+
+.remove-image-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.1);
+}
+
+/* User uploaded images in messages */
+.user-images-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.user-uploaded-image {
+  position: relative;
+  max-width: 150px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.user-uploaded-image:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.user-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 250px;
 }
 
 .dark-theme .sidebar-header {

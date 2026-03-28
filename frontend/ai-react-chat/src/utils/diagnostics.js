@@ -31,9 +31,9 @@ export const CheckBasics = {
     const hasIndexedDB = !!window.indexedDB;
     const hasLocalStorage = !!window.localStorage;
     
-    console.log('✅ 浏览器支持检查:');
-    console.log(`   IndexedDB: ${hasIndexedDB ? '✅ 支持' : '❌ 不支持'}`);
-    console.log(`   LocalStorage: ${hasLocalStorage ? '✅ 支持' : '❌ 不支持'}`);
+    console.log('✅ Browser support check:');
+    console.log(`   IndexedDB: ${hasIndexedDB ? '✅ Supported' : '❌ Not supported'}`);
+    console.log(`   LocalStorage: ${hasLocalStorage ? '✅ Supported' : '❌ Not supported'}`);
     
     return {
       indexedDB: hasIndexedDB,
@@ -49,13 +49,13 @@ export const CheckBasics = {
       const test = window.indexedDB.open('_test_db_');
       
       test.onerror = () => {
-        console.warn('⚠️ 检测到隐私/无痕模式 - IndexedDB 可能不可用');
+        console.warn('⚠️ Private/Incognito mode detected - IndexedDB may be unavailable');
         resolve(true);
       };
       
       test.onsuccess = () => {
         window.indexedDB.deleteDatabase('_test_db_');
-        console.log('✅ 非隐私模式 - IndexedDB 正常可用');
+        console.log('✅ Not in private mode - IndexedDB is available');
         resolve(false);
       };
     });
@@ -66,7 +66,7 @@ export const CheckBasics = {
    */
   async checkStorageQuota() {
     if (!navigator.storage) {
-      console.warn('⚠️ navigator.storage 不可用');
+      console.warn('⚠️ navigator.storage is unavailable');
       return null;
     }
 
@@ -76,10 +76,10 @@ export const CheckBasics = {
       const quota = estimate.quota || 0;
       const percent = (usage / quota * 100).toFixed(2);
 
-      console.log('📦 存储配额信息:');
-      console.log(`   已使用: ${(usage / 1024 / 1024).toFixed(2)} MB`);
-      console.log(`   总配额: ${(quota / 1024 / 1024).toFixed(2)} MB`);
-      console.log(`   使用率: ${percent}%`);
+      console.log('📦 Storage quota info:');
+      console.log(`   Used: ${(usage / 1024 / 1024).toFixed(2)} MB`);
+      console.log(`   Total quota: ${(quota / 1024 / 1024).toFixed(2)} MB`);
+      console.log(`   Usage: ${percent}%`);
 
       return {
         usage,
@@ -89,7 +89,7 @@ export const CheckBasics = {
         quotaMB: (quota / 1024 / 1024).toFixed(2)
       };
     } catch (e) {
-      console.error('❌ 无法获取存储配额:', e.message);
+      console.error('❌ Failed to get storage quota:', e.message);
       return null;
     }
   },
@@ -99,16 +99,16 @@ export const CheckBasics = {
    */
   async checkPersistence() {
     if (!navigator.storage?.persisted) {
-      console.warn('⚠️ 持久化 API 不可用');
+      console.warn('⚠️ Persistence API is unavailable');
       return null;
     }
 
     try {
       const isPersisted = await navigator.storage.persisted();
-      console.log(`🔒 持久化状态: ${isPersisted ? '✅ 已启用' : '❌ 未启用'}`);
+      console.log(`🔒 Persistence status: ${isPersisted ? '✅ Enabled' : '❌ Disabled'}`);
       return isPersisted;
     } catch (e) {
-      console.error('❌ 检查持久化失败:', e.message);
+      console.error('❌ Failed to check persistence:', e.message);
       return null;
     }
   }
@@ -124,22 +124,22 @@ export const CheckDatabase = {
    */
   async testDexieConnection() {
     try {
-      console.log('🔗 测试 Dexie 连接...');
+      console.log('🔗 Testing Dexie connection...');
       
       // 尝试打开数据库
       await db.open();
-      console.log('✅ Dexie 连接成功');
+      console.log('✅ Dexie connected successfully');
       
       // 检查表
       const tables = Object.keys(db.tables || {});
-      console.log(`✅ 数据库表: ${tables.join(', ')}`);
+      console.log(`✅ Database tables: ${tables.join(', ')}`);
       
       return {
         success: true,
         tables: tables
       };
     } catch (e) {
-      console.error('❌ Dexie 连接失败:', e.message);
+      console.error('❌ Dexie connection failed:', e.message);
       return {
         success: false,
         error: e.message
@@ -152,35 +152,35 @@ export const CheckDatabase = {
    */
   async testTableAccess() {
     try {
-      console.log('📋 测试表访问权限...');
+      console.log('📋 Testing table access...');
 
       // 检查 images 表
       try {
         const imageCount = await db.images.count();
-        console.log(`✅ images 表: 共 ${imageCount} 条记录`);
+        console.log(`✅ images table: ${imageCount} records`);
       } catch (e) {
-        console.error('❌ images 表无法访问:', e.message);
+        console.error('❌ images table is inaccessible:', e.message);
       }
 
       // 检查 conversations 表
       try {
         const convCount = await db.conversations.count();
-        console.log(`✅ conversations 表: 共 ${convCount} 条记录`);
+        console.log(`✅ conversations table: ${convCount} records`);
       } catch (e) {
-        console.error('❌ conversations 表无法访问:', e.message);
+        console.error('❌ conversations table is inaccessible:', e.message);
       }
 
       // 检查 cache 表
       try {
         const cacheCount = await db.cache.count();
-        console.log(`✅ cache 表: 共 ${cacheCount} 条记录`);
+        console.log(`✅ cache table: ${cacheCount} records`);
       } catch (e) {
-        console.error('❌ cache 表无法访问:', e.message);
+        console.error('❌ cache table is inaccessible:', e.message);
       }
 
       return { success: true };
     } catch (e) {
-      console.error('❌ 表访问测试失败:', e.message);
+      console.error('❌ Table access test failed:', e.message);
       return { success: false, error: e.message };
     }
   }
@@ -196,7 +196,7 @@ export const CheckReadWrite = {
    */
   async testWrite() {
     try {
-      console.log('✍️ 测试写入操作...');
+      console.log('✍️ Testing write operations...');
 
       // 测试写入图片
       const testImage = {
@@ -209,7 +209,7 @@ export const CheckReadWrite = {
       };
 
       await db.images.add(testImage);
-      console.log(`✅ 图片写入成功: ${testImage.id}`);
+      console.log(`✅ Image written successfully: ${testImage.id}`);
 
       // 测试写入对话
       const testConversation = {
@@ -229,7 +229,7 @@ export const CheckReadWrite = {
       };
 
       await db.conversations.add(testConversation);
-      console.log(`✅ 对话写入成功: ${testConversation.id}`);
+      console.log(`✅ Conversation written successfully: ${testConversation.id}`);
 
       return {
         success: true,
@@ -237,7 +237,7 @@ export const CheckReadWrite = {
         testConversationId: testConversation.id
       };
     } catch (e) {
-      console.error('❌ 写入测试失败:', e.message);
+      console.error('❌ Write test failed:', e.message);
       return { success: false, error: e.message };
     }
   },
@@ -247,27 +247,27 @@ export const CheckReadWrite = {
    */
   async testRead(imageId, conversationId) {
     try {
-      console.log('📖 测试读取操作...');
+      console.log('📖 Testing read operations...');
 
       // 读取图片
       const image = await db.images.get(imageId);
       if (image) {
-        console.log(`✅ 图片读取成功: ${image.id}`);
+        console.log(`✅ Image read successfully: ${image.id}`);
       } else {
-        console.warn(`⚠️ 图片不存在: ${imageId}`);
+        console.warn(`⚠️ Image not found: ${imageId}`);
       }
 
       // 读取对话
       const conversation = await db.conversations.get(conversationId);
       if (conversation) {
-        console.log(`✅ 对话读取成功: ${conversation.id}`);
+        console.log(`✅ Conversation read successfully: ${conversation.id}`);
       } else {
-        console.warn(`⚠️ 对话不存在: ${conversationId}`);
+        console.warn(`⚠️ Conversation not found: ${conversationId}`);
       }
 
       return { success: true };
     } catch (e) {
-      console.error('❌ 读取测试失败:', e.message);
+      console.error('❌ Read test failed:', e.message);
       return { success: false, error: e.message };
     }
   },
@@ -277,17 +277,17 @@ export const CheckReadWrite = {
    */
   async testDelete(imageId, conversationId) {
     try {
-      console.log('🗑️ 测试删除操作...');
+      console.log('🗑️ Testing delete operations...');
 
       await db.images.delete(imageId);
-      console.log(`✅ 图片删除成功: ${imageId}`);
+      console.log(`✅ Image deleted successfully: ${imageId}`);
 
       await db.conversations.delete(conversationId);
-      console.log(`✅ 对话删除成功: ${conversationId}`);
+      console.log(`✅ Conversation deleted successfully: ${conversationId}`);
 
       return { success: true };
     } catch (e) {
-      console.error('❌ 删除测试失败:', e.message);
+      console.error('❌ Delete test failed:', e.message);
       return { success: false, error: e.message };
     }
   }
@@ -303,7 +303,7 @@ export const CheckStorageManager = {
    */
   async testImageExtraction() {
     try {
-      console.log('🖼️ 测试图片提取和恢复...');
+      console.log('🖼️ Testing image extraction and restoration...');
 
       // 创建包含图片的消息
       const message = {
@@ -315,22 +315,22 @@ export const CheckStorageManager = {
 
       // 提取图片
       const extracted = await StorageManager.extractImages(message);
-      console.log(`✅ 图片提取成功: ${extracted.imageIds.length} 张图片`);
+      console.log(`✅ Image extraction succeeded: ${extracted.imageIds.length} image(s)`);
 
       // 恢复图片
       const restored = await StorageManager.restoreImages(extracted);
-      console.log(`✅ 图片恢复成功`);
+      console.log('✅ Image restoration succeeded');
 
       // 验证
       if (restored.text.includes('IMG_DATA:')) {
-        console.log('✅ 图片恢复正确');
+        console.log('✅ Image restoration is correct');
         return { success: true };
       } else {
-        console.error('❌ 图片恢复异常');
+        console.error('❌ Image restoration is incorrect');
         return { success: false, error: '图片数据未恢复' };
       }
     } catch (e) {
-      console.error('❌ 图片处理测试失败:', e.message);
+      console.error('❌ Image processing test failed:', e.message);
       return { success: false, error: e.message };
     }
   },
@@ -340,7 +340,7 @@ export const CheckStorageManager = {
    */
   async testFullWorkflow() {
     try {
-      console.log('🔄 测试完整工作流...');
+      console.log('🔄 Testing full workflow...');
 
       const convId = `test_workflow_${Date.now()}`;
       const messages = [
@@ -359,19 +359,19 @@ export const CheckStorageManager = {
 
       // 保存
       await StorageManager.saveMessages(convId, messages);
-      console.log('✅ 消息保存成功');
+      console.log('✅ Messages saved successfully');
 
       // 加载
       const loaded = await StorageManager.loadMessages(convId);
-      console.log(`✅ 消息加载成功: ${loaded.length} 条`);
+      console.log(`✅ Messages loaded successfully: ${loaded.length} item(s)`);
 
       // 清理
       await StorageManager.deleteConversation(convId);
-      console.log('✅ 测试数据清理成功');
+      console.log('✅ Test data cleaned up successfully');
 
       return { success: true };
     } catch (e) {
-      console.error('❌ 工作流测试失败:', e.message);
+      console.error('❌ Workflow test failed:', e.message);
       return { success: false, error: e.message };
     }
   }
@@ -387,20 +387,20 @@ export const CheckStatistics = {
    */
   async getStats() {
     try {
-      console.log('📊 收集统计信息...');
+      console.log('📊 Collecting statistics...');
 
       const stats = await IndexedDBManager.getStorageStats();
       
-      console.log('📊 IndexedDB 统计:');
-      console.log(`   📸 图片总数: ${stats.imageCount}`);
-      console.log(`   💬 对话总数: ${stats.conversationCount}`);
-      console.log(`   💾 图片总大小: ${stats.totalImageSizeMB} MB`);
+      console.log('📊 IndexedDB statistics:');
+      console.log(`   📸 Total images: ${stats.imageCount}`);
+      console.log(`   💬 Total conversations: ${stats.conversationCount}`);
+      console.log(`   💾 Total image size: ${stats.totalImageSizeMB} MB`);
 
       // LocalStorage info
-      console.log('📊 LocalStorage 统计:');
+      console.log('📊 LocalStorage statistics:');
       const lsSize = new Blob(Object.values(localStorage)).size / 1024 / 1024;
-      console.log(`   📝 已用: ${lsSize.toFixed(2)} MB (限制 ~10 MB)`);
-      console.log(`   📦 条目数: ${Object.keys(localStorage).length}`);
+      console.log(`   📝 Used: ${lsSize.toFixed(2)} MB (limit ~10 MB)`);
+      console.log(`   📦 Items: ${Object.keys(localStorage).length}`);
 
       return {
         indexedDB: stats,
@@ -410,7 +410,7 @@ export const CheckStatistics = {
         }
       };
     } catch (e) {
-      console.error('❌ 统计失败:', e.message);
+      console.error('❌ Statistics collection failed:', e.message);
       return null;
     }
   }
@@ -423,13 +423,13 @@ export const CheckStatistics = {
 export const runFullDiagnostics = async () => {
   console.clear();
   console.log('='.repeat(60));
-  console.log('🔍 IndexedDB 完整诊断开始');
+  console.log('🔍 Full IndexedDB diagnostics started');
   console.log('='.repeat(60));
 
   const results = {};
 
   // 1. 基础检查
-  console.log('\n📋 第 1 步: 基础环境检查');
+  console.log('\n📋 Step 1: Basic environment checks');
   console.log('-'.repeat(60));
   results.basics = CheckBasics.isSupportedByBrowser();
   const isPrivate = await CheckBasics.isPrivateMode();
@@ -437,13 +437,13 @@ export const runFullDiagnostics = async () => {
   const persistence = await CheckBasics.checkPersistence();
 
   // 2. 数据库连接
-  console.log('\n📋 第 2 步: 数据库连接测试');
+  console.log('\n📋 Step 2: Database connection tests');
   console.log('-'.repeat(60));
   results.dexie = await CheckDatabase.testDexieConnection();
   results.tables = await CheckDatabase.testTableAccess();
 
   // 3. 读写测试
-  console.log('\n📋 第 3 步: 读写操作测试');
+  console.log('\n📋 Step 3: Read/write tests');
   console.log('-'.repeat(60));
   const writeResult = await CheckReadWrite.testWrite();
   if (writeResult.success) {
@@ -452,19 +452,19 @@ export const runFullDiagnostics = async () => {
   }
 
   // 4. StorageManager 测试
-  console.log('\n📋 第 4 步: StorageManager 功能测试');
+  console.log('\n📋 Step 4: StorageManager feature tests');
   console.log('-'.repeat(60));
   results.imageExtraction = await CheckStorageManager.testImageExtraction();
   results.workflow = await CheckStorageManager.testFullWorkflow();
 
   // 5. 统计信息
-  console.log('\n📋 第 5 步: 统计信息');
+  console.log('\n📋 Step 5: Statistics');
   console.log('-'.repeat(60));
   results.stats = await CheckStatistics.getStats();
 
   // 最终结果
   console.log('\n' + '='.repeat(60));
-  console.log('✨ 诊断完成');
+  console.log('✨ Diagnostics completed');
   console.log('='.repeat(60));
 
   const allSuccess = Object.values(results).every(r => 
@@ -472,12 +472,12 @@ export const runFullDiagnostics = async () => {
   );
 
   if (allSuccess) {
-    console.log('✅ 所有测试通过！IndexedDB 运作正常');
+    console.log('✅ All tests passed! IndexedDB is working correctly');
   } else {
-    console.warn('⚠️ 部分测试失败，请检查异常日志');
+    console.warn('⚠️ Some tests failed, please check the error logs');
   }
 
-  console.log('\n💡 诊断结果存储在 results 对象中，可通过以下方式查看:');
+  console.log('\n💡 Diagnostic results are stored in the results object and can be viewed with:');
   console.log('   console.log(results)');
 
   return results;
@@ -488,7 +488,7 @@ export const runFullDiagnostics = async () => {
 // ============================================================================
 
 export const quickTest = async () => {
-  console.log('\n🚀 快速测试 IndexedDB...\n');
+  console.log('\n🚀 Running quick IndexedDB test...\n');
 
   try {
     // 1. 基础检查
@@ -511,9 +511,9 @@ export const quickTest = async () => {
     // 6. 统计
     await CheckStatistics.getStats();
 
-    console.log('\n✅ 快速测试完成！');
+    console.log('\n✅ Quick test completed!');
   } catch (e) {
-    console.error('\n❌ 快速测试失败:', e);
+    console.error('\n❌ Quick test failed:', e);
   }
 };
 
@@ -538,7 +538,7 @@ export const generateReport = async () => {
   a.download = `indexeddb-report-${Date.now()}.json`;
   a.click();
 
-  console.log('✅ 报告已导出');
+  console.log('✅ Report exported successfully');
   return report;
 };
 
