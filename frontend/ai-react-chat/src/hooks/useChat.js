@@ -53,6 +53,20 @@ export function useChat({
     }));
   };
 
+  const isAuthLimitError = (error) => {
+    if (!error) return false;
+
+    const status = Number(error.status);
+    const candidates = [error.code, error.reason, error.detail, error.message]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    const hasLimitSignal = /guest|trial|limit|quota|sign in|signin|login|auth required|authentication/.test(candidates);
+
+    return (status === 401 || status === 403 || status === 429) && hasLimitSignal;
+  };
+
   const handleImageUpload = async (event) => {
     const files = event.target.files;
     if (!files) return;
@@ -120,21 +134,6 @@ export function useChat({
   const sendMessage = async () => {
     const msg = inputRef.current?.value.trim();
     if (!msg || isGenerating) return;
-
-    if (!isLoggedIn) {
-      onAuthRequired();
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `msg_${Date.now()}_system`,
-          sender: 'bot',
-          text: 'Please log in to send a message.',
-          isError: true,
-          createdAt: Date.now(),
-        },
-      ]);
-      return;
-    }
 
     const currentConvId = conversationId;
     const shouldUseFirstMessageAsTitle = messages.length === 0;
@@ -237,13 +236,20 @@ export function useChat({
             updated[lastMessageIndex] = {
               id: botMsgId,
               sender: 'bot',
-              text: 'Oops, the connection dropped... Ei-Heh?',
+              text: isAuthLimitError(error)
+                ? 'Guest trial finished. Please sign in with Google to continue chatting.'
+                : 'Oops, the connection dropped... Ei-Heh?',
+              isError: true,
               createdAt: Date.now(),
             };
           }
 
           return updated;
         });
+
+        if (isAuthLimitError(error)) {
+          onAuthRequired();
+        }
       }
     } finally {
       setIsGenerating(false);

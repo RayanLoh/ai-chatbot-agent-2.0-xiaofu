@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
-
 export function useAuth() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [GoogleProvider, setGoogleProvider] = useState(null);
-  const [guestMessageCount, setGuestMessageCount] = useState(0);
 
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -16,9 +14,6 @@ export function useAuth() {
     setIsMounted(true);
 
     if (typeof window === 'undefined') return;
-
-    const count = parseInt(localStorage.getItem('guestMessageCount') || '0', 10);
-    setGuestMessageCount(count);
 
     const token = localStorage.getItem('auth_token');
     if (!token) return;
@@ -56,14 +51,12 @@ export function useAuth() {
 
   const handleLoginSuccess = (decoded, token) => {
     localStorage.setItem('auth_token', token);
-    localStorage.setItem('guestMessageCount', '0');
     localStorage.setItem('user_data', JSON.stringify({
       picture: decoded.picture,
       avatar_url: decoded.avatar_url,
       name: decoded.name,
     }));
 
-    setGuestMessageCount(0);
     setUser(decoded);
     setIsLoggedIn(true);
     setShowLoginModal(false);
@@ -72,9 +65,7 @@ export function useAuth() {
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_data');
-    localStorage.setItem('guestMessageCount', '0');
     localStorage.removeItem('lastConversationId');
-    setGuestMessageCount(0);
     setUser(null);
     setIsLoggedIn(false);
   };
@@ -82,7 +73,6 @@ export function useAuth() {
   return {
     clientId,
     GoogleProvider,
-    guestMessageCount,
     isLoggedIn,
     isMounted,
     openLoginModal,

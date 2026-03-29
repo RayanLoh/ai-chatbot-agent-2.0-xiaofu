@@ -1,15 +1,39 @@
 import { buildApiUrl } from './config';
 
+const GUEST_ID_STORAGE_KEY = 'guest_id';
+
 const getToken = () => {
   if (typeof window === 'undefined') return null;
   return localStorage.getItem('auth_token');
 };
 
+const createGuestId = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `guest_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+};
+
+const getOrCreateGuestId = () => {
+  if (typeof window === 'undefined') return null;
+
+  let guestId = localStorage.getItem(GUEST_ID_STORAGE_KEY);
+  if (!guestId) {
+    guestId = createGuestId();
+    localStorage.setItem(GUEST_ID_STORAGE_KEY, guestId);
+  }
+
+  return guestId;
+};
+
 export const buildHeaders = ({ isJson = true } = {}) => {
   const token = getToken();
+  const guestId = getOrCreateGuestId();
   return {
     ...(isJson ? { 'Content-Type': 'application/json' } : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(guestId ? { 'X-Guest-Id': guestId } : {}),
   };
 };
 

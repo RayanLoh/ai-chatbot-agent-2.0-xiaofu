@@ -17,7 +17,12 @@ export const generateResponse = async (prompt, conversationId, model, signal, im
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ detail: response.statusText }));
-    throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+    const error = new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+    error.status = response.status;
+    error.detail = errorData.detail || response.statusText;
+    error.code = errorData.code || errorData.error_code || errorData.reason || null;
+    error.reason = errorData.reason || null;
+    throw error;
   }
 
   return response.json();

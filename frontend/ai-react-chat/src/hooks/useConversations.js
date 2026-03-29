@@ -117,17 +117,9 @@ export function useConversations({ isLoggedIn, isMounted }) {
   }, [cleanupDisposableConversations, conversationId, conversations]);
 
   const loadConversations = useCallback(async () => {
-    if (!isLoggedIn) {
-      setIsLoadingConversations(false);
-      setConversations([]);
-      setConversationId(null);
-      setMessages([]);
-      return;
-    }
-
     setIsLoadingConversations(true);
     try {
-      console.log('📡 [Private] Loading conversations for logged-in user...');
+      console.log(`📡 Loading conversations for ${isLoggedIn ? 'authenticated' : 'guest'} user...`);
       const data = await api.getConversations();
       const validConvList = Array.isArray(data.conversations) ? data.conversations : [];
       const { remainingConversations, deletedIds } = await cleanupDisposableConversations(validConvList);

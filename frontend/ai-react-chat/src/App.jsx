@@ -25,7 +25,6 @@ function App() {
   const {
     clientId,
     GoogleProvider,
-    guestMessageCount,
     isLoggedIn,
     isMounted,
     openLoginModal,
