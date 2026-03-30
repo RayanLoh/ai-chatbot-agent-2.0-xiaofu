@@ -81,6 +81,7 @@ export function useAuth() {
       avatar_url: decoded.avatar_url,
       name: decoded.name,
     }));
+    localStorage.removeItem('lastConversationId');
 
     setUser(decoded);
     setIsLoggedIn(true);

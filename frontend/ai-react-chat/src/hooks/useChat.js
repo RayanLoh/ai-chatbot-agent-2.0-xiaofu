@@ -67,6 +67,42 @@ export function useChat({
     return (status === 401 || status === 403 || status === 429) && hasLimitSignal;
   };
 
+  const getVisibleErrorMessage = (error) => {
+    if (!error) {
+      return 'Oops, the connection dropped... Ei-Heh?';
+    }
+
+    if (isAuthLimitError(error)) {
+      return 'Guest trial finished. Please sign in with Google to continue chatting.';
+    }
+
+    const detail = typeof error.detail === 'string' ? error.detail.trim() : '';
+    const message = typeof error.message === 'string' ? error.message.trim() : '';
+    const status = Number(error.status || 0);
+
+    if (detail) {
+      return detail;
+    }
+
+    if (message && !message.startsWith('HTTP error!')) {
+      return message;
+    }
+
+    if (status === 500) {
+      return 'The AI service failed while processing this request. Please try again.';
+    }
+
+    if (status === 503) {
+      return 'The AI service is temporarily unavailable. Please try again in a moment.';
+    }
+
+    if (status === 429) {
+      return 'Too many requests were sent in a short time. Please wait a moment and retry.';
+    }
+
+    return 'Oops, the connection dropped... Ei-Heh?';
+  };
+
   const handleImageUpload = async (event) => {
     const files = event.target.files;
     if (!files) return;
@@ -236,9 +272,7 @@ export function useChat({
             updated[lastMessageIndex] = {
               id: botMsgId,
               sender: 'bot',
-              text: isAuthLimitError(error)
-                ? 'Guest trial finished. Please sign in with Google to continue chatting.'
-                : 'Oops, the connection dropped... Ei-Heh?',
+              text: getVisibleErrorMessage(error),
               isError: true,
               createdAt: Date.now(),
             };
