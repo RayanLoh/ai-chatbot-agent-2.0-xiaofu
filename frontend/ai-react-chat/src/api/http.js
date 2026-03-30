@@ -1,10 +1,43 @@
 import { buildApiUrl } from './config';
+import { jwtDecode } from 'jwt-decode';
 
 const GUEST_ID_STORAGE_KEY = 'guest_id';
 
+const clearStoredAuth = () => {
+  if (typeof window === 'undefined') return;
+
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('user_data');
+};
+
+const isTokenExpired = (token) => {
+  try {
+    const decoded = jwtDecode(token);
+    const expiresAt = Number(decoded?.exp || 0);
+
+    if (!expiresAt) {
+      return true;
+    }
+
+    return expiresAt * 1000 <= Date.now();
+  } catch {
+    return true;
+  }
+};
+
 const getToken = () => {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('auth_token');
+
+  const token = localStorage.getItem('auth_token');
+  if (!token) return null;
+
+  if (isTokenExpired(token)) {
+    console.warn('Expired auth token detected while building request headers. Clearing local auth state.');
+    clearStoredAuth();
+    return null;
+  }
+
+  return token;
 };
 
 const createGuestId = () => {

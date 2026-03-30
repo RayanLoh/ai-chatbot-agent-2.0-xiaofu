@@ -1,6 +1,26 @@
 import { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
+const isTokenExpired = (token) => {
+  try {
+    const decoded = jwtDecode(token);
+    const expiresAt = Number(decoded?.exp || 0);
+
+    if (!expiresAt) {
+      return true;
+    }
+
+    return expiresAt * 1000 <= Date.now();
+  } catch {
+    return true;
+  }
+};
+
+const clearStoredAuth = () => {
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('user_data');
+};
+
 export function useAuth() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [user, setUser] = useState(null);
@@ -18,6 +38,12 @@ export function useAuth() {
     const token = localStorage.getItem('auth_token');
     if (!token) return;
 
+    if (isTokenExpired(token)) {
+      console.warn('Stored Google token has expired. Clearing local auth state.');
+      clearStoredAuth();
+      return;
+    }
+
     try {
       const decoded = jwtDecode(token);
       const storedUserData = localStorage.getItem('user_data');
@@ -30,8 +56,7 @@ export function useAuth() {
       setIsLoggedIn(true);
     } catch (error) {
       console.error('Invalid token:', error);
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user_data');
+      clearStoredAuth();
     }
   }, []);
 
@@ -63,8 +88,7 @@ export function useAuth() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_data');
+    clearStoredAuth();
     localStorage.removeItem('lastConversationId');
     setUser(null);
     setIsLoggedIn(false);
