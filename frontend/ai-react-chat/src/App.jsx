@@ -313,26 +313,13 @@ const appContent = (
               title="Choose AI Model"
             >
               <option value="models/gemini-2.5-flash">Gemini 2.5 Flash</option>
-              <option value="models/gemini-2.5-pro">Gemini 2.5 Pro</option>
-              <option value="models/gemini-2.5-flash-preview-tts">Gemini 2.5 Flash Preview TTS</option>
-              <option value="models/gemini-2.5-pro-preview-tts">Gemini 2.5 Pro Preview TTS</option>
-              <option value="models/gemma-3-1b-it">Gemma 3 1B IT</option>
-              <option value="models/gemma-3-4b-it">Gemma 3 4B IT</option>
-              <option value="models/gemma-3-12b-it">Gemma 3 12B IT</option>
-              <option value="models/gemma-3-27b-it">Gemma 3 27B IT</option>
-              <option value="models/gemma-3n-e4b-it">Gemma 3N E4B IT</option>
-              <option value="models/gemma-3n-e2b-it">Gemma 3N E2B IT</option>
-              <option value="models/gemini-pro-latest">Gemini Pro Latest</option>
-              <option value="models/gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
               <option value="models/gemini-2.5-flash-image">Gemini 2.5 Flash Image</option>
-              <option value="models/gemini-2.5-flash-lite-preview-09-2025">Gemini 2.5 Flash Lite Preview 09-2025</option>
+              <option value="models/gemini-2.5-pro">Gemini 2.5 Pro</option>
               <option value="models/gemini-3-pro-preview">Gemini 3 Pro Preview</option>
               <option value="models/gemini-3-flash-preview">Gemini 3 Flash Preview</option>
               <option value="models/gemini-3.1-pro-preview">Gemini 3.1 Pro Preview</option>
-              <option value="models/gemini-3.1-pro-preview-customtools">Gemini 3.1 Pro Preview CustomTools</option>
               <option value="models/gemini-3-pro-image-preview">Gemini 3 Pro Image Preview</option>
               <option value="models/nano-banana-pro-preview">Nano Banana Pro Preview</option>
-              <option value="models/gemini-2.5-computer-use-preview-10-2025">Gemini 2.5 Computer Use Preview 10-2025</option>
               <option value="models/deep-research-pro-preview-12-2025">Deep Research Pro Preview 12-2025</option>
             </select>
             <textarea
