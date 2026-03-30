@@ -17,10 +17,21 @@ import { useConversations } from './hooks/useConversations';
 import { useTheme } from './hooks/useTheme';
 
 const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 768;
+const isTouchDevice = () => {
+  if (typeof window === 'undefined') return false;
+
+  return Boolean(
+    navigator.maxTouchPoints > 0
+    || window.matchMedia?.('(pointer: coarse)').matches
+    || 'ontouchstart' in window
+  );
+};
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [previewImage, setPreviewImage] = useState(null);
+  const [isMobileViewport, setIsMobileViewport] = useState(() => isMobile());
+  const [isDesktopNonTouch, setIsDesktopNonTouch] = useState(() => !isMobile() && !isTouchDevice());
 
   const {
     clientId,
@@ -85,8 +96,14 @@ function App() {
   const imageScrollTimeoutRef = useRef(null);
 
   useEffect(() => {
-    setIsSidebarOpen(!isMobile());
-    const handleResize = () => setIsSidebarOpen(!isMobile());
+    const handleResize = () => {
+      const mobileViewport = isMobile();
+      setIsMobileViewport(mobileViewport);
+      setIsDesktopNonTouch(!mobileViewport && !isTouchDevice());
+      setIsSidebarOpen(!mobileViewport);
+    };
+
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -169,10 +186,11 @@ function App() {
   }, []);
 
   const showNewConversationHint = !isLoadingMessages && messages.length === 0;
+  const showDynamicIsland = isDesktopNonTouch;
 
 const appContent = (
   <div className="app-container">
-    <DynamicIsland />
+    {showDynamicIsland ? <DynamicIsland /> : null}
     <Header 
       onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
       theme={theme}
@@ -405,7 +423,7 @@ const appContent = (
   const routesContent = (
     <Routes>
       <Route path="/" element={appContent} />
-      <Route path="/settings" element={<><DynamicIsland /><Settings theme={theme} onThemeChange={handleThemeChange} /></>} />
+      <Route path="/settings" element={<>{showDynamicIsland ? <DynamicIsland /> : null}<Settings theme={theme} onThemeChange={handleThemeChange} /></>} />
     </Routes>
   );
 
