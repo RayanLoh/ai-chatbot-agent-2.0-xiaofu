@@ -17,6 +17,25 @@ import { useConversations } from './hooks/useConversations';
 import { useTheme } from './hooks/useTheme';
 
 const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 768;
+const MOBILE_TEXTAREA_MIN_HEIGHT = 48;
+const DESKTOP_TEXTAREA_MIN_HEIGHT = 44;
+const MOBILE_TEXTAREA_MAX_HEIGHT = 140;
+const DESKTOP_TEXTAREA_MAX_HEIGHT = 84;
+const PULL_REFRESH_THRESHOLD = 72;
+const PULL_REFRESH_MAX_DISTANCE = 104;
+
+const modelOptions = [
+  { value: 'models/gemini-2.5-flash', label: 'Gemini 2.5 Flash', compactLabel: '2.5 Flash' },
+  { value: 'models/gemini-2.5-flash-image', label: 'Gemini 2.5 Flash Image', compactLabel: '2.5 Image' },
+  { value: 'models/gemini-2.5-pro', label: 'Gemini 2.5 Pro', compactLabel: '2.5 Pro' },
+  { value: 'models/gemini-3-pro-preview', label: 'Gemini 3 Pro Preview', compactLabel: '3 Pro' },
+  { value: 'models/gemini-3-flash-preview', label: 'Gemini 3 Flash Preview', compactLabel: '3 Flash' },
+  { value: 'models/gemini-3.1-pro-preview', label: 'Gemini 3.1 Pro Preview', compactLabel: '3.1 Pro' },
+  { value: 'models/gemini-3-pro-image-preview', label: 'Gemini 3 Pro Image Preview', compactLabel: '3 Image' },
+  { value: 'models/nano-banana-pro-preview', label: 'Nano Banana Pro Preview', compactLabel: 'Nano' },
+  { value: 'models/deep-research-pro-preview-12-2025', label: 'Deep Research Pro Preview 12-2025', compactLabel: 'Research' },
+];
+
 const isTouchDevice = () => {
   if (typeof window === 'undefined') return false;
 
@@ -27,11 +46,20 @@ const isTouchDevice = () => {
   );
 };
 
+const normalizeBotMarkdown = (value = '') => value
+  .replace(/[“”]/g, '"')
+  .replace(/[‘’]/g, "'")
+  .replace(/"\*\*([^*]+)\*\*"/g, '**"$1"**')
+  .replace(/'\*\*([^*]+)\*\*'/g, "**'$1'**")
+  .replace(/\*\*\s+(["'])/g, '**$1')
+  .replace(/(["'])\s+\*\*/g, '$1**');
+
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [previewImage, setPreviewImage] = useState(null);
   const [isMobileViewport, setIsMobileViewport] = useState(() => isMobile());
   const [isDesktopNonTouch, setIsDesktopNonTouch] = useState(() => !isMobile() && !isTouchDevice());
+  const [pullDistance, setPullDistance] = useState(0);
 
   const {
     clientId,
@@ -65,7 +93,11 @@ function App() {
     loadConversations,
     deleteConversation,
     updateConversationTitle,
-  } = useConversations({ isLoggedIn, isMounted });
+  } = useConversations({
+    isLoggedIn,
+    isMounted,
+    authScopeKey: user?.sub || (isLoggedIn ? 'authenticated' : 'guest'),
+  });
 
   const {
     aiModel,
@@ -77,12 +109,14 @@ function App() {
     isUploading,
     handleImageUpload,
     removeUploadedImage,
+    resetComposer,
     stopGenerating,
     sendMessage,
   } = useChat({
     isLoggedIn,
     onAuthRequired: openLoginModal,
     conversationId,
+    setConversationId,
     messages,
     setMessages,
     loadConversations,
@@ -94,6 +128,32 @@ function App() {
   const hasInitializedScrollRef = useRef(false);
   const scrollAnimationFrameRef = useRef(null);
   const imageScrollTimeoutRef = useRef(null);
+  const pullStartYRef = useRef(null);
+  const isPullingToRefreshRef = useRef(false);
+
+  const resetTextareaHeight = (textarea) => {
+    if (!textarea) {
+      return;
+    }
+
+    const minHeight = isMobileViewport ? MOBILE_TEXTAREA_MIN_HEIGHT : DESKTOP_TEXTAREA_MIN_HEIGHT;
+    textarea.style.height = `${minHeight}px`;
+    textarea.style.overflowY = 'hidden';
+  };
+
+  const autoResizeTextarea = (textarea) => {
+    if (!textarea) {
+      return;
+    }
+
+    const minHeight = isMobileViewport ? MOBILE_TEXTAREA_MIN_HEIGHT : DESKTOP_TEXTAREA_MIN_HEIGHT;
+    const maxHeight = isMobileViewport ? MOBILE_TEXTAREA_MAX_HEIGHT : DESKTOP_TEXTAREA_MAX_HEIGHT;
+    textarea.style.height = `${minHeight}px`;
+
+    const nextHeight = Math.min(textarea.scrollHeight, maxHeight);
+    textarea.style.height = `${Math.max(nextHeight, minHeight)}px`;
+    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -107,6 +167,10 @@ function App() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    autoResizeTextarea(inputRef.current);
+  }, [isMobileViewport]);
 
   const scrollToBottom = (behavior = 'smooth') => {
     const container = messagesContainerRef.current;
@@ -185,6 +249,60 @@ function App() {
     }
   }, []);
 
+  const handlePullRefreshStart = (event) => {
+    if (!isMobileViewport) return;
+
+    const container = messagesContainerRef.current;
+    if (!container || container.scrollTop > 0) return;
+
+    pullStartYRef.current = event.touches[0]?.clientY ?? null;
+    isPullingToRefreshRef.current = pullStartYRef.current !== null;
+  };
+
+  const handlePullRefreshMove = (event) => {
+    if (!isMobileViewport || !isPullingToRefreshRef.current || pullStartYRef.current === null) {
+      return;
+    }
+
+    const container = messagesContainerRef.current;
+    if (!container || container.scrollTop > 0) {
+      isPullingToRefreshRef.current = false;
+      pullStartYRef.current = null;
+      setPullDistance(0);
+      return;
+    }
+
+    const currentY = event.touches[0]?.clientY ?? pullStartYRef.current;
+    const delta = currentY - pullStartYRef.current;
+
+    if (delta <= 0) {
+      setPullDistance(0);
+      return;
+    }
+
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+
+    setPullDistance(Math.min(Math.round(delta * 0.45), PULL_REFRESH_MAX_DISTANCE));
+  };
+
+  const handlePullRefreshEnd = () => {
+    if (!isPullingToRefreshRef.current) {
+      setPullDistance(0);
+      return;
+    }
+
+    const shouldRefresh = pullDistance >= PULL_REFRESH_THRESHOLD;
+    isPullingToRefreshRef.current = false;
+    pullStartYRef.current = null;
+    setPullDistance(0);
+
+    if (shouldRefresh) {
+      window.location.reload();
+    }
+  };
+
   const showNewConversationHint = !isLoadingMessages && messages.length === 0;
   const showDynamicIsland = isDesktopNonTouch;
 
@@ -212,7 +330,14 @@ const appContent = (
         }}
         onDeleteConversation={deleteConversation}
         onNewChat={async () => {
+          resetComposer();
           const newConversation = await createNewChat();
+
+          if (inputRef.current) {
+            inputRef.current.focus();
+            resetTextareaHeight(inputRef.current);
+          }
+
           if (newConversation && isMobile()) {
             setIsSidebarOpen(false);
           }
@@ -223,9 +348,19 @@ const appContent = (
       />
 
       <div className={`chat-container ${isSidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
+        {isMobileViewport ? (
+          <div className={`pull-refresh-indicator ${pullDistance >= PULL_REFRESH_THRESHOLD ? 'ready' : ''}`} style={{ height: `${pullDistance}px` }}>
+            <span>{pullDistance >= PULL_REFRESH_THRESHOLD ? 'Release to refresh' : 'Pull to refresh'}</span>
+          </div>
+        ) : null}
         <div
           ref={messagesContainerRef}
           className="messages"
+          style={pullDistance > 0 ? { transform: `translateY(${pullDistance}px)` } : undefined}
+          onTouchStart={handlePullRefreshStart}
+          onTouchMove={handlePullRefreshMove}
+          onTouchEnd={handlePullRefreshEnd}
+          onTouchCancel={handlePullRefreshEnd}
           onLoadCapture={(event) => {
             if (typeof HTMLImageElement === 'undefined') {
               return;
@@ -252,19 +387,23 @@ const appContent = (
             </div>
           ) : (
             messages.map((m, i) => (
-              <div key={m.id || i} className={`msg ${m.sender} ${m.isLoading ? 'loading' : ''}`}>
+              <div key={m.id || i} className={`msg ${m.sender} ${m.isLoading ? 'loading' : ''} ${m.isStreaming ? 'streaming' : ''} ${m.isError ? 'error' : ''}`}>
                 {m.sender === "bot" ? (
                   <>
                     {m.text && (
-                      <ReactMarkdown 
-                        remarkPlugins={[remarkGfm]}
-                        components={{
-                          pre: ({ node, ...props }) => <div className="code-block-wrapper"><pre {...props} /></div>,
-                          code: ({ node, inline, ...props }) => inline ? <code className="inline-code" {...props} /> : <code className="block-code" {...props} />
-                        }}
-                      >
-                        {m.text}
-                      </ReactMarkdown>
+                      m.isStreaming ? (
+                        <pre>{normalizeBotMarkdown(m.text)}</pre>
+                      ) : (
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            pre: ({ node, ...props }) => <div className="code-block-wrapper"><pre {...props} /></div>,
+                            code: ({ node, inline, ...props }) => inline ? <code className="inline-code" {...props} /> : <code className="block-code" {...props} />
+                          }}
+                        >
+                          {normalizeBotMarkdown(m.text)}
+                        </ReactMarkdown>
+                      )
                     )}
                     
                     {m.images && m.images.map((imgUrl, index) => (
@@ -324,43 +463,34 @@ const appContent = (
             </div>
           )}
           <div className="input-box">
-            <select 
-              value={aiModel}
-              onChange={(e) => setAiModel(e.target.value)}
-              className="model-select-input"
-              title="Choose AI Model"
-            >
-              <option value="models/gemini-2.5-flash">Gemini 2.5 Flash</option>
-              <option value="models/gemini-2.5-flash-image">Gemini 2.5 Flash Image</option>
-              <option value="models/gemini-2.5-pro">Gemini 2.5 Pro</option>
-              <option value="models/gemini-3-pro-preview">Gemini 3 Pro Preview</option>
-              <option value="models/gemini-3-flash-preview">Gemini 3 Flash Preview</option>
-              <option value="models/gemini-3.1-pro-preview">Gemini 3.1 Pro Preview</option>
-              <option value="models/gemini-3-pro-image-preview">Gemini 3 Pro Image Preview</option>
-              <option value="models/nano-banana-pro-preview">Nano Banana Pro Preview</option>
-              <option value="models/deep-research-pro-preview-12-2025">Deep Research Pro Preview 12-2025</option>
-            </select>
-            <textarea
-              ref={inputRef}
-              placeholder="Ask something..."
-              rows="1"
-              className="chat-textarea"
-              onInput={(e) => {
-                e.target.style.height = '44px';
-                const newHeight = e.target.scrollHeight;
-                e.target.style.height = `${newHeight}px`;
-                e.target.style.overflowY = newHeight > 84 ? 'auto' : 'hidden';
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey && !isGenerating) {
-                  e.preventDefault();
-                  sendMessage();
-                  e.target.style.height = '44px';
-                  e.target.style.overflowY = 'hidden';
-                }
-              }}
-            ></textarea>
-            <div className="input-actions">
+            <div className="input-main-row">
+              <select 
+                value={aiModel}
+                onChange={(e) => setAiModel(e.target.value)}
+                className="model-select-input"
+                title="Choose AI Model"
+              >
+                {modelOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {isMobileViewport ? option.compactLabel : option.label}
+                  </option>
+                ))}
+              </select>
+              <textarea
+                ref={inputRef}
+                placeholder="Ask something..."
+                rows="1"
+                className="chat-textarea"
+                onInput={(e) => autoResizeTextarea(e.target)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey && !isGenerating) {
+                    e.preventDefault();
+                    sendMessage();
+                    resetTextareaHeight(e.target);
+                  }
+                }}
+              ></textarea>
+              <div className="input-actions">
               <input
                 type="file"
                 ref={fileInputRef}
@@ -374,15 +504,28 @@ const appContent = (
                 disabled={isUploading || isGenerating}
                 className="upload-btn"
                 title="Upload image for AI analysis"
+                aria-label={isUploading ? 'Uploading image' : 'Upload image'}
               >
                 <Image size={20} />
-                {isUploading ? 'Uploading...' : 'Image'}
+                <span className="upload-btn-label">{isUploading ? 'Uploading...' : 'Image'}</span>
               </button>
               {isGenerating ? (
-                <button onClick={stopGenerating} className="stop">Stop</button>
+                <button onClick={stopGenerating} className="stop send-btn stop-btn">Stop</button>
               ) : (
-                <button onClick={sendMessage}>Send</button>
+                <button
+                  onClick={() => {
+                    sendMessage();
+                    resetTextareaHeight(inputRef.current);
+                  }}
+                  className="send-btn"
+                  aria-label="Send message"
+                  title="Send message"
+                >
+                  <span className="send-btn-label">Send</span>
+                  <span className="send-btn-icon" aria-hidden="true" />
+                </button>
               )}
+            </div>
             </div>
           </div>
           {uploadedImageUrls.length > 0 && (

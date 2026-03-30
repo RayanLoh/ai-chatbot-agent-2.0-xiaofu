@@ -13,12 +13,19 @@ function isDisposableConversation(conversation) {
   return messageCount === 0 && EMPTY_CONVERSATION_TITLES.has(normalizedTitle);
 }
 
-export function useConversations({ isLoggedIn, isMounted }) {
+export function useConversations({ isLoggedIn, isMounted, authScopeKey }) {
   const [conversationId, setConversationId] = useState(null);
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+
+  useEffect(() => {
+    setConversationId(null);
+    setConversations([]);
+    setMessages([]);
+    localStorage.removeItem('lastConversationId');
+  }, [authScopeKey]);
 
   const cleanupDisposableConversations = useCallback(async (sourceConversations, excludeId = null) => {
     const disposableConversations = sourceConversations.filter(

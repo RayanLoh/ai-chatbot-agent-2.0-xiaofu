@@ -2,10 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 
 import * as api from '../api';
 
+const DEFAULT_AI_MODEL = 'models/gemini-2.5-flash';
+const LEGACY_DEFAULT_MODELS = new Set([
+  'models/gemini-3-flash-preview',
+  'models/gemini-3.1-pro-preview',
+]);
+
 export function useChat({
   isLoggedIn,
   onAuthRequired,
   conversationId,
+  setConversationId,
   messages,
   setMessages,
   loadConversations,
@@ -15,19 +22,23 @@ export function useChat({
   const [isGenerating, setIsGenerating] = useState(false);
   const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [aiModel, setAiModel] = useState('models/gemini-3-flash-preview');
+  const [aiModel, setAiModel] = useState(DEFAULT_AI_MODEL);
   const [hasLoadedAiModel, setHasLoadedAiModel] = useState(false);
 
   const inputRef = useRef(null);
   const abortControllerRef = useRef(null);
   const fileInputRef = useRef(null);
+  const revealTimeoutRef = useRef(null);
+  const activeRevealMessageIdRef = useRef(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const savedModel = localStorage.getItem('aiModel');
-    if (savedModel) {
+    if (savedModel && !LEGACY_DEFAULT_MODELS.has(savedModel)) {
       setAiModel(savedModel);
+    } else {
+      setAiModel(DEFAULT_AI_MODEL);
     }
 
     setHasLoadedAiModel(true);
@@ -38,6 +49,12 @@ export function useChat({
       localStorage.setItem('aiModel', aiModel);
     }
   }, [aiModel, hasLoadedAiModel]);
+
+  useEffect(() => () => {
+    if (revealTimeoutRef.current) {
+      window.clearTimeout(revealTimeoutRef.current);
+    }
+  }, []);
 
   const buildConversationTitle = (text) => {
     const normalizedText = text.replace(/\s+/g, ' ').trim();
@@ -153,9 +170,117 @@ export function useChat({
     setUploadedImageUrls((prev) => prev.filter((_, imageIndex) => imageIndex !== index));
   };
 
+  const resetComposer = () => {
+    setUploadedImageUrls([]);
+
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const patchBotMessage = (messageId, updater) => {
+    setMessages((prev) => prev.map((message) => (
+      message.id === messageId
+        ? { ...message, ...updater(message) }
+        : message
+    )));
+  };
+
+  const revealBotText = (messageId, fullText, images = []) => new Promise((resolve) => {
+    const normalizedText = (fullText || '').trim();
+
+    if (!normalizedText) {
+      patchBotMessage(messageId, () => ({
+        text: '',
+        images,
+        isLoading: false,
+        isStreaming: false,
+      }));
+      resolve();
+      return;
+    }
+
+    if (revealTimeoutRef.current) {
+      window.clearTimeout(revealTimeoutRef.current);
+      revealTimeoutRef.current = null;
+    }
+
+    activeRevealMessageIdRef.current = messageId;
+    let cursor = 0;
+    const totalLength = normalizedText.length;
+
+    const finishReveal = () => {
+      patchBotMessage(messageId, () => ({
+        text: normalizedText,
+        images,
+        isLoading: false,
+        isStreaming: false,
+      }));
+      activeRevealMessageIdRef.current = null;
+      revealTimeoutRef.current = null;
+      resolve();
+    };
+
+    const stepReveal = () => {
+      if (activeRevealMessageIdRef.current !== messageId) {
+        resolve();
+        return;
+      }
+
+      const remaining = totalLength - cursor;
+      const stride = Math.max(1, Math.ceil(remaining / 26));
+      cursor = Math.min(totalLength, cursor + stride);
+
+      while (cursor < totalLength && /[\s，。！？；：,.!?;:]/.test(normalizedText[cursor])) {
+        cursor += 1;
+      }
+
+      patchBotMessage(messageId, () => ({
+        text: normalizedText.slice(0, cursor),
+        images: [],
+        isLoading: false,
+        isStreaming: cursor < totalLength,
+      }));
+
+      if (cursor >= totalLength) {
+        finishReveal();
+        return;
+      }
+
+      revealTimeoutRef.current = window.setTimeout(stepReveal, normalizedText.length > 320 ? 18 : 28);
+    };
+
+    patchBotMessage(messageId, () => ({
+      text: '',
+      images: [],
+      isLoading: false,
+      isStreaming: true,
+    }));
+
+    stepReveal();
+  });
+
   const stopGenerating = async () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
+    }
+
+    if (revealTimeoutRef.current) {
+      window.clearTimeout(revealTimeoutRef.current);
+      revealTimeoutRef.current = null;
+    }
+
+    if (activeRevealMessageIdRef.current) {
+      patchBotMessage(activeRevealMessageIdRef.current, (message) => ({
+        text: message.text,
+        isLoading: false,
+        isStreaming: false,
+      }));
+      activeRevealMessageIdRef.current = null;
     }
 
     try {
@@ -213,26 +338,12 @@ export function useChat({
         uploadedImageUrls,
       );
 
-      setMessages((prev) => {
-        const updated = [...prev];
-        const lastMessageIndex = updated.findIndex((message) => message.id === botMsgId);
-
-        if (lastMessageIndex !== -1) {
-          updated[lastMessageIndex] = {
-            id: botMsgId,
-            sender: 'bot',
-            text: (data.text || '').trim(),
-            images: data.images || [],
-            createdAt: Date.now(),
-          };
-        }
-
-        return updated;
-      });
+      await revealBotText(botMsgId, data.text || '', data.images || []);
 
       if (data.conversation_id && currentConvId !== data.conversation_id) {
         await loadConversations();
-        await selectConversation(data.conversation_id);
+        setConversationId?.(data.conversation_id);
+        localStorage.setItem('lastConversationId', data.conversation_id);
       }
 
       const resolvedConversationId = data.conversation_id || currentConvId;
@@ -264,6 +375,11 @@ export function useChat({
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error('Front-end error:', error);
+        if (revealTimeoutRef.current) {
+          window.clearTimeout(revealTimeoutRef.current);
+          revealTimeoutRef.current = null;
+        }
+        activeRevealMessageIdRef.current = null;
         setMessages((prev) => {
           const updated = [...prev];
           const lastMessageIndex = updated.findIndex((message) => message.id === botMsgId);
@@ -274,6 +390,8 @@ export function useChat({
               sender: 'bot',
               text: getVisibleErrorMessage(error),
               isError: true,
+              isLoading: false,
+              isStreaming: false,
               createdAt: Date.now(),
             };
           }
@@ -301,6 +419,7 @@ export function useChat({
     isUploading,
     handleImageUpload,
     removeUploadedImage,
+    resetComposer,
     stopGenerating,
     sendMessage,
   };

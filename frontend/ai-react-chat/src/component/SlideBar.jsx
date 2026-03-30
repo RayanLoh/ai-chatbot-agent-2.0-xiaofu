@@ -86,7 +86,7 @@ function SlideBar({
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <button className="new-chat-btn" onClick={onNewChat}>＋</button>
+          <button type="button" className="new-chat-btn" onClick={onNewChat}>＋</button>
         </div>
 
         <div className="conversation-list">
@@ -141,6 +141,7 @@ function SlideBar({
                 
                 <div className="conversation-actions">
                   <button
+                    type="button"
                     className="edit-btn"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -151,6 +152,7 @@ function SlideBar({
                     ✎
                   </button>
                   <button
+                    type="button"
                     className="delete-btn"
                     onClick={(e) => handleDelete(conv.id, e)}
                   >
