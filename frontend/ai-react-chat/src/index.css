@@ -6,6 +6,7 @@
   --bg-input: rgba(255, 250, 245, 0.8);
   --bg-user-msg: linear-gradient(135deg, rgba(255, 182, 193, 0.9), rgba(219, 112, 147, 0.85));
   --bg-bot-msg: linear-gradient(135deg, rgba(152, 251, 152, 0.85), rgba(176, 224, 230, 0.8));
+  --text-bot-heading: #8a3ffc;
   
   /* 文字色 */
   --text-primary: #2a2a2a;
@@ -34,6 +35,7 @@
   --bg-input: rgba(40, 40, 45, 0.85);
   --bg-user-msg: linear-gradient(135deg, rgba(200, 100, 150, 0.8), rgba(180, 80, 130, 0.8));
   --bg-bot-msg: linear-gradient(135deg, rgba(100, 180, 150, 0.75), rgba(120, 200, 180, 0.75));
+  --text-bot-heading: #ffe58f;
   
   /* 文字色 */
   --text-primary: #e0e0e0;
@@ -1168,8 +1170,8 @@ button.stop:hover {
 .msg.bot h1, .msg.bot h2, .msg.bot h3 {
   margin-top: 5px;
   margin-bottom: 10px;
-  color: #2d5a4a;
-  font-weight: bold;
+  color: var(--text-bot-heading) !important;
+  font-weight: 700;
   text-shadow: 0 2px 4px rgba(255, 255, 255, 0.3);
 }
 
@@ -1772,7 +1774,7 @@ button.stop:hover {
 .dark-theme .msg.bot h1,
 .dark-theme .msg.bot h2,
 .dark-theme .msg.bot h3 {
-  color: #ffdff6;
+  color: var(--text-bot-heading) !important;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
