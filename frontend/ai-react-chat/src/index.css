@@ -1769,6 +1769,13 @@ button.stop:hover {
   color: #d0e8e0;
 }
 
+.dark-theme .msg.bot h1,
+.dark-theme .msg.bot h2,
+.dark-theme .msg.bot h3 {
+  color: #ffdff6;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
 /* 暗色主题 - 输入框颜色处理 */
 .dark-theme input {
   background: rgba(50, 50, 60, 0.7);
