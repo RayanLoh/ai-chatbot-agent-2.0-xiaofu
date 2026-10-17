@@ -40,7 +40,7 @@ export default function LoginModal({ onClose, onLoginSuccess, enabled }) {
         /> : <p>{t("Google 登录暂未配置，你仍可以先体验游客聊天。")}</p>}
         </div>
         {error && <p className="xiaofu-login-error" role="alert">{t(error)}</p>}
-        <button className="xiaofu-login-guest" onClick={onClose}>{t("先随便逛逛")} <span aria-hidden="true">↗</span></button>
+        <button className="xiaofu-login-guest" onClick={onClose}>{t("先随便逛逛")}</button>
       </div>
     </div>, document.body,
   );

@@ -13,7 +13,7 @@ import ModelPicker from "./component/ModelPicker";
 import "./index.css";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Maximize2, Download, X, Image, Sparkles, ArrowUp, ArrowUpRight, PenLine, Compass, Palette, Square, ShieldCheck } from 'lucide-react';
+import { Maximize2, Download, X, Image, Sparkles, ArrowUp, PenLine, Compass, Palette, Square, ShieldCheck } from 'lucide-react';
 import { downloadImage, getModels } from './api';
 import { useAuth } from './hooks/useAuth';
 import { useChat } from './hooks/useChat';
@@ -413,7 +413,7 @@ const appContent = (
                     if (imageModel) setAiModel(imageModel.value);
                   }
                   if (inputRef.current) { inputRef.current.value = t(item.prompt); inputRef.current.focus(); autoResizeTextarea(inputRef.current); setHasDraft(true); }
-                }}><item.icon size={20} strokeWidth={1.5} /><span><strong>{t(item.title)}</strong></span><ArrowUpRight size={15} className="starter-arrow" /></button>)}
+                }}><item.icon size={20} strokeWidth={1.5} /><span><strong>{t(item.title)}</strong></span></button>)}
               </div>
             </section>
           ) : (

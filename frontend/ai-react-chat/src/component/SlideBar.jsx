@@ -1,7 +1,7 @@
 import { useLanguage } from '../i18n/LanguageProvider';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, MessageCircle, Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { MessageCircle, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import '../styles/SlideBar.css';
 
@@ -46,7 +46,7 @@ export default function SlideBar({
           </div>)}
       </div>
       <div className="sidebar-bottom">
-        <Link className="sidebar-settings" to="/settings"><span>{t("偏好设置")}</span><ArrowUpRight size={15} /></Link>
+        <Link className="sidebar-settings" to="/settings"><span>{t("偏好设置")}</span></Link>
       </div>
     </aside>
     <DeleteConfirmModal isOpen={Boolean(pending)} conversationTitle={pending?.title || '新对话'} isDeleting={deleting}
