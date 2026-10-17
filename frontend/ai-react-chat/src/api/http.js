@@ -1,115 +1,81 @@
-import { buildApiUrl } from './config';
+import { buildApiUrl, endpoints } from './config';
 import { jwtDecode } from 'jwt-decode';
 
-const GUEST_ID_STORAGE_KEY = 'guest_id';
-
+let guestSessionPromise = null;
 const clearStoredAuth = () => {
-  if (typeof window === 'undefined') return;
-
   localStorage.removeItem('auth_token');
   localStorage.removeItem('user_data');
-};
-
-const isTokenExpired = (token) => {
-  try {
-    const decoded = jwtDecode(token);
-    const expiresAt = Number(decoded?.exp || 0);
-
-    if (!expiresAt) {
-      return true;
-    }
-
-    return expiresAt * 1000 <= Date.now();
-  } catch {
-    return true;
-  }
+  window.dispatchEvent(new Event('xiaofu:auth-expired'));
 };
 
 const getToken = () => {
-  if (typeof window === 'undefined') return null;
-
   const token = localStorage.getItem('auth_token');
   if (!token) return null;
-
-  if (isTokenExpired(token)) {
-    console.warn('Expired auth token detected while building request headers. Clearing local auth state.');
-    clearStoredAuth();
-    return null;
-  }
-
-  return token;
+  try {
+    if (Number(jwtDecode(token).exp || 0) * 1000 > Date.now()) return token;
+  } catch { /* invalid token */ }
+  clearStoredAuth();
+  return null;
 };
 
-const createGuestId = () => {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-
-  return `guest_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+export const parseError = async (response) => {
+  const payload = await response.json().catch(() => ({}));
+  const detail = payload.detail;
+  const nested = detail && typeof detail === 'object' && !Array.isArray(detail) ? detail : {};
+  const message = typeof detail === 'string' ? detail
+    : typeof nested.detail === 'string' ? nested.detail
+    : Array.isArray(detail) ? detail.map((item) => item.msg).filter(Boolean).join('; ')
+    : payload.error || `Request failed (${response.status})`;
+  const error = new Error(message);
+  Object.assign(error, {
+    status: response.status, detail: message,
+    code: payload.code || nested.code || null,
+    reason: payload.reason || nested.reason || null,
+  });
+  return error;
 };
 
-const getOrCreateGuestId = () => {
-  if (typeof window === 'undefined') return null;
-
-  let guestId = localStorage.getItem(GUEST_ID_STORAGE_KEY);
-  if (!guestId) {
-    guestId = createGuestId();
-    localStorage.setItem(GUEST_ID_STORAGE_KEY, guestId);
+const getGuestToken = async () => {
+  const existing = localStorage.getItem('guest_token');
+  if (existing) return existing;
+  if (!guestSessionPromise) {
+    guestSessionPromise = (async () => {
+      const response = await fetch(buildApiUrl(endpoints.guestSession), { method: 'POST' });
+      if (!response.ok) throw await parseError(response);
+      const data = await response.json();
+      localStorage.setItem('guest_token', data.token);
+      return data.token;
+    })().finally(() => { guestSessionPromise = null; });
   }
-
-  return guestId;
+  return guestSessionPromise;
 };
 
-export const buildHeaders = ({ isJson = true } = {}) => {
+export const buildHeaders = async ({ isJson = true } = {}) => {
   const token = getToken();
-  const guestId = getOrCreateGuestId();
   return {
     ...(isJson ? { 'Content-Type': 'application/json' } : {}),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(guestId ? { 'X-Guest-Id': guestId } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : { 'X-Guest-Token': await getGuestToken() }),
   };
 };
 
-const parseError = async (response) => {
-  const errorData = await response.json().catch(() => ({ detail: response.statusText }));
-  return new Error(errorData.detail || `HTTP error! status: ${response.status}`);
-};
-
-export const requestJson = async (path, options = {}) => {
-  try {
-    const response = await fetch(buildApiUrl(path), {
-      ...options,
-      headers: {
-        ...buildHeaders({ isJson: true }),
-        ...(options.headers || {}),
-      },
-    });
-
-    if (!response.ok) {
-      throw await parseError(response);
+export const request = async (path, options = {}, isJson = true, retry = true) => {
+  const response = await fetch(buildApiUrl(path), {
+    ...options,
+    headers: { ...await buildHeaders({ isJson }), ...(options.headers || {}) },
+  });
+  if (!response.ok) {
+    const error = await parseError(response);
+    if (retry && error.code === 'INVALID_GUEST_TOKEN') {
+      localStorage.removeItem('guest_token');
+      return request(path, options, isJson, false);
     }
-
-    return response.json();
-  } catch (error) {
-    console.error(`API call to ${path} failed:`, error);
+    if (error.code === 'INVALID_AUTH_TOKEN') clearStoredAuth();
     throw error;
   }
+  return response;
 };
 
-export const requestForm = async (path, formData, options = {}) => {
-  const response = await fetch(buildApiUrl(path), {
-    method: 'POST',
-    ...options,
-    headers: {
-      ...buildHeaders({ isJson: false }),
-      ...(options.headers || {}),
-    },
-    body: formData,
-  });
-
-  if (!response.ok) {
-    throw await parseError(response);
-  }
-
-  return response.json();
-};
+export const requestJson = async (path, options = {}) => (await request(path, options)).json();
+export const requestForm = async (path, formData, options = {}) => (
+  await request(path, { method: 'POST', ...options, body: formData }, false)
+).json();

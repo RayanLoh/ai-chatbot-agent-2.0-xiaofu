@@ -1,21 +1,11 @@
-const DEFAULT_LOCAL_API_BASE = 'http://localhost:8080';
-const DEFAULT_PRODUCTION_API_BASE = 'https://xiaofu-backend-301455980722.asia-southeast1.run.app';
-
-const normalizeBaseUrl = (value) => value.trim().replace(/\/$/, '');
-
-const shouldUseProductionFallback = (apiBase) => {
-  if (typeof window === 'undefined') return false;
-
-  const hostname = window.location.hostname || '';
-  const isVercelDeployment = hostname.endsWith('.vercel.app');
-
-  return isVercelDeployment && apiBase.includes('xiaofu-ai.duckdns.org');
-};
+const configured = (import.meta.env.VITE_API_BASE || '').trim().replace(/\/+$/, '');
 
 export const endpoints = {
   health: '/health',
+  models: '/models',
+  guestSession: '/guest-session',
   conversations: '/conversations',
-  conversation: (conversationId) => `/conversations/${conversationId}`,
+  conversation: (id) => `/conversations/${encodeURIComponent(id)}`,
   generate: '/generate',
   stop: '/stop',
   upload: '/upload',
@@ -23,27 +13,18 @@ export const endpoints = {
 };
 
 export const getApiBase = () => {
-  let apiBase = normalizeBaseUrl(import.meta.env.VITE_API_BASE || '');
-  if (apiBase && !apiBase.startsWith('http')) {
-    apiBase = `https://${apiBase}`;
+  if (configured) {
+    const url = new URL(configured);
+    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.search || url.hash) {
+      throw new Error('VITE_API_BASE must be an HTTP(S) API address');
+    }
+    return configured;
   }
-
-  if (shouldUseProductionFallback(apiBase)) {
-    console.warn('Using Cloud Run API base because the deployed Vercel build still points to the legacy duckdns backend.');
-    return DEFAULT_PRODUCTION_API_BASE;
+  if (import.meta.env.DEV) {
+    return 'http://localhost:8080';
   }
-
-  if (apiBase) {
-    return apiBase;
-  }
-
-  if (typeof window !== 'undefined' && window.location.hostname.endsWith('.vercel.app')) {
-    return DEFAULT_PRODUCTION_API_BASE;
-  }
-
-  return DEFAULT_LOCAL_API_BASE;
+  // Production may use a reverse proxy on the same origin.
+  return '';
 };
 
 export const buildApiUrl = (path) => `${getApiBase()}${path}`;
-
-export const buildDownloadImageUrl = (url) => buildApiUrl(endpoints.downloadImage(url));

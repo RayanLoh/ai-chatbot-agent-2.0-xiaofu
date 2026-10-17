@@ -1,3 +1,6 @@
+import AssetImage from './component/AssetImage';
+import SubscriptionModal from './component/SubscriptionModal';
+import { useLanguage } from './i18n/LanguageProvider';
 import { useEffect, useRef, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import SlideBar from "./component/SlideBar";
@@ -6,11 +9,12 @@ import Footer from "./component/Footer";
 import DynamicIsland from "./component/DynamicIsland";
 import Settings from "./component/Settings";
 import LoginModal from "./component/LoginModal";
+import ModelPicker from "./component/ModelPicker";
 import "./index.css";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Maximize2, Download, X, Image } from 'lucide-react';
-import { buildDownloadImageUrl } from './api';
+import { Maximize2, Download, X, Image, Sparkles, ArrowUp, ArrowUpRight, PenLine, Compass, Palette, Square, ShieldCheck } from 'lucide-react';
+import { downloadImage, getModels } from './api';
 import { useAuth } from './hooks/useAuth';
 import { useChat } from './hooks/useChat';
 import { useConversations } from './hooks/useConversations';
@@ -24,17 +28,7 @@ const DESKTOP_TEXTAREA_MAX_HEIGHT = 84;
 const PULL_REFRESH_THRESHOLD = 72;
 const PULL_REFRESH_MAX_DISTANCE = 104;
 
-const modelOptions = [
-  { value: 'models/gemini-2.5-flash', label: 'Gemini 2.5 Flash', compactLabel: '2.5 Flash' },
-  { value: 'models/gemini-2.5-flash-image', label: 'Gemini 2.5 Flash Image', compactLabel: '2.5 Image' },
-  { value: 'models/gemini-2.5-pro', label: 'Gemini 2.5 Pro', compactLabel: '2.5 Pro' },
-  { value: 'models/gemini-3-pro-preview', label: 'Gemini 3 Pro Preview', compactLabel: '3 Pro' },
-  { value: 'models/gemini-3-flash-preview', label: 'Gemini 3 Flash Preview', compactLabel: '3 Flash' },
-  { value: 'models/gemini-3.1-pro-preview', label: 'Gemini 3.1 Pro Preview', compactLabel: '3.1 Pro' },
-  { value: 'models/gemini-3-pro-image-preview', label: 'Gemini 3 Pro Image Preview', compactLabel: '3 Image' },
-  { value: 'models/nano-banana-pro-preview', label: 'Nano Banana Pro Preview', compactLabel: 'Nano' },
-  { value: 'models/deep-research-pro-preview-12-2025', label: 'Deep Research Pro Preview 12-2025', compactLabel: 'Research' },
-];
+
 
 const isTouchDevice = () => {
   if (typeof window === 'undefined') return false;
@@ -55,7 +49,19 @@ const normalizeBotMarkdown = (value = '') => value
   .replace(/(["'])\s+\*\*/g, '$1**');
 
 function App() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const { t, language } = useLanguage();
+  const [hasDraft, setHasDraft] = useState(false);
+  const [showSubscription, setShowSubscription] = useState(false);
+  const [modelOptions, setModelOptions] = useState([]);
+  const [modelError, setModelError] = useState('');
+  useEffect(() => {
+    let alive = true;
+    getModels().then((models) => {
+      if (alive) setModelOptions(models);
+    }).catch((error) => { if (alive) setModelError(error.message); });
+    return () => { alive = false; };
+  }, []);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => !isMobile());
   const [previewImage, setPreviewImage] = useState(null);
   const [isMobileViewport, setIsMobileViewport] = useState(() => isMobile());
   const [isDesktopNonTouch, setIsDesktopNonTouch] = useState(() => !isMobile() && !isTouchDevice());
@@ -81,6 +87,7 @@ function App() {
   } = useTheme();
 
   const {
+    conversationError,
     conversationId,
     setConversationId,
     conversations,
@@ -112,9 +119,13 @@ function App() {
     resetComposer,
     stopGenerating,
     sendMessage,
+    pendingRecovery,
+    resumePendingGeneration,
   } = useChat({
-    isLoggedIn,
+    authScopeKey: user?.sub || 'guest',
+    availableModels: modelOptions.filter((option) => option.available !== false).map((option) => option.value),
     onAuthRequired: openLoginModal,
+    onSubscriptionRequired: () => setShowSubscription(true),
     conversationId,
     setConversationId,
     messages,
@@ -310,27 +321,31 @@ const appContent = (
   <div className="app-container">
     {showDynamicIsland ? <DynamicIsland /> : null}
     <Header 
+      sidebarOpen={isSidebarOpen}
       onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
       theme={theme}
       onThemeToggle={toggleTheme}
       user={user}
       isLoggedIn={isLoggedIn}
-      onLogout={handleLogout}
+      onLogout={() => { resetComposer(); setHasDraft(false); handleLogout(); }}
       onLogin={openLoginModal}
     />
     <div className="main-container">
       <div className={`sidebar-overlay ${isSidebarOpen ? 'visible' : ''}`} onClick={() => setIsSidebarOpen(false)} />
       
       <SlideBar
+        error={conversationError}
+        onRetry={loadConversations}
         conversations={conversations}
         isLoading={isLoadingConversations}
         onSelectConversation={(id) => {
+          resetComposer(); setHasDraft(false);
           selectConversation(id);
           if (isMobile()) setIsSidebarOpen(false);
         }}
         onDeleteConversation={deleteConversation}
         onNewChat={async () => {
-          resetComposer();
+          resetComposer(); setHasDraft(false);
           const newConversation = await createNewChat();
 
           if (inputRef.current) {
@@ -350,12 +365,14 @@ const appContent = (
       <div className={`chat-container ${isSidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
         {isMobileViewport ? (
           <div className={`pull-refresh-indicator ${pullDistance >= PULL_REFRESH_THRESHOLD ? 'ready' : ''}`} style={{ height: `${pullDistance}px` }}>
-            <span>{pullDistance >= PULL_REFRESH_THRESHOLD ? 'Release to refresh' : 'Pull to refresh'}</span>
+            <span>{pullDistance >= PULL_REFRESH_THRESHOLD ? t("Release to refresh") : t("Pull to refresh")}</span>
           </div>
         ) : null}
         <div
           ref={messagesContainerRef}
           className="messages"
+          aria-label={t("聊天消息")}
+          aria-busy={isLoadingMessages}
           style={pullDistance > 0 ? { transform: `translateY(${pullDistance}px)` } : undefined}
           onTouchStart={handlePullRefreshStart}
           onTouchMove={handlePullRefreshMove}
@@ -379,18 +396,33 @@ const appContent = (
           }}
         >
           {isLoadingMessages ? (
-            <div className="msg bot loading"><p>Loading messages...</p></div>
+            <div className="msg bot loading"><p>{t("Loading messages...")}</p></div>
           ) : showNewConversationHint ? (
-            <div className="empty-chat-hint">
-              <p className="empty-chat-title">Start a new conversation</p>
-              <p className="empty-chat-text">Type your message in the box below and press Send. Your new conversation will appear automatically after the first message is sent.</p>
-            </div>
+            <section className="welcome">
+              <div className="welcome-art" aria-hidden="true"><span className="welcome-orbit" /><Sparkles size={68} strokeWidth={1} /></div>
+              <h1>{t("嗨，我是小芙。")}</h1>
+              <p className="welcome-description">{t("想聊点什么？")}</p>
+              <div className="starter-grid">
+                {[
+                  { icon: PenLine, title: '写点不一样的', description: '让文字，更像你自己', prompt: '帮我写一段有个人风格的自我介绍，先问我几个问题来了解我。' },
+                  { icon: Compass, title: '理清一个想法', description: '把一团思绪，变成下一步', prompt: '我有一个还不成熟的想法，请通过提问帮我理清目标，再一起制定行动计划。' },
+                  { icon: Palette, title: '想象一幅画面', description: '给灵感，一点形状和颜色', prompt: '请为我创作一幅温暖的插画：一只小猫坐在窗边看夕阳，柔和的杏桃色，手绘质感。', image: true },
+                ].map((item) => <button key={item.title} className="starter-card" onClick={() => {
+                  if (item.image) {
+                    const imageModel = modelOptions.find((option) => option.imageGeneration && option.available !== false);
+                    if (imageModel) setAiModel(imageModel.value);
+                  }
+                  if (inputRef.current) { inputRef.current.value = t(item.prompt); inputRef.current.focus(); autoResizeTextarea(inputRef.current); setHasDraft(true); }
+                }}><item.icon size={20} strokeWidth={1.5} /><span><strong>{t(item.title)}</strong></span><ArrowUpRight size={15} className="starter-arrow" /></button>)}
+              </div>
+            </section>
           ) : (
             messages.map((m, i) => (
               <div key={m.id || i} className={`msg ${m.sender} ${m.isLoading ? 'loading' : ''} ${m.isStreaming ? 'streaming' : ''} ${m.isError ? 'error' : ''}`}>
                 {m.sender === "bot" ? (
                   <>
-                    {m.text && (
+                    <div className="message-author"><Sparkles size={15} />{language === 'zh' ? '小芙' : 'Xiaofu'} <span>· XIAOFU</span></div>
+                    {m.isLoading ? <div className="thinking-indicator" role="status"><i /><i /><i /><span>{t("小芙正在想一想…")}</span></div> : m.text && (
                       m.isStreaming ? (
                         <pre>{normalizeBotMarkdown(m.text)}</pre>
                       ) : (
@@ -406,23 +438,28 @@ const appContent = (
                       )
                     )}
                     
+                    {m.warnings?.includes('HISTORY_IMAGES_UNAVAILABLE') && <p className="message-notice" role="note">{t('Some older images are unavailable. Re-upload them if needed.')}</p>}
                     {m.images && m.images.map((imgUrl, index) => (
                       <div key={index} className="image-result-container">
-                        <img 
+                        <AssetImage scope={user?.sub || 'guest'} 
                           src={imgUrl} 
-                          alt={`AI Generated Art ${index + 1}`}
+                          alt={t('Generated image {count}', { count: index + 1 })}
                           className="generated-image"
                           loading="lazy"
                         />
                         <div className="image-overlay">
                           <div className="overlay-actions">
-                            <button className="icon-btn" onClick={() => setPreviewImage(imgUrl)} title="Preview (Enlarge)">
+                            <button className="icon-btn" onClick={() => setPreviewImage(imgUrl)} title={t("Preview (Enlarge)")}>
                               <Maximize2 size={24} />
                             </button>
                             <a 
-                              href={buildDownloadImageUrl(imgUrl)}
+                              href="#"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                downloadImage(imgUrl).catch((error) => alert(error.message));
+                              }}
                               className="icon-btn"
-                              title="Download Image"
+                              title={t("Download Image")}
                             >
                               <Download size={24} />
                             </a>
@@ -438,9 +475,9 @@ const appContent = (
                       <div className="user-images-container">
                         {m.images.map((imgUrl, index) => (
                           <div key={index} className="user-uploaded-image">
-                            <img 
+                            <AssetImage scope={user?.sub || 'guest'} 
                               src={imgUrl} 
-                              alt={`User Uploaded ${index + 1}`}
+                              alt={t('Reference image {count}', { count: index + 1 })}
                               className="user-image"
                               loading="lazy"
                               onClick={() => setPreviewImage(imgUrl)}
@@ -458,91 +495,56 @@ const appContent = (
 
           {previewImage && (
             <div className="fullscreen-preview-modal" onClick={() => setPreviewImage(null)}>
-              <span className="close-preview" onClick={() => setPreviewImage(null)}>×</span>
-              <img src={previewImage} alt="Fullscreen Preview" className="preview-image-large" onClick={(e) => e.stopPropagation()} />
+              <button className="close-preview" aria-label={t("关闭图片预览")} onClick={() => setPreviewImage(null)}>×</button>
+              <AssetImage scope={user?.sub || 'guest'} src={previewImage} alt={t('Image preview')} className="preview-image-large" onClick={(e) => e.stopPropagation()} />
             </div>
           )}
+          <div className="composer-shell">
+          {pendingRecovery && !isGenerating && <div className="composer-caption" role="status">
+            <span>{t('A reply may still be pending.')}</span>
+            <button className="icon-btn" onClick={resumePendingGeneration}>{t('Recover reply')}</button>
+          </div>}
           <div className="input-box">
             <div className="input-main-row">
-              <select 
-                value={aiModel}
-                onChange={(e) => setAiModel(e.target.value)}
-                className="model-select-input"
-                title="Choose AI Model"
-              >
-                {modelOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {isMobileViewport ? option.compactLabel : option.label}
-                  </option>
-                ))}
-              </select>
-              <textarea
-                ref={inputRef}
-                placeholder="Ask something..."
-                rows="1"
-                className="chat-textarea"
-                onInput={(e) => autoResizeTextarea(e.target)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey && !isGenerating) {
-                    e.preventDefault();
-                    sendMessage();
-                    resetTextareaHeight(e.target);
+              <textarea ref={inputRef} aria-label={t("发送给小芙的消息")} placeholder={t("有个想法？和小芙聊聊…")} rows="1" className="chat-textarea"
+                onInput={(event) => { autoResizeTextarea(event.target); setHasDraft(Boolean(event.target.value.trim())); }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing && !isGenerating) {
+                    event.preventDefault(); sendMessage(); setHasDraft(Boolean(inputRef.current?.value.trim())); resetTextareaHeight(event.target);
                   }
-                }}
-              ></textarea>
-              <div className="input-actions">
-              <input
-                type="file"
-                ref={fileInputRef}
-                multiple
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={handleImageUpload}
-              />
-              <button 
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading || isGenerating}
-                className="upload-btn"
-                title="Upload image for AI analysis"
-                aria-label={isUploading ? 'Uploading image' : 'Upload image'}
-              >
-                <Image size={20} />
-                <span className="upload-btn-label">{isUploading ? 'Uploading...' : 'Image'}</span>
-              </button>
-              {isGenerating ? (
-                <button onClick={stopGenerating} className="stop send-btn stop-btn">Stop</button>
-              ) : (
-                <button
-                  onClick={() => {
-                    sendMessage();
-                    resetTextareaHeight(inputRef.current);
-                  }}
-                  className="send-btn"
-                  aria-label="Send message"
-                  title="Send message"
-                >
-                  <span className="send-btn-label">Send</span>
-                  <span className="send-btn-icon" aria-hidden="true" />
-                </button>
-              )}
-            </div>
+                }} />
+              <div className="composer-toolbar">
+                <div className="composer-left">
+                  <input type="file" ref={fileInputRef} multiple accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={handleImageUpload} />
+                  <button onClick={() => fileInputRef.current?.click()} disabled={isUploading || isGenerating} className="upload-btn" title={t("添加参考图片")} aria-label={isUploading ? t("图片上传中") : t("添加图片")}><Image size={18} /></button>
+                  <span className="toolbar-divider" />
+                  <ModelPicker options={modelOptions} value={aiModel} onChange={setAiModel} disabled={isGenerating || isUploading} error={modelError} />
+                </div>
+                <div className="input-actions">
+                  <span className="composer-keyboard"><kbd>Enter</kbd> {t("发送")} · <kbd>Shift + Enter</kbd> {t("换行")}</span>
+                  {isGenerating ? <button onClick={stopGenerating} className="stop-btn" aria-label={t("停止生成")} title={t("停止生成")}><Square size={13} fill="currentColor" /></button>
+                    : <button onClick={() => { sendMessage(); setHasDraft(Boolean(inputRef.current?.value.trim())); resetTextareaHeight(inputRef.current); }} disabled={!hasDraft || isUploading || !modelOptions.some((option) => option.available !== false) || Boolean(pendingRecovery)} className="send-btn" aria-label={t("发送消息")} title={t("发送消息")}><ArrowUp size={19} /></button>}
+                </div>
+              </div>
             </div>
           </div>
+          <div className="composer-caption"><span><ShieldCheck size={11} />{isLoggedIn ? t("你的想法，值得被认真对待") : t("先随便聊聊，登录后继续探索")}</span><button className="subscription-secondary" style={{ margin: 0, padding: '3px 9px' }} onClick={() => setShowSubscription(true)}>{t('Usage & plans')}</button></div>
           {uploadedImageUrls.length > 0 && (
             <div className="uploaded-images-preview">
-              <p className="uploaded-images-title">📸 Uploaded ({uploadedImageUrls.length}):</p>
+              <p className="uploaded-images-title">{t('Uploaded')} ({uploadedImageUrls.length}):</p>
               <div className="images-grid">
                 {uploadedImageUrls.map((url, index) => (
                   <div key={index} className="uploaded-image-item">
-                    <img 
+                    <AssetImage scope={user?.sub || 'guest'} 
                       src={url} 
-                      alt={`Uploaded ${index + 1}`}
+                      alt={t('Reference image {count}', { count: index + 1 })}
                       onClick={() => setPreviewImage(url)}
                     />
                     <button 
                       className="remove-image-btn"
                       onClick={() => removeUploadedImage(index)}
-                      title="Remove image"
+                      title={t("移除图片")}
+                      aria-label={t("移除图片")}
                     >
                       <X size={16} />
                     </button>
@@ -551,11 +553,14 @@ const appContent = (
               </div>
             </div>
           )}
+          </div>
         </div>
     </div>
     <Footer />
+    {showSubscription && <SubscriptionModal key={user?.sub || 'guest'} isLoggedIn={isLoggedIn} onClose={() => setShowSubscription(false)} onSignIn={() => { setShowSubscription(false); openLoginModal(); }} />}
     {showLoginModal && (
       <LoginModal
+        enabled={Boolean(GoogleProvider && clientId)}
         onClose={closeLoginModal}
         onLoginSuccess={handleLoginSuccess}
       />
@@ -572,7 +577,7 @@ const appContent = (
 
   return (
     <div className="app-root" suppressHydrationWarning={true}>
-      {GoogleProvider ? (
+      {GoogleProvider && clientId ? (
         <GoogleProvider clientId={clientId}>{routesContent}</GoogleProvider>
       ) : (
         routesContent
@@ -582,3 +587,4 @@ const appContent = (
 }
 
 export default App;
+

@@ -1,0 +1,904 @@
+{
+  "Some older images are unavailable. Re-upload them if needed.": {"en":"Some older images are unavailable. Re-upload them if needed.","zh":"部分旧图片已无法读取，需要时请重新上传。","ms":"Sesetengah imej lama tidak tersedia. Muat naik semula jika diperlukan."},
+  "No models available": {"en":"No models available","zh":"暂无可用模型","ms":"Tiada model tersedia"},
+  "AI_NOT_CONFIGURED": {"en":"AI service is not configured","zh":"AI 服务尚未配置","ms":"Perkhidmatan AI belum dikonfigurasi"},
+  "MODEL_BUDGET_NOT_CONFIGURED": {"en":"Model budget is not configured","zh":"模型预算尚未配置","ms":"Bajet model belum dikonfigurasi"},
+  "PRIVATE_STORAGE_NOT_CONFIGURED": {"en":"Private image storage is not configured","zh":"私有图片存储尚未配置","ms":"Storan imej peribadi belum dikonfigurasi"},
+  "MODEL_UNAVAILABLE": {"en":"This model is unavailable","zh":"此模型暂不可用","ms":"Model ini tidak tersedia"},
+  "Google verification is temporarily unavailable. Please retry.": {"en":"Google verification is temporarily unavailable. Please retry.","zh":"Google 验证暂时不可用，请稍后重试。","ms":"Pengesahan Google tidak tersedia buat sementara. Sila cuba lagi."},
+  "Subscriptions coming soon": {"en":"Subscriptions coming soon","zh":"订阅即将开放","ms":"Langganan akan datang"},
+  "Template preview only. Payments and subscription activation are not available yet.": {"en":"Template preview only. Payments and subscription activation are not available yet.","zh":"目前仅为方案模板，暂不支持付款或开通订阅。","ms":"Pratonton templat sahaja. Pembayaran dan pengaktifan langganan belum tersedia."},
+  "Usage & plans": {"en":"Usage & plans","zh":"用量与订阅","ms":"Penggunaan & pelan"},
+  "Free": {"en":"Free","zh":"免费","ms":"Percuma"},
+  "Close plans": {"en":"Close plans","zh":"关闭订阅方案","ms":"Tutup pelan"},
+  "A little more room to explore.": {"en":"A little more room to explore.","zh":"给灵感，多一点空间。","ms":"Lebih ruang untuk meneroka."},
+  "Start free. Upgrade when you need more.": {"en":"Start free. Upgrade when you need more.","zh":"先免费体验，需要更多时再升级。","ms":"Mulakan percuma. Naik taraf apabila perlu."},
+  "Unable to load your plan. Please retry.": {"en":"Unable to load your plan. Please retry.","zh":"暂时无法读取账号用量，请重试。","ms":"Tidak dapat memuatkan penggunaan akaun. Sila cuba lagi."},
+  "Retry": {"en":"Retry","zh":"重试","ms":"Cuba lagi"},
+  "Loading your plan…": {"en":"Loading your plan…","zh":"正在读取订阅方案…","ms":"Memuatkan pelan anda…"},
+  "Guest trial": {"en":"Guest trial","zh":"游客体验","ms":"Percubaan tetamu"},
+  "{remaining} of {limit} messages left": {"en":"{remaining} of {limit} messages left","zh":"剩余 {remaining} / {limit} 次","ms":"Baki {remaining} daripada {limit} mesej"},
+  "Messages used": {"en":"Messages used","zh":"已使用次数","ms":"Mesej digunakan"},
+  "Resets at {time}": {"en":"Resets at {time}","zh":"{time} 重置","ms":"Ditetapkan semula pada {time}"},
+  "A first spark": {"en":"A first spark","zh":"从一点灵感开始","ms":"Cetusan pertama"},
+  "{count} trial messages": {"en":"{count} trial messages","zh":"总共 {count} 次免费体验","ms":"{count} mesej percubaan keseluruhan"},
+  "{count} messages per day": {"en":"Up to {count} messages per day","zh":"每天最多 {count} 次","ms":"Sehingga {count} mesej sehari"},
+  "Selected chat models": {"en":"Selected chat models","zh":"精选聊天模型","ms":"Model sembang terpilih"},
+  "Sign in to try free": {"en":"Sign in to try free","zh":"登录免费体验","ms":"Log masuk untuk mencuba"},
+  "Keep exploring": {"en":"Keep exploring","zh":"继续探索","ms":"Teruskan meneroka"},
+  "Keep the ideas flowing": {"en":"Keep the ideas flowing","zh":"让灵感继续发生","ms":"Teruskan aliran idea"},
+  "More models, including image generation": {"en":"More models, including image generation","zh":"更多模型，支持图片生成","ms":"Lebih banyak model, termasuk penjanaan imej"},
+  "/ month": {"en":"/ month","zh":"/ 月","ms":"/ bulan"},
+  "Subscribe with PayPal": {"en":"Subscribe with PayPal","zh":"使用 PayPal 订阅","ms":"Langgan dengan PayPal"},
+  "Opening PayPal…": {"en":"Opening PayPal…","zh":"正在打开 PayPal…","ms":"Membuka PayPal…"},
+  "PayPal setup pending": {"en":"PayPal setup pending","zh":"PayPal 待配置","ms":"Persediaan PayPal belum selesai"},
+  "Manage in PayPal": {"en":"Manage in PayPal","zh":"前往 PayPal 管理","ms":"Urus dalam PayPal"},
+  "Refresh subscription status": {"en":"Refresh subscription status","zh":"刷新订阅状态","ms":"Muat semula status langganan"},
+  "Renews monthly. Cancel renewal in PayPal; paid access lasts until the end of the paid period.": {"en":"Renews monthly. Cancel renewal in PayPal; paid access lasts until the end of the paid period.","zh":"按月自动续费；可在 PayPal 取消续费，已付费权益保留至本期结束。","ms":"Diperbaharui setiap bulan. Batalkan pembaharuan di PayPal; akses berbayar kekal hingga tamat tempoh dibayar."},
+  "PayPal checkout is not configured yet": {"en":"PayPal checkout is not configured yet","zh":"PayPal 收款尚未配置，目前不会收款。","ms":"Pembayaran PayPal belum dikonfigurasi. Tiada bayaran dikutip buat masa ini."},
+  "PayPal sandbox — test payments only.": {"en":"PayPal sandbox — test payments only.","zh":"PayPal 沙盒：仅供测试，不会真实扣款。","ms":"Kotak pasir PayPal — pembayaran ujian sahaja."},
+  "Usage and service capacity limits apply.": {"en":"Usage and service capacity limits apply.","zh":"受模型用量与服务容量限制。","ms":"Tertakluk pada had penggunaan dan kapasiti perkhidmatan."},
+  "Upgrade to Pro to continue.": {"en":"Upgrade to Pro to continue.","zh":"升级 Pro，继续探索。","ms":"Naik taraf kepada Pro untuk meneruskan."},
+  "Your Pro daily limit has been reached.": {"en":"Your Pro daily limit has been reached.","zh":"已达到 Pro 今日使用上限。","ms":"Had harian Pro anda telah dicapai."},
+  "Service capacity reached. Please try again later.": {"en":"Service capacity reached. Please try again later.","zh":"服务容量已满，请稍后重试。","ms":"Kapasiti perkhidmatan dicapai. Sila cuba lagi kemudian."},
+  "切换会话侧栏": {
+    "en": "Toggle conversation sidebar",
+    "zh": "切换会话侧栏",
+    "ms": "Togol bar sisi perbualan"
+  },
+  "小芙首页": {
+    "en": "Xiaofu home",
+    "zh": "小芙首页",
+    "ms": "Laman utama Xiaofu"
+  },
+  "留一点空间，给新的灵感。": {
+    "en": "A little room for a new idea.",
+    "zh": "留一点空间，给新的灵感。",
+    "ms": "Ruang kecil untuk idea baharu."
+  },
+  "PERSONAL SPACE": {
+    "en": "PERSONAL SPACE",
+    "zh": "个人空间",
+    "ms": "RUANG PERIBADI"
+  },
+  "切换明暗主题": {
+    "en": "Toggle light and dark theme",
+    "zh": "切换明暗主题",
+    "ms": "Tukar tema cerah dan gelap"
+  },
+  "界面语言": {
+    "en": "Interface language",
+    "zh": "界面语言",
+    "ms": "Bahasa antara muka"
+  },
+  "你的灵感空间": {
+    "en": "YOUR SPACE FOR IDEAS",
+    "zh": "你的灵感空间",
+    "ms": "RUANG IDEA ANDA"
+  },
+  "开启新对话": {
+    "en": "New conversation",
+    "zh": "开启新对话",
+    "ms": "Perbualan baharu"
+  },
+  "搜索对话": {
+    "en": "Search conversations",
+    "zh": "搜索对话",
+    "ms": "Cari perbualan"
+  },
+  "寻找聊过的灵感…": {
+    "en": "Find a past conversation…",
+    "zh": "寻找聊过的灵感…",
+    "ms": "Cari perbualan lalu…"
+  },
+  "最近对话": {
+    "en": "RECENT",
+    "zh": "最近",
+    "ms": "TERKINI"
+  },
+  "正在找回你的对话…": {
+    "en": "Loading your conversations…",
+    "zh": "正在找回你的对话…",
+    "ms": "Memuatkan perbualan anda…"
+  },
+  "暂时连接不上对话": {
+    "en": "Your history is unavailable",
+    "zh": "暂时连接不上对话",
+    "ms": "Sejarah belum tersedia"
+  },
+  "暂时无法读取历史对话，请检查连接后重试。": {
+    "en": "Please check your connection and try again.",
+    "zh": "暂时无法读取历史对话，请检查连接后重试。",
+    "ms": "Sila semak sambungan dan cuba lagi."
+  },
+  "暂时无法读取历史对话": {
+    "en": "Could not load conversations",
+    "zh": "暂时无法读取历史对话",
+    "ms": "Tidak dapat memuatkan perbualan"
+  },
+  "请检查连接后重试。": {
+    "en": "Please check your connection and try again.",
+    "zh": "请检查连接后重试。",
+    "ms": "Sila semak sambungan dan cuba lagi."
+  },
+  "重新连接": {
+    "en": "Try again",
+    "zh": "重新连接",
+    "ms": "Cuba lagi"
+  },
+  "暂时没有找到": {
+    "en": "No conversations found",
+    "zh": "暂时没有找到",
+    "ms": "Tiada perbualan ditemui"
+  },
+  "故事还没开始": {
+    "en": "Your story starts here",
+    "zh": "故事还没开始",
+    "ms": "Kisah anda bermula di sini"
+  },
+  "试试另一个关键词": {
+    "en": "Try a different keyword",
+    "zh": "试试另一个关键词",
+    "ms": "Cuba kata kunci lain"
+  },
+  "新的想法，会在这里留下足迹": {
+    "en": "Your ideas will find a home here",
+    "zh": "新的想法，会在这里留下足迹",
+    "ms": "Idea anda akan tersimpan di sini"
+  },
+  "修改对话标题": {
+    "en": "Rename conversation",
+    "zh": "修改对话标题",
+    "ms": "Namakan semula perbualan"
+  },
+  "新对话": {
+    "en": "New conversation",
+    "zh": "新对话",
+    "ms": "Perbualan baharu"
+  },
+  "重命名": {
+    "en": "Rename",
+    "zh": "重命名",
+    "ms": "Namakan semula"
+  },
+  "删除": {
+    "en": "Delete",
+    "zh": "删除",
+    "ms": "Padam"
+  },
+  "消息数量": {
+    "en": "{count} messages",
+    "zh": "{count} 条消息",
+    "ms": "{count} mesej"
+  },
+  "小芙，和你一起想。": {
+    "en": "A little company for your ideas.",
+    "zh": "小芙，和你一起想。",
+    "ms": "Teman untuk idea anda."
+  },
+  "一点好奇，无限可能": {
+    "en": "A little curiosity. Endless possibilities.",
+    "zh": "一点好奇，无限可能",
+    "ms": "Sedikit rasa ingin tahu. Tanpa batasan."
+  },
+  "偏好设置": {
+    "en": "Preferences",
+    "zh": "偏好设置",
+    "ms": "Keutamaan"
+  },
+  "会话列表": {
+    "en": "Conversations",
+    "zh": "会话列表",
+    "ms": "Perbualan"
+  },
+  "聊天消息": {
+    "en": "Chat messages",
+    "zh": "聊天消息",
+    "ms": "Mesej perbualan"
+  },
+  "嗨，我是小芙。": {
+    "en": "Hi, I’m Xiaofu.",
+    "zh": "嗨，我是小芙。",
+    "ms": "Hai, saya Xiaofu."
+  },
+  "把想法，聊成": {
+    "en": "Turn a thought into ",
+    "zh": "把想法，聊成",
+    "ms": "Ubah idea menjadi "
+  },
+  "可能。": {
+    "en": "possibility.",
+    "zh": "可能。",
+    "ms": "kenyataan."
+  },
+  "那些没想好的、想尝试的，或者只是想说说的话。": {
+    "en": "The half-formed ideas. The things you want to try.",
+    "zh": "那些没想好的、想尝试的，或者只是想说说的话。",
+    "ms": "Idea yang belum lengkap. Sesuatu yang ingin dicuba."
+  },
+  "都可以从这里开始，我们一起慢慢找到答案。": {
+    "en": "Bring them here. We’ll figure it out together.",
+    "zh": "都可以从这里开始，我们一起慢慢找到答案。",
+    "ms": "Mulakan di sini. Kita cari jawapannya bersama."
+  },
+  "不知道从哪开始？试试这些": {
+    "en": "A little inspiration to get you started",
+    "zh": "不知道从哪开始？试试这些",
+    "ms": "Sedikit inspirasi untuk bermula"
+  },
+  "从一个小小的想法出发 ↗": {
+    "en": "IT STARTS WITH A LITTLE IDEA ↗",
+    "zh": "从一个小小的想法出发 ↗",
+    "ms": "BERMULA DENGAN IDEA KECIL ↗"
+  },
+  "写点不一样的": {
+    "en": "Find your words",
+    "zh": "写点不一样的",
+    "ms": "Cari kata-kata anda"
+  },
+  "让文字，更像你自己": {
+    "en": "Make it sound more like you",
+    "zh": "让文字，更像你自己",
+    "ms": "Tulis dengan gaya anda"
+  },
+  "理清一个想法": {
+    "en": "Untangle an idea",
+    "zh": "理清一个想法",
+    "ms": "Susun idea anda"
+  },
+  "把一团思绪，变成下一步": {
+    "en": "From a thought to a next step",
+    "zh": "把一团思绪，变成下一步",
+    "ms": "Dari fikiran ke langkah seterusnya"
+  },
+  "想象一幅画面": {
+    "en": "Picture something",
+    "zh": "想象一幅画面",
+    "ms": "Bayangkan sesuatu"
+  },
+  "给灵感，一点形状和颜色": {
+    "en": "Give your imagination a little colour",
+    "zh": "给灵感，一点形状和颜色",
+    "ms": "Warnai imaginasi anda"
+  },
+  "帮我写一段有个人风格的自我介绍，先问我几个问题来了解我。": {
+    "en": "Help me write a personal introduction in my own style. Ask a few questions to get to know me first.",
+    "zh": "帮我写一段有个人风格的自我介绍，先问我几个问题来了解我。",
+    "ms": "Bantu saya menulis pengenalan diri dengan gaya saya sendiri. Tanya beberapa soalan untuk mengenali saya dahulu."
+  },
+  "我有一个还不成熟的想法，请通过提问帮我理清目标，再一起制定行动计划。": {
+    "en": "I have a half-formed idea. Help me clarify my goal through questions, then work with me on an action plan.",
+    "zh": "我有一个还不成熟的想法，请通过提问帮我理清目标，再一起制定行动计划。",
+    "ms": "Saya ada idea yang belum lengkap. Bantu saya menjelaskan matlamat melalui soalan, kemudian rangka pelan tindakan bersama saya."
+  },
+  "请为我创作一幅温暖的插画：一只小猫坐在窗边看夕阳，柔和的杏桃色，手绘质感。": {
+    "en": "Create a warm illustration of a little cat watching the sunset by a window, with soft apricot colours and a hand-drawn texture.",
+    "zh": "请为我创作一幅温暖的插画：一只小猫坐在窗边看夕阳，柔和的杏桃色，手绘质感。",
+    "ms": "Cipta ilustrasi hangat seekor anak kucing melihat matahari terbenam di tepi tingkap, dengan warna aprikot lembut dan tekstur lukisan tangan."
+  },
+  "小芙正在想一想…": {
+    "en": "Xiaofu is thinking…",
+    "zh": "小芙正在想一想…",
+    "ms": "Xiaofu sedang berfikir…"
+  },
+  "发送给小芙的消息": {
+    "en": "Message Xiaofu",
+    "zh": "发送给小芙的消息",
+    "ms": "Mesej kepada Xiaofu"
+  },
+  "有个想法？和小芙聊聊…": {
+    "en": "Have a thought? Share it with Xiaofu…",
+    "zh": "有个想法？和小芙聊聊…",
+    "ms": "Ada idea? Kongsikan dengan Xiaofu…"
+  },
+  "图片上传中": {
+    "en": "Uploading images",
+    "zh": "图片上传中",
+    "ms": "Sedang memuat naik imej"
+  },
+  "添加图片": {
+    "en": "Add images",
+    "zh": "添加图片",
+    "ms": "Tambah imej"
+  },
+  "添加参考图片": {
+    "en": "Attach reference images",
+    "zh": "添加参考图片",
+    "ms": "Lampirkan imej rujukan"
+  },
+  "停止生成": {
+    "en": "Stop generating",
+    "zh": "停止生成",
+    "ms": "Hentikan penjanaan"
+  },
+  "发送消息": {
+    "en": "Send message",
+    "zh": "发送消息",
+    "ms": "Hantar mesej"
+  },
+  "发送": {
+    "en": "to send",
+    "zh": "发送",
+    "ms": "untuk hantar"
+  },
+  "换行": {
+    "en": "for a new line",
+    "zh": "换行",
+    "ms": "untuk baris baharu"
+  },
+  "你的想法，值得被认真对待": {
+    "en": "Every idea deserves a little attention",
+    "zh": "你的想法，值得被认真对待",
+    "ms": "Setiap idea patut diberi perhatian"
+  },
+  "先随便聊聊，登录后继续探索": {
+    "en": "Try a little chat. Sign in to keep exploring.",
+    "zh": "先随便聊聊，登录后继续探索",
+    "ms": "Cuba berbual. Log masuk untuk terus meneroka."
+  },
+  "正在上传图片…": {
+    "en": "Uploading images…",
+    "zh": "正在上传图片…",
+    "ms": "Sedang memuat naik imej…"
+  },
+  "模型加载失败，请确认后端已启动后刷新": {
+    "en": "Models unavailable. Check your connection and refresh.",
+    "zh": "模型加载失败，请确认后端已启动后刷新",
+    "ms": "Model tidak tersedia. Semak sambungan dan muat semula."
+  },
+  "文字 · 灵感 · 新的可能": {
+    "en": "WORDS · IDEAS · POSSIBILITIES",
+    "zh": "文字 · 灵感 · 新的可能",
+    "ms": "KATA-KATA · IDEA · KEMUNGKINAN"
+  },
+  "关闭图片预览": {
+    "en": "Close image preview",
+    "zh": "关闭图片预览",
+    "ms": "Tutup pratonton imej"
+  },
+  "移除图片": {
+    "en": "Remove image",
+    "zh": "移除图片",
+    "ms": "Buang imej"
+  },
+  "选择 AI 模型": {
+    "en": "Choose AI model",
+    "zh": "选择 AI 模型",
+    "ms": "Pilih model AI"
+  },
+  "加载模型…": {
+    "en": "Loading models…",
+    "zh": "加载模型…",
+    "ms": "Memuatkan model…"
+  },
+  "为这次对话，选个搭档": {
+    "en": "A model for your next idea",
+    "zh": "为这次对话，选个搭档",
+    "ms": "Model untuk idea seterusnya"
+  },
+  "选择模型": {
+    "en": "CHOOSE A MODEL",
+    "zh": "选择模型",
+    "ms": "PILIH MODEL"
+  },
+  "AI 模型": {
+    "en": "AI models",
+    "zh": "AI 模型",
+    "ms": "Model AI"
+  },
+  "通用聊天": {
+    "en": "Everyday conversations",
+    "zh": "通用聊天",
+    "ms": "Perbualan harian"
+  },
+  "推理与编程": {
+    "en": "Reasoning & coding",
+    "zh": "推理与编程",
+    "ms": "Penaakulan & pengaturcaraan"
+  },
+  "图片生成": {
+    "en": "Image creation",
+    "zh": "图片生成",
+    "ms": "Penciptaan imej"
+  },
+  "其他模型": {
+    "en": "Other models",
+    "zh": "其他模型",
+    "ms": "Model lain"
+  },
+  "预览版": {
+    "en": "Preview",
+    "zh": "预览版",
+    "ms": "Pratonton"
+  },
+  "用文字和参考图，创造新画面": {
+    "en": "Create with words and reference images",
+    "zh": "用文字和参考图，创造新画面",
+    "ms": "Cipta dengan kata-kata dan imej rujukan"
+  },
+  "深入思考，拆解复杂问题": {
+    "en": "Think deeper about complex problems",
+    "zh": "深入思考，拆解复杂问题",
+    "ms": "Fikirkan masalah rumit dengan mendalam"
+  },
+  "陪你写作、探索和聊聊日常": {
+    "en": "Write, explore and talk things through",
+    "zh": "陪你写作、探索和聊聊日常",
+    "ms": "Menulis, meneroka dan berbincang"
+  },
+  "不同模型的可用额度由服务账号决定": {
+    "en": "Model access and quotas depend on the service account",
+    "zh": "不同模型的可用额度由服务账号决定",
+    "ms": "Akses dan kuota model bergantung pada akaun perkhidmatan"
+  },
+  "打开账户菜单": {
+    "en": "Open account menu",
+    "zh": "打开账户菜单",
+    "ms": "Buka menu akaun"
+  },
+  "我的账户": {
+    "en": "My account",
+    "zh": "我的账户",
+    "ms": "Akaun saya"
+  },
+  "退出登录": {
+    "en": "Sign out",
+    "zh": "退出登录",
+    "ms": "Log keluar"
+  },
+  "登录 / 开始": {
+    "en": "Sign in",
+    "zh": "登录 / 开始",
+    "ms": "Log masuk"
+  },
+  "登录小芙": {
+    "en": "Sign in to Xiaofu",
+    "zh": "登录小芙",
+    "ms": "Log masuk ke Xiaofu"
+  },
+  "和小芙，继续聊下去。": {
+    "en": "Keep the conversation going.",
+    "zh": "和小芙，继续聊下去。",
+    "ms": "Teruskan perbualan bersama Xiaofu."
+  },
+  "登录失败，请再试一次。": {
+    "en": "Could not sign in. Please try again.",
+    "zh": "登录失败，请再试一次。",
+    "ms": "Tidak dapat log masuk. Sila cuba lagi."
+  },
+  "Google 登录暂未配置，你仍可以先体验游客聊天。": {
+    "en": "Google sign-in is not configured. You can try chatting as a guest.",
+    "zh": "Google 登录暂未配置，你仍可以先体验游客聊天。",
+    "ms": "Log masuk Google belum dikonfigurasi. Anda boleh berbual sebagai tetamu."
+  },
+  "先随便逛逛": {
+    "en": "Keep exploring",
+    "zh": "先随便逛逛",
+    "ms": "Terus meneroka"
+  },
+  "关闭通知": {
+    "en": "Dismiss notification",
+    "zh": "关闭通知",
+    "ms": "Tutup pemberitahuan"
+  },
+  "返回聊天": {
+    "en": "Back to chat",
+    "zh": "返回聊天",
+    "ms": "Kembali ke perbualan"
+  },
+  "常规": {
+    "en": "General",
+    "zh": "常规",
+    "ms": "Umum"
+  },
+  "通知": {
+    "en": "Notifications",
+    "zh": "通知",
+    "ms": "Pemberitahuan"
+  },
+  "个人偏好": {
+    "en": "Personalisation",
+    "zh": "个人偏好",
+    "ms": "Pemperibadian"
+  },
+  "应用": {
+    "en": "Apps",
+    "zh": "应用",
+    "ms": "Aplikasi"
+  },
+  "安全": {
+    "en": "Security",
+    "zh": "安全",
+    "ms": "Keselamatan"
+  },
+  "家庭": {
+    "en": "Family",
+    "zh": "家庭",
+    "ms": "Keluarga"
+  },
+  "账户": {
+    "en": "Account",
+    "zh": "账户",
+    "ms": "Akaun"
+  },
+  "让这里，更像你。": {
+    "en": "Make yourself at home.",
+    "zh": "让这里，更像你。",
+    "ms": "Jadikan ruang ini milik anda."
+  },
+  "界面外观": {
+    "en": "Appearance",
+    "zh": "界面外观",
+    "ms": "Penampilan"
+  },
+  "跟随系统": {
+    "en": "System",
+    "zh": "跟随系统",
+    "ms": "Ikut sistem"
+  },
+  "暖白": {
+    "en": "Light",
+    "zh": "暖白",
+    "ms": "Cerah"
+  },
+  "深色": {
+    "en": "Dark",
+    "zh": "深色",
+    "ms": "Gelap"
+  },
+  "应用内提示": {
+    "en": "In-app notifications",
+    "zh": "应用内提示",
+    "ms": "Pemberitahuan dalam aplikasi"
+  },
+  "用轻量浮层提醒回复和连接状态，不打断当前思路。": {
+    "en": "Quiet updates for replies and connection status, without breaking your flow.",
+    "zh": "用轻量浮层提醒回复和连接状态，不打断当前思路。",
+    "ms": "Makluman ringkas tentang balasan dan sambungan tanpa mengganggu tumpuan anda."
+  },
+  "小芙的新回复已到达": {
+    "en": "A new reply from Xiaofu",
+    "zh": "小芙的新回复已到达",
+    "ms": "Balasan baharu daripada Xiaofu"
+  },
+  "尚未开放": {
+    "en": "This feature is not available yet.",
+    "zh": "尚未开放",
+    "ms": "Ciri ini belum tersedia."
+  },
+  "Loading messages...": {
+    "en": "Loading messages...",
+    "zh": "正在加载消息…",
+    "ms": "Memuatkan mesej…"
+  },
+  "Preview (Enlarge)": {
+    "en": "Preview (Enlarge)",
+    "zh": "放大预览",
+    "ms": "Besarkan pratonton"
+  },
+  "Download Image": {
+    "en": "Download Image",
+    "zh": "下载图片",
+    "ms": "Muat turun imej"
+  },
+  "Uploaded": {
+    "en": "Uploaded",
+    "zh": "已上传",
+    "ms": "Dimuat naik"
+  },
+  "Remove \"{title}\"?": {
+    "en": "Remove \"{title}\"?",
+    "zh": "删除“{title}”？",
+    "ms": "Padam \"{title}\"?"
+  },
+  "Delete Conversation": {
+    "en": "Delete Conversation",
+    "zh": "删除对话",
+    "ms": "Padam perbualan"
+  },
+  "This will permanently delete the conversation and its messages from your history.": {
+    "en": "This will permanently delete the conversation and its messages from your history.",
+    "zh": "此操作会永久删除该对话及其全部消息。",
+    "ms": "Tindakan ini akan memadamkan perbualan dan semua mesejnya secara kekal."
+  },
+  "Keep it": {
+    "en": "Keep it",
+    "zh": "保留对话",
+    "ms": "Simpan"
+  },
+  "Deleting...": {
+    "en": "Deleting...",
+    "zh": "正在删除…",
+    "ms": "Sedang memadam…"
+  },
+  "Delete permanently": {
+    "en": "Delete permanently",
+    "zh": "永久删除",
+    "ms": "Padam secara kekal"
+  },
+  "Notification center is ready.": {
+    "en": "Notification center is ready.",
+    "zh": "通知设置已就绪。",
+    "ms": "Tetapan pemberitahuan sedia."
+  },
+  "Browser notifications allowed": {
+    "en": "Browser notifications allowed",
+    "zh": "已允许浏览器通知",
+    "ms": "Pemberitahuan pelayar dibenarkan"
+  },
+  "Browser notifications blocked": {
+    "en": "Browser notifications blocked",
+    "zh": "已阻止浏览器通知",
+    "ms": "Pemberitahuan pelayar disekat"
+  },
+  "Browser permission not decided": {
+    "en": "Browser permission not decided",
+    "zh": "尚未选择通知权限",
+    "ms": "Kebenaran pelayar belum ditetapkan"
+  },
+  "Browser notifications not supported": {
+    "en": "Browser notifications not supported",
+    "zh": "此浏览器不支持通知",
+    "ms": "Pelayar ini tidak menyokong pemberitahuan"
+  },
+  "This browser does not support desktop notifications.": {
+    "en": "This browser does not support desktop notifications.",
+    "zh": "此浏览器不支持桌面通知。",
+    "ms": "Pelayar ini tidak menyokong pemberitahuan desktop."
+  },
+  "Desktop notifications enabled.": {
+    "en": "Desktop notifications enabled.",
+    "zh": "桌面通知已开启。",
+    "ms": "Pemberitahuan desktop diaktifkan."
+  },
+  "Desktop notifications were denied by the browser.": {
+    "en": "Desktop notifications were denied by the browser.",
+    "zh": "浏览器已拒绝通知权限。",
+    "ms": "Kebenaran pemberitahuan ditolak oleh pelayar."
+  },
+  "Desktop notification permission was dismissed.": {
+    "en": "Desktop notification permission was dismissed.",
+    "zh": "未授予桌面通知权限。",
+    "ms": "Kebenaran pemberitahuan desktop tidak diberikan."
+  },
+  "Desktop notifications turned off for this app.": {
+    "en": "Desktop notifications turned off for this app.",
+    "zh": "此应用的桌面通知已关闭。",
+    "ms": "Pemberitahuan desktop untuk aplikasi ini dimatikan."
+  },
+  "Dynamic Island alerts enabled.": {
+    "en": "Dynamic Island alerts enabled.",
+    "zh": "应用内提示已开启。",
+    "ms": "Pemberitahuan dalam aplikasi diaktifkan."
+  },
+  "Dynamic Island alerts paused.": {
+    "en": "Dynamic Island alerts paused.",
+    "zh": "应用内提示已暂停。",
+    "ms": "Pemberitahuan dalam aplikasi dijeda."
+  },
+  "Notification test": {
+    "en": "Notification test",
+    "zh": "测试通知",
+    "ms": "Ujian pemberitahuan"
+  },
+  "Your notification settings are active and ready for new replies.": {
+    "en": "Your notification settings are active and ready for new replies.",
+    "zh": "通知设置已生效，可以接收新的回复提示。",
+    "ms": "Tetapan pemberitahuan anda sedia untuk balasan baharu."
+  },
+  "Desktop notification and Dynamic Island test sent.": {
+    "en": "Desktop notification and Dynamic Island test sent.",
+    "zh": "桌面和应用内测试通知已发送。",
+    "ms": "Ujian pemberitahuan desktop dan dalam aplikasi dihantar."
+  },
+  "Desktop notification test sent.": {
+    "en": "Desktop notification test sent.",
+    "zh": "桌面测试通知已发送。",
+    "ms": "Ujian pemberitahuan desktop dihantar."
+  },
+  "Dynamic Island test animation played.": {
+    "en": "Dynamic Island test animation played.",
+    "zh": "应用内测试提示已显示。",
+    "ms": "Ujian pemberitahuan dalam aplikasi dipaparkan."
+  },
+  "Enable at least one notification channel before testing.": {
+    "en": "Enable at least one notification channel before testing.",
+    "zh": "请先开启至少一种通知方式。",
+    "ms": "Aktifkan sekurang-kurangnya satu saluran pemberitahuan dahulu."
+  },
+  "Live alerts": {
+    "en": "Live alerts",
+    "zh": "即时提示",
+    "ms": "Makluman segera"
+  },
+  "Build a notification flow that feels active, not generic.": {
+    "en": "Build a notification flow that feels active, not generic.",
+    "zh": "不错过回复，也不打断思路。",
+    "ms": "Kekal dimaklumkan tanpa gangguan."
+  },
+  "Use browser notifications for background alerts and the Dynamic Island animation for rich in-app feedback.": {
+    "en": "Use browser notifications for background alerts and the Dynamic Island animation for rich in-app feedback.",
+    "zh": "使用桌面通知接收后台提醒，或通过应用内提示查看新消息。",
+    "ms": "Gunakan pemberitahuan desktop untuk makluman latar belakang atau makluman dalam aplikasi untuk mesej baharu."
+  },
+  "Desktop notification": {
+    "en": "Desktop notification",
+    "zh": "桌面通知",
+    "ms": "Pemberitahuan desktop"
+  },
+  "Send a native browser notification when the app needs attention.": {
+    "en": "Send a native browser notification when the app needs attention.",
+    "zh": "当应用需要你的注意时，显示浏览器桌面通知。",
+    "ms": "Paparkan pemberitahuan desktop apabila aplikasi memerlukan perhatian."
+  },
+  "Toggle desktop notifications": {
+    "en": "Toggle desktop notifications",
+    "zh": "切换桌面通知",
+    "ms": "Togol pemberitahuan desktop"
+  },
+  "Request permission": {
+    "en": "Request permission",
+    "zh": "申请通知权限",
+    "ms": "Minta kebenaran"
+  },
+  "切换应用内提示": {
+    "en": "Toggle in-app notifications",
+    "zh": "切换应用内提示",
+    "ms": "Togol pemberitahuan dalam aplikasi"
+  },
+  "Run a test": {
+    "en": "Run a test",
+    "zh": "测试一下",
+    "ms": "Jalankan ujian"
+  },
+  "Trigger the configured notification channels and confirm the animation appears.": {
+    "en": "Trigger the configured notification channels and confirm the animation appears.",
+    "zh": "发送一条测试提醒，确认通知设置有效。",
+    "ms": "Hantar makluman ujian untuk menyemak tetapan pemberitahuan."
+  },
+  "Test notifications": {
+    "en": "Test notifications",
+    "zh": "测试通知",
+    "ms": "Uji pemberitahuan"
+  },
+  "Enable two-factor authentication or change your password.": {
+    "en": "Manage your password and two-factor authentication in your Google account.",
+    "zh": "请在你的 Google 账户中管理密码与双重验证。",
+    "ms": "Urus kata laluan dan pengesahan dua faktor dalam akaun Google anda."
+  },
+  "Generation stopped.": {
+    "en": "Generation stopped.",
+    "zh": "生成已停止。",
+    "ms": "Penjanaan dihentikan."
+  },
+  "Attach at most four images.": {
+    "en": "Attach at most four images.",
+    "zh": "最多可添加 4 张图片。",
+    "ms": "Lampirkan maksimum empat imej."
+  },
+  "Use PNG, JPEG, WebP or GIF images up to 10 MiB.": {
+    "en": "Use PNG, JPEG, WebP or GIF images up to 10 MiB.",
+    "zh": "请使用 PNG、JPEG、WebP 或 GIF 图片，每张不超过 10 MiB。",
+    "ms": "Gunakan imej PNG, JPEG, WebP atau GIF sehingga 10 MiB."
+  },
+  "Messages must be at most 20,000 characters.": {
+    "en": "Messages must be at most 20,000 characters.",
+    "zh": "消息不能超过 20,000 个字符。",
+    "ms": "Mesej mesti tidak melebihi 20,000 aksara."
+  },
+  "Unable to get a reply. Please retry.": {
+    "en": "Unable to get a reply. Please retry.",
+    "zh": "暂时无法获取回复，请重试。",
+    "ms": "Tidak dapat menerima balasan. Sila cuba lagi."
+  },
+  "AI image generated": {
+    "en": "AI image generated",
+    "zh": "图片已生成",
+    "ms": "Imej AI telah dijana"
+  },
+  "New reply received": {
+    "en": "New reply received",
+    "zh": "收到新回复",
+    "ms": "Balasan baharu diterima"
+  },
+  "Conversation updated": {
+    "en": "Conversation updated",
+    "zh": "对话已更新",
+    "ms": "Perbualan dikemas kini"
+  },
+  "Image ready": {
+    "en": "Image ready",
+    "zh": "图片已就绪",
+    "ms": "Imej sedia"
+  },
+  "Pull to refresh": {
+    "en": "Pull to refresh",
+    "zh": "下拉刷新",
+    "ms": "Tarik untuk muat semula"
+  },
+  "Release to refresh": {
+    "en": "Release to refresh",
+    "zh": "松开刷新",
+    "ms": "Lepaskan untuk muat semula"
+  },
+  "A LITTLE CURIOSITY. A LOT OF POSSIBILITY.": {
+    "en": "A LITTLE CURIOSITY. A LOT OF POSSIBILITY.",
+    "zh": "一点好奇，无限可能。",
+    "ms": "RASA INGIN TAHU, TANPA BATASAN."
+  },
+  "A LITTLE SPARK": {
+    "en": "A LITTLE SPARK",
+    "zh": "一点灵光",
+    "ms": "CETUSAN IDEA"
+  },
+  "Generated image {count}": {
+    "en": "Generated image {count}",
+    "zh": "生成的图片 {count}",
+    "ms": "Imej dijana {count}"
+  },
+  "Reference image {count}": {
+    "en": "Reference image {count}",
+    "zh": "参考图片 {count}",
+    "ms": "Imej rujukan {count}"
+  },
+  "Image preview": {
+    "en": "Image preview",
+    "zh": "图片预览",
+    "ms": "Pratonton imej"
+  },
+  "想聊点什么？": {
+    "en": "What’s on your mind?",
+    "zh": "想聊点什么？",
+    "ms": "Apa yang anda fikirkan?"
+  },
+  "搜索": {
+    "en": "Search",
+    "zh": "搜索",
+    "ms": "Cari"
+  },
+  "暂无对话": {
+    "en": "No conversations yet",
+    "zh": "暂无对话",
+    "ms": "Belum ada perbualan"
+  },
+  "A reply may still be pending.": {
+    "en": "A reply may still be pending.",
+    "zh": "回复可能仍在生成。",
+    "ms": "Balasan mungkin masih diproses."
+  },
+  "Recover reply": {
+    "en": "Recover reply",
+    "zh": "恢复回复",
+    "ms": "Pulihkan balasan"
+  },
+  "Image unavailable. Please upload again.": {
+    "en": "Image unavailable. Please upload again.",
+    "zh": "图片无法读取，请重新上传。",
+    "ms": "Imej tidak tersedia. Sila muat naik semula."
+  },
+  "Generation failed. Your draft has been restored.": {
+    "en": "Generation failed. Your draft has been restored.",
+    "zh": "生成失败，已恢复草稿。",
+    "ms": "Penjanaan gagal. Draf anda telah dipulihkan."
+  },
+  "Reply is still pending. Check recovery before sending again.": {
+    "en": "Reply is still pending. Check recovery before sending again.",
+    "zh": "回复仍在等待，请先恢复回复。",
+    "ms": "Balasan masih tertunda. Semak pemulihan sebelum menghantar semula."
+  },
+  "Usage budget reached. Please try again later.": {
+    "en": "Usage budget reached. Please try again later.",
+    "zh": "已达到用量预算，请稍后再试。",
+    "ms": "Had bajet dicapai. Sila cuba lagi kemudian."
+  },
+  "Model budget is not configured": {
+    "en": "Model budget is not configured",
+    "zh": "此模型尚未配置预算",
+    "ms": "Bajet model belum dikonfigurasi"
+  },
+  "Private image storage is not configured": {
+    "en": "Private image storage is not configured",
+    "zh": "私有图片存储尚未配置",
+    "ms": "Storan imej peribadi belum dikonfigurasi"
+  }
+}

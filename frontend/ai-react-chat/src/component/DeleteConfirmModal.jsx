@@ -1,3 +1,4 @@
+import { useLanguage } from '../i18n/LanguageProvider';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -12,6 +13,7 @@ function DeleteConfirmModal({
   onCancel,
   onConfirm,
 }) {
+  const { t, language } = useLanguage();
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [isVisible, setIsVisible] = useState(isOpen);
 
@@ -66,11 +68,9 @@ function DeleteConfirmModal({
         aria-labelledby="delete-confirm-title"
       >
         <div className="delete-confirm-orb" aria-hidden="true" />
-        <p className="delete-confirm-eyebrow">Delete Conversation</p>
-        <h3 id="delete-confirm-title">Remove "{safeTitle}"?</h3>
-        <p className="delete-confirm-copy">
-          This will permanently delete the conversation and its messages from your history.
-        </p>
+        <p className="delete-confirm-eyebrow">{t("Delete Conversation")}</p>
+        <h3 id="delete-confirm-title">{t('Remove "{title}"?', { title: safeTitle })}</h3>
+        <p className="delete-confirm-copy">{t("This will permanently delete the conversation and its messages from your history.")}</p>
 
         <div className="delete-confirm-actions">
           <button
@@ -78,16 +78,14 @@ function DeleteConfirmModal({
             className="delete-confirm-secondary"
             onClick={onCancel}
             disabled={isDeleting}
-          >
-            Keep it
-          </button>
+          >{t("Keep it")}</button>
           <button
             type="button"
             className="delete-confirm-primary"
             onClick={onConfirm}
             disabled={isDeleting}
           >
-            {isDeleting ? 'Deleting...' : 'Delete permanently'}
+            {t(isDeleting ? 'Deleting...' : 'Delete permanently')}
           </button>
         </div>
       </div>

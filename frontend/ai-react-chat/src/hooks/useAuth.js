@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 
 const isTokenExpired = (token) => {
@@ -26,7 +27,7 @@ export function useAuth() {
   const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [GoogleProvider, setGoogleProvider] = useState(null);
+  const GoogleProvider = GoogleOAuthProvider;
 
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -60,15 +61,16 @@ export function useAuth() {
     }
   }, []);
 
+
   useEffect(() => {
-    (async () => {
-      try {
-        const mod = await import('@react-oauth/google');
-        setGoogleProvider(() => mod.GoogleOAuthProvider);
-      } catch (error) {
-        console.error('Provider load error:', error);
-      }
-    })();
+    const expire = () => { setUser(null); setIsLoggedIn(false); setShowLoginModal(true); };
+    const check = () => {
+      const token = localStorage.getItem('auth_token');
+      if (token && isTokenExpired(token)) { clearStoredAuth(); expire(); }
+    };
+    window.addEventListener('xiaofu:auth-expired', expire);
+    const timer = window.setInterval(check, 30000);
+    return () => { window.removeEventListener('xiaofu:auth-expired', expire); window.clearInterval(timer); };
   }, []);
 
   const openLoginModal = () => setShowLoginModal(true);

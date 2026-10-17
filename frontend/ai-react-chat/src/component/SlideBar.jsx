@@ -1,179 +1,59 @@
+import { useLanguage } from '../i18n/LanguageProvider';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowUpRight, MessageCircle, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import '../styles/SlideBar.css';
-import logoImg from '../assets/樱桃少女漫画版014.png';
 
-// This component is now simplified to mostly display data passed via props.
-// State management and API calls are handled by the parent App.jsx.
-
-function SlideBar({
-  conversations,
-  isLoading,
-  onSelectConversation,
-  onDeleteConversation,
-  onNewChat,
-  onUpdateTitle, // New prop for handling title updates
-  currentConversationId,
-  isOpen,
+export default function SlideBar({
+  conversations, isLoading, error, onRetry, onSelectConversation, onDeleteConversation, onNewChat,
+  onUpdateTitle, currentConversationId, isOpen,
 }) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isEditing, setIsEditing] = useState(null);
-  const [editTitle, setEditTitle] = useState('');
-  const [conversationPendingDeletion, setConversationPendingDeletion] = useState(null);
-  const [isDeletingConversation, setIsDeletingConversation] = useState(false);
-
-  const handleDelete = (id, e) => {
-    e.stopPropagation();
-    const targetConversation = conversations.find((conversation) => conversation.id === id) || null;
-    setConversationPendingDeletion(targetConversation);
-  };
-
-  const closeDeleteModal = () => {
-    if (isDeletingConversation) return;
-    setConversationPendingDeletion(null);
-  };
-
-  const confirmDeleteConversation = async () => {
-    if (!conversationPendingDeletion) return;
-
-    setIsDeletingConversation(true);
-
-    try {
-      await onDeleteConversation(conversationPendingDeletion.id);
-      setConversationPendingDeletion(null);
-    } finally {
-      setIsDeletingConversation(false);
-    }
-  };
-
-  const handleUpdateTitle = async (id) => {
-    if (editTitle && onUpdateTitle) {
-      await onUpdateTitle(id, editTitle);
-    }
-    setIsEditing(null);
-  };
-
-  const filteredConversations = conversations.filter(conv => 
-    (conv.title || 'new chat').toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const formatDate = (timestamp) => {
-    if (!timestamp) return "Just now";
-    try {
-      const date = new Date(timestamp);
-      // Check if the date is valid before formatting
-      if (isNaN(date.getTime())) return "Invalid date";
-      return date.toLocaleString('zh-CN', {
-        month: 'numeric',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch (e) {
-      return "Just now";
-    }
-  };
-
-  return (
-    <>
-      <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
-        <div className="sidebar-header">
-          <div className="search-box">
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <button type="button" className="new-chat-btn" onClick={onNewChat}>＋</button>
-        </div>
-
-        <div className="conversation-list">
-          {isLoading && conversations.length === 0 ? (
-            <div className="loading-conversations">
-              <img src={logoImg} alt="Loading..." className="loading-logo" />
-              <p>Loading conversations...</p>
-            </div>
-          ) : filteredConversations.map((conv) => {
-            if (conv.id === 'error') {
-              return (
-                <div key="conv-error" className="conversation-item error">
-                  <div style={{padding: '12px', color: '#b00'}}>
-                    <strong>Unable to load conversations:</strong>
-                    <div style={{fontSize: '12px', marginTop: '6px'}}>{conv.error}</div>
-                  </div>
-                </div>
-              );
-            }
-
-            return (
-              <div 
-                key={conv.id}
-                className={`conversation-item ${conv.id === currentConversationId ? 'active' : ''}`}
-              >
-                <div 
-                  className="conversation-content"
-                  onClick={() => onSelectConversation(conv.id)}
-                >
-                  {isEditing === conv.id ? (
-                    <input
-                      type="text"
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      onBlur={() => handleUpdateTitle(conv.id)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleUpdateTitle(conv.id)}
-                      autoFocus
-                      onClick={(e) => e.stopPropagation()} // Prevent conversation selection while editing
-                    />
-                  ) : (
-                    <>
-                      <div className="conversation-title">
-                        {conv.title || 'new chat'}
-                      </div>
-                      <div className="conversation-info">
-                        <span>{conv.message_count || 0} messages</span>
-                        <span>{formatDate(conv.updated_at || conv.timestamp)}</span>
-                      </div>
-                    </>
-                  )}
-                </div>
-                
-                <div className="conversation-actions">
-                  <button
-                    type="button"
-                    className="edit-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsEditing(conv.id);
-                      setEditTitle(conv.title || 'new chat');
-                    }}
-                  >
-                    ✎
-                  </button>
-                  <button
-                    type="button"
-                    className="delete-btn"
-                    onClick={(e) => handleDelete(conv.id, e)}
-                  >
-                    ×
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+  const { t } = useLanguage();
+  const [search, setSearch] = useState('');
+  const [editing, setEditing] = useState(null);
+  const [title, setTitle] = useState('');
+  const [pending, setPending] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const filtered = conversations.filter((item) => (item.title || '新对话').toLowerCase().includes(search.toLowerCase()));
+  const save = async (id) => { setEditing(null); if (title.trim()) await onUpdateTitle(id, title); };
+  return <>
+    <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`} aria-label={t("会话列表")} inert={!isOpen ? true : undefined}>
+      <div className="sidebar-top">
+        <button className="new-chat-btn" onClick={onNewChat}><Plus size={18} /><span>{t("开启新对话")}</span></button>
+        <label className="search-box"><Search size={16} /><input aria-label={t("搜索对话")} placeholder={t("搜索") } value={search} onChange={(event) => setSearch(event.target.value)} /></label>
       </div>
-
-      <DeleteConfirmModal
-        isOpen={Boolean(conversationPendingDeletion)}
-        conversationTitle={conversationPendingDeletion?.title || 'new chat'}
-        isDeleting={isDeletingConversation}
-        onCancel={closeDeleteModal}
-        onConfirm={confirmDeleteConversation}
-      />
-    </>
-  );
+      <div className="history-heading"><span>{t("最近对话")}</span></div>
+      <div className="conversation-list">
+        {isLoading && !conversations.length ? <div className="sidebar-empty"><span className="loading-dots">•••</span><p>{t("正在找回你的对话…")}</p></div>
+          : error ? <div className="sidebar-empty"><p>{t("暂时连接不上对话")}</p><button className="retry-history" onClick={onRetry}>{t("重新连接")}</button></div>
+          : !filtered.length ? <div className="sidebar-empty"><p>{search ? t("暂时没有找到") : t("暂无对话")}</p></div>
+          : filtered.map((item) => <div key={item.id} className={`conversation-item ${item.id === currentConversationId ? 'active' : ''}`}>
+            <MessageCircle className="conversation-symbol" size={16} />
+            {editing === item.id ? <input className="title-editor" aria-label={t("修改对话标题")} value={title} autoFocus maxLength={200}
+              onChange={(event) => setTitle(event.target.value)} onBlur={() => save(item.id)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') { event.preventDefault(); event.currentTarget.blur(); }
+                if (event.key === 'Escape') { event.preventDefault(); setEditing(null); }
+              }} />
+              : <button className="conversation-content" onClick={() => onSelectConversation(item.id)} aria-current={item.id === currentConversationId ? 'page' : undefined}>
+                <span className="conversation-title">{item.title || t('新对话')}</span>
+              </button>}
+            <div className="conversation-actions">
+              <button aria-label={`${t('重命名')} ${item.title || t('新对话')}`} className="edit-btn" onClick={() => { setEditing(item.id); setTitle(item.title || ''); }}><Pencil size={13} /></button>
+              <button aria-label={`${t('删除')} ${item.title || t('新对话')}`} className="delete-btn" onClick={() => setPending(item)}><Trash2 size={13} /></button>
+            </div>
+          </div>)}
+      </div>
+      <div className="sidebar-bottom">
+        <Link className="sidebar-settings" to="/settings"><span>{t("偏好设置")}</span><ArrowUpRight size={15} /></Link>
+      </div>
+    </aside>
+    <DeleteConfirmModal isOpen={Boolean(pending)} conversationTitle={pending?.title || '新对话'} isDeleting={deleting}
+      onCancel={() => { if (!deleting) setPending(null); }} onConfirm={async () => {
+        if (!pending) return;
+        setDeleting(true);
+        try { await onDeleteConversation(pending.id); setPending(null); } finally { setDeleting(false); }
+      }} />
+  </>;
 }
-
-export default SlideBar;

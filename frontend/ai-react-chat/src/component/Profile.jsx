@@ -1,88 +1,33 @@
-import React, { useState, useEffect, useRef } from "react";
-import { MoreVertical } from "lucide-react";
-import "../styles/Profile.css";
-import { useNavigate } from "react-router-dom";
+import { useLanguage } from '../i18n/LanguageProvider';
+import { useEffect, useRef, useState } from 'react';
+import { LogOut, Settings, ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import '../styles/Profile.css';
 
-function Profile({ user, isLoggedIn, onLogout, onLogin }) {
+export default function Profile({ user, isLoggedIn, onLogout, onLogin }) {
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
-
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef(null);
-
+  const [open, setOpen] = useState(false);
+  const root = useRef(null);
+  const trigger = useRef(null);
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setMenuOpen(false);
-      }
+    const dismiss = (event) => {
+      if (event.type === 'keydown' && event.key === 'Escape') { setOpen(false); trigger.current?.focus(); }
+      if (event.type === 'pointerdown' && !root.current?.contains(event.target)) setOpen(false);
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('pointerdown', dismiss);
+    document.addEventListener('keydown', dismiss);
+    return () => { document.removeEventListener('pointerdown', dismiss); document.removeEventListener('keydown', dismiss); };
   }, []);
-
-  const handleLogoutClick = () => {
-    onLogout();
-    setMenuOpen(false);
-  };
-
-  // 获取用户头像，优先级：picture > avatar_url
-  const getUserAvatar = () => {
-    if (!user) {
-      console.warn("No user data");
-      return "/default-avatar.svg";
-    }
-    
-    const avatar = user.picture || user.avatar_url;
-    console.log("Getting avatar for user:", {
-      name: user.name,
-      hasPicture: !!user.picture,
-      hasAvatarUrl: !!user.avatar_url,
-      selectedAvatar: avatar,
-    });
-    
-    return avatar || "/default-avatar.svg";
-  };
-  
-  return (
-    <div className="profile" ref={menuRef}>
-      {isLoggedIn ? (
-        <>
-          <img
-            src={getUserAvatar()}
-            alt="profile"
-            className="profile-icon"
-            onClick={() => setMenuOpen(!menuOpen)}
-            crossOrigin="anonymous"
-            referrerPolicy="no-referrer"
-            onLoad={(e) => {
-              console.log("✅ Avatar image loaded successfully:", e.target.src);
-            }}
-            onError={(e) => {
-              console.warn("❌ Avatar image failed to load:", e.target.src);
-              console.warn("Error details:", e);
-              // 使用 SVG 数据 URI 作为备用
-              e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23e0e0e0'/%3E%3Ccircle cx='50' cy='35' r='15' fill='%23999'/%3E%3Cpath d='M 20 80 Q 20 60 50 60 Q 80 60 80 80' fill='%23999'/%3E%3C/svg%3E";
-            }}
-          />
-          <MoreVertical
-            className="menu-dots"
-            size={22}
-            onClick={() => setMenuOpen(!menuOpen)}
-          />
-          {menuOpen && (
-            <div className="dropdown-menu">
-              <p style={{ margin: "5px 0", fontWeight: "bold" }}>{user?.name}</p>
-              <button onClick={() => navigate("/settings")}>Settings</button>
-              <button onClick={handleLogoutClick}>Logout</button>
-            </div>
-          )}
-        </>
-      ) : (
-        <button className="login-btn" onClick={onLogin}>
-          Login
-        </button>
-      )}
-    </div>
-  );
+  return <div className="profile" ref={root}>
+    {isLoggedIn ? <>
+      <button className="profile-trigger" ref={trigger} aria-label={t("打开账户菜单")} aria-expanded={open} onClick={() => setOpen(!open)}>
+        <img src={user?.picture || user?.avatar_url || '/default-avatar.svg'} className="profile-icon" alt="" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = '/default-avatar.svg'; }} /><ChevronDown size={12} />
+      </button>
+      {open && <div className="dropdown-menu"><p>{user?.name || t('我的账户')}</p>
+        <button onClick={() => { setOpen(false); navigate('/settings'); }}><Settings size={15} />{t("偏好设置")}</button>
+        <button onClick={() => { setOpen(false); onLogout(); }}><LogOut size={15} />{t("退出登录")}</button>
+      </div>}
+    </> : <button className="login-btn" onClick={onLogin}>{t("登录 / 开始")}</button>}
+  </div>;
 }
-
-export default Profile;

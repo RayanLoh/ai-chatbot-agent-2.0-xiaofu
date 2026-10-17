@@ -1,0 +1,41 @@
+name: Backend checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test-only-password
+          POSTGRES_DB: xiaofu_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.11.15'
+      - run: uv sync --frozen --python 3.12
+      - run: uv run pytest -q
+      - name: Check PostgreSQL migration and permissions
+        env:
+          PGPASSWORD: test-only-password
+        run: |
+          psql -h localhost -U postgres -d xiaofu_test -v ON_ERROR_STOP=1 -c "create role anon; create role authenticated; create role service_role bypassrls;"
+          psql -h localhost -U postgres -d xiaofu_test -v ON_ERROR_STOP=1 -f migrations/001_maintenance.sql
+          psql -h localhost -U postgres -d xiaofu_test -v ON_ERROR_STOP=1 -f tests/database.sql
+          psql -h localhost -U postgres -d xiaofu_test -v ON_ERROR_STOP=1 -f migrations/002_reliability.sql
+          psql -h localhost -U postgres -d xiaofu_test -v ON_ERROR_STOP=1 -f tests/reliability.sql
+          psql -h localhost -U postgres -d xiaofu_test -v ON_ERROR_STOP=1 -f migrations/003_subscriptions.sql
+          psql -h localhost -U postgres -d xiaofu_test -v ON_ERROR_STOP=1 -f tests/subscriptions.sql
+          psql -h localhost -U postgres -d xiaofu_test -v ON_ERROR_STOP=1 -f migrations/004_backend_reliability.sql
+          psql -h localhost -U postgres -d xiaofu_test -v ON_ERROR_STOP=1 -f tests/backend_fixes.sql
+      - run: uv run pip-audit --disable-pip --no-deps -r requirements.txt

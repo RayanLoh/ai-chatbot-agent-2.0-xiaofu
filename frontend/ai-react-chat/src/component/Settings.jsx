@@ -1,3 +1,4 @@
+import { useLanguage } from '../i18n/LanguageProvider';
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Settings.css";
@@ -16,18 +17,20 @@ import {
   X,
 } from "lucide-react";
 import Footer from "./Footer";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const menuItems = [
-  { id: "general", label: "general", icon: <Cog size={18} /> },
-  { id: "notifications", label: "notifications", icon: <Bell size={18} /> },
-  { id: "personalization", label: "personalization", icon: <User size={18} /> },
-  { id: "apps", label: "apps", icon: <Database size={18} /> },
-  { id: "security", label: "security", icon: <Lock size={18} /> },
-  { id: "family", label: "family", icon: <Users size={18} /> },
-  { id: "account", label: "account", icon: <KeyRound size={18} /> },
+  { id: "general", label: "常规", icon: <Cog size={18} /> },
+  { id: "notifications", label: "通知", icon: <Bell size={18} /> },
+  { id: "personalization", label: "个人偏好", icon: <User size={18} /> },
+  { id: "apps", label: "应用", icon: <Database size={18} /> },
+  { id: "security", label: "安全", icon: <Lock size={18} /> },
+  { id: "family", label: "家庭", icon: <Users size={18} /> },
+  { id: "account", label: "账户", icon: <KeyRound size={18} /> },
 ];
 
 function Settings({ theme, onThemeChange }) {
+  const { t, language } = useLanguage();
   const [selected, setSelected] = useState("general");
   const [desktopNotificationsEnabled, setDesktopNotificationsEnabled] = useState(false);
   const [islandNotificationsEnabled, setIslandNotificationsEnabled] = useState(true);
@@ -138,8 +141,8 @@ function Settings({ theme, onThemeChange }) {
   const handleNotificationTest = async () => {
     const payload = {
       title: "XiaoFu Agent",
-      subtitle: "Notification test",
-      message: "Your notification settings are active and ready for new replies.",
+      subtitle: t("Notification test"),
+      message: t("Your notification settings are active and ready for new replies."),
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
@@ -191,21 +194,24 @@ function Settings({ theme, onThemeChange }) {
 
   return (
     <div className={`settings-page-container ${effectiveTheme}-theme`} style={{ background: "var(--bg-primary)", minHeight: "100vh" }}>
-      <button className="close-settings-btn" onClick={() => navigate("/")}>
+      <button aria-label={t("返回聊天")} className="close-settings-btn" onClick={() => navigate("/")}>
         <X size={28} />
       </button>
       <div className="settings-container">
         <aside className="settings-sidebar">
-          <h2 className="sidebar-title">settings</h2>
+          <h2 className="sidebar-title">{t("偏好设置")}</h2>
           <ul>
             {menuItems.map((item) => (
               <li
                 key={item.id}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setSelected(item.id); } }}
                 className={selected === item.id ? "active" : ""}
                 onClick={() => setSelected(item.id)}
               >
                 {item.icon}
-                <span>{item.label}</span>
+                <span>{t(item.label)}</span>
               </li>
             ))}
           </ul>
@@ -214,39 +220,33 @@ function Settings({ theme, onThemeChange }) {
         <main className="settings-content">
           {selected === "general" && (
             <div className="settings-section">
-              <h3>General</h3>
+              <h3>{t("让这里，更像你。")}</h3>
               <div className="setting-item">
-                <label>Appearance</label>
+                <label>{t("界面外观")}</label>
                 <select value={theme} onChange={(e) => onThemeChange(e.target.value)}>
-                  <option value="system">System</option>
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
+                  <option value="system">{t("跟随系统")}</option>
+                  <option value="light">{t("暖白")}</option>
+                  <option value="dark">{t("深色")}</option>
                 </select>
               </div>
               <div className="setting-item">
-                <label>Language</label>
-                <select>
-                  <option>Auto Detect</option>
-                  <option>Chinese</option>
-                  <option>English</option>
-                </select>
+                <label>{t("界面语言")}</label>
+                <LanguageSwitcher />
               </div>
             </div>
           )}
           {selected === "notifications" && (
             <div className="settings-section">
-              <h3>Notifications</h3>
+              <h3>{t("通知")}</h3>
               <div className="notification-hero-card">
                 <div>
-                  <p className="notification-kicker">Live alerts</p>
-                  <h4>Build a notification flow that feels active, not generic.</h4>
-                  <p className="notification-description">
-                    Use browser notifications for background alerts and the Dynamic Island animation for rich in-app feedback.
-                  </p>
+                  <p className="notification-kicker">{t("Live alerts")}</p>
+                  <h4>{t("Build a notification flow that feels active, not generic.")}</h4>
+                  <p className="notification-description">{t("Use browser notifications for background alerts and the Dynamic Island animation for rich in-app feedback.")}</p>
                 </div>
                 <div className="notification-permission-chip">
                   <MonitorDot size={16} />
-                  <span>{permissionLabel}</span>
+                  <span>{t(permissionLabel)}</span>
                 </div>
               </div>
 
@@ -254,59 +254,56 @@ function Settings({ theme, onThemeChange }) {
                 <div className="settings-surface-card">
                   <div className="settings-surface-head">
                     <div>
-                      <h4>Desktop notification</h4>
-                      <p>Send a native browser notification when the app needs attention.</p>
+                      <h4>{t("Desktop notification")}</h4>
+                      <p>{t("Send a native browser notification when the app needs attention.")}</p>
                     </div>
-                    {renderToggle(desktopNotificationsEnabled, handleDesktopToggle, "Toggle desktop notifications")}
+                    {renderToggle(desktopNotificationsEnabled, handleDesktopToggle, t("Toggle desktop notifications"))}
                   </div>
                   <div className="settings-surface-footer">
-                    <button type="button" className="settings-secondary-btn" onClick={requestNotificationPermission}>
-                      Request permission
-                    </button>
-                    <span className="settings-status-inline">{notificationPermission}</span>
+                    <button type="button" className="settings-secondary-btn" onClick={requestNotificationPermission}>{t("Request permission")}</button>
+                    <span className="settings-status-inline">{t(permissionLabel)}</span>
                   </div>
                 </div>
 
                 <div className="settings-surface-card island-card">
                   <div className="settings-surface-head">
                     <div>
-                      <h4>Dynamic Island effect</h4>
-                      <p>Animate a compact floating alert at the top of the page for in-app reply cues.</p>
+                      <h4>{t("应用内提示")}</h4>
+                      <p>{t("用轻量浮层提醒回复和连接状态，不打断当前思路。")}</p>
                     </div>
-                    {renderToggle(islandNotificationsEnabled, handleIslandToggle, "Toggle Dynamic Island notifications")}
+                    {renderToggle(islandNotificationsEnabled, handleIslandToggle, t("切换应用内提示"))}
                   </div>
                   <div className="island-preview-mini">
                     <div className="island-preview-pill" />
                     <div className="island-preview-wave wave-one" />
                     <div className="island-preview-wave wave-two" />
                     <Sparkles size={14} />
-                    <span>Smooth top-drop animation preview</span>
+                    <span>{t("小芙的新回复已到达")}</span>
                   </div>
                 </div>
               </div>
 
               <div className="notification-test-panel">
                 <div>
-                  <h4>Run a test</h4>
-                  <p>Trigger the configured notification channels and confirm the animation appears.</p>
+                  <h4>{t("Run a test")}</h4>
+                  <p>{t("Trigger the configured notification channels and confirm the animation appears.")}</p>
                 </div>
-                <button type="button" className="settings-primary-btn" onClick={handleNotificationTest}>
-                  Test notifications
-                </button>
+                <button type="button" className="settings-primary-btn" onClick={handleNotificationTest}>{t("Test notifications")}</button>
               </div>
 
               <div className="notification-status-banner">
                 <CheckCircle2 size={18} />
-                <span>{notificationStatus}</span>
+                <span>{t(notificationStatus)}</span>
               </div>
             </div>
           )}
           {selected === "security" && (
             <div className="settings-section">
-              <h3>Security</h3>
-              <p>Enable two-factor authentication or change your password.</p>
+              <h3>{t("安全")}</h3>
+              <p>{t("Enable two-factor authentication or change your password.")}</p>
             </div>
           )}
+          {!['general', 'notifications', 'security'].includes(selected) && <div className="settings-section"><h3>{t(menuItems.find((item) => item.id === selected)?.label || '')}</h3><p>{t('尚未开放')}</p></div>}
         </main>
       </div>
       <Footer />

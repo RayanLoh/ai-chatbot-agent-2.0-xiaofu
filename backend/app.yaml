@@ -1,0 +1,3 @@
+runtime: python312
+entrypoint: uvicorn main:app --host 0.0.0.0 --port $PORT
+# Inject secrets through your deployment environment; see README.md.

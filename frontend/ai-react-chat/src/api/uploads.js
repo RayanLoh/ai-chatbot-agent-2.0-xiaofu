@@ -1,5 +1,5 @@
 import { buildApiUrl, endpoints } from './config';
-import { requestForm } from './http';
+import { requestForm, request } from './http';
 
 const toAbsoluteUrl = (value) => {
   if (!value || typeof value !== 'string') return null;
@@ -53,18 +53,18 @@ const extractUploadUrl = (payload) => {
   }
 
   for (const candidate of directCandidates) {
-    const absolute = toAbsoluteUrl(candidate);
+    const absolute = typeof candidate === 'string' && candidate.startsWith('/assets/') ? candidate : toAbsoluteUrl(candidate);
     if (absolute) return absolute;
   }
 
   return null;
 };
 
-export const uploadImage = async (file) => {
+export const uploadImage = async (file, signal) => {
   const formData = new FormData();
   formData.append('file', file);
 
-  const payload = await requestForm(endpoints.upload, formData);
+  const payload = await requestForm(endpoints.upload, formData, { signal });
   const url = extractUploadUrl(payload);
 
   if (!url) {
@@ -73,4 +73,18 @@ export const uploadImage = async (file) => {
   }
 
   return { ...payload, url };
+};
+export const downloadImage = async (url) => {
+  const response = await request(endpoints.downloadImage(url), {}, false);
+  const blobUrl = URL.createObjectURL(await response.blob());
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = 'xiaofu-image';
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+};
+
+export const fetchPrivateImage = async (url, signal) => {
+  const response = await request(endpoints.downloadImage(url), { signal }, false);
+  return response.blob();
 };
