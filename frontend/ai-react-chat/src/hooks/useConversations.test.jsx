@@ -8,7 +8,39 @@ vi.mock('../api', () => ({
   deleteConversation: vi.fn(), updateConversationTitle: vi.fn(),
 }));
 const deferred = () => { let resolve; const promise = new Promise((r) => { resolve = r; }); return { promise, resolve }; };
-beforeEach(() => { vi.clearAllMocks(); api.getConversations.mockResolvedValue({ conversations: [] }); });
+beforeEach(() => { vi.clearAllMocks(); localStorage.clear(); api.getConversations.mockResolvedValue({ conversations: [] }); });
+
+it('shows empty history for a new guest without requesting or showing a failure', async () => {
+  const notify = vi.spyOn(window, 'dispatchEvent');
+  api.getConversations.mockRejectedValue(new Error('API unavailable'));
+  const { result, unmount } = renderHook(() => useConversations({ isMounted: true, authScopeKey: 'guest' }));
+  await waitFor(() => expect(result.current.isLoadingConversations).toBe(false));
+  expect(result.current.conversations).toEqual([]);
+  expect(result.current.conversationError).toBe('');
+  expect(api.getConversations).not.toHaveBeenCalled();
+  expect(notify).not.toHaveBeenCalled();
+  unmount();
+  notify.mockRestore();
+});
+
+it('still reports a real history failure for a returning guest', async () => {
+  localStorage.setItem('guest_token', 'existing-guest');
+  api.getConversations.mockRejectedValue(new Error('API unavailable'));
+  const { result, unmount } = renderHook(() => useConversations({ isMounted: true, authScopeKey: 'guest' }));
+  await waitFor(() => expect(result.current.isLoadingConversations).toBe(false));
+  expect(api.getConversations).toHaveBeenCalledOnce();
+  expect(result.current.conversationError).not.toBe('');
+  unmount();
+});
+
+it('accepts an empty history for a signed-in new user', async () => {
+  const { result, unmount } = renderHook(() => useConversations({ isMounted: true, authScopeKey: 'user:new' }));
+  await waitFor(() => expect(result.current.isLoadingConversations).toBe(false));
+  expect(api.getConversations).toHaveBeenCalledOnce();
+  expect(result.current.conversations).toEqual([]);
+  expect(result.current.conversationError).toBe('');
+  unmount();
+});
 
 it('ignores a slower previously selected conversation', async () => {
   const slow = deferred();

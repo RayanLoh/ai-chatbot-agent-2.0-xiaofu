@@ -21,6 +21,12 @@ export function useConversations({ isMounted, authScopeKey }) {
     setIsLoadingConversations(true);
     setConversationError('');
     try {
+      // A first-time visitor has no server identity or history to restore.
+      // Create a guest session only when they actually start using the chat.
+      if (owner === 'guest' && !localStorage.getItem('guest_token')) {
+        setConversations([]);
+        return;
+      }
       const data = await api.getConversations();
       if (!mounted.current || scope.current !== owner || version !== listVersion.current) return;
       setConversations(Array.isArray(data.conversations) ? data.conversations : []);
