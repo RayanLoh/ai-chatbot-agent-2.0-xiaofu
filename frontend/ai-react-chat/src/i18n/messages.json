@@ -1,4 +1,5 @@
 {
+  "Close": {"en":"Close","zh":"关闭","ms":"Tutup"},
   "Some older images are unavailable. Re-upload them if needed.": {"en":"Some older images are unavailable. Re-upload them if needed.","zh":"部分旧图片已无法读取，需要时请重新上传。","ms":"Sesetengah imej lama tidak tersedia. Muat naik semula jika diperlukan."},
   "No models available": {"en":"No models available","zh":"暂无可用模型","ms":"Tiada model tersedia"},
   "AI_NOT_CONFIGURED": {"en":"AI service is not configured","zh":"AI 服务尚未配置","ms":"Perkhidmatan AI belum dikonfigurasi"},
