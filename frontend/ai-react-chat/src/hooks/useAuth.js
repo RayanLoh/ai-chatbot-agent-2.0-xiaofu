@@ -36,29 +36,43 @@ export function useAuth() {
 
     if (typeof window === 'undefined') return;
 
-    const token = localStorage.getItem('auth_token');
-    if (!token) return;
+    const syncStoredAuth = () => {
+      const token = localStorage.getItem('auth_token');
+      setUser(null);
+      setIsLoggedIn(false);
+      if (!token) return;
 
-    if (isTokenExpired(token)) {
-      console.warn('Stored Google token has expired. Clearing local auth state.');
-      clearStoredAuth();
-      return;
-    }
-
-    try {
-      const decoded = jwtDecode(token);
-      const storedUserData = localStorage.getItem('user_data');
-      if (storedUserData) {
-        const userData = JSON.parse(storedUserData);
-        decoded.picture = userData.picture || decoded.picture;
-        decoded.avatar_url = userData.avatar_url || decoded.avatar_url;
+      if (isTokenExpired(token)) {
+        console.warn('Stored Google token has expired. Clearing local auth state.');
+        clearStoredAuth();
+        return;
       }
-      setUser(decoded);
-      setIsLoggedIn(true);
-    } catch (error) {
-      console.error('Invalid token:', error);
-      clearStoredAuth();
-    }
+
+      try {
+        const decoded = jwtDecode(token);
+        const storedUserData = localStorage.getItem('user_data');
+        if (storedUserData) {
+          const userData = JSON.parse(storedUserData);
+          if (userData.sub === decoded.sub) {
+            decoded.picture = userData.picture || decoded.picture;
+            decoded.avatar_url = userData.avatar_url || decoded.avatar_url;
+          }
+        }
+        setUser(decoded);
+        setIsLoggedIn(true);
+        setShowLoginModal(false);
+      } catch (error) {
+        console.error('Invalid token:', error);
+        clearStoredAuth();
+      }
+    };
+    syncStoredAuth();
+    const onStorage = (event) => {
+      if (event.storageArea === localStorage &&
+          (event.key === 'auth_token' || event.key === 'user_data' || event.key === null)) syncStoredAuth();
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
 
@@ -79,6 +93,7 @@ export function useAuth() {
   const handleLoginSuccess = (decoded, token) => {
     localStorage.setItem('auth_token', token);
     localStorage.setItem('user_data', JSON.stringify({
+      sub: decoded.sub,
       picture: decoded.picture,
       avatar_url: decoded.avatar_url,
       name: decoded.name,

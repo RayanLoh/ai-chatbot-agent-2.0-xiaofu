@@ -14,7 +14,8 @@ app = FastAPI(title='Xiaofu API')
 
 
 def _build_cors_origins():
-    origins = {'http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:4173', 'http://127.0.0.1:4173'}
+    origins = {f'http://{host}:{port}' for host in ('localhost', '127.0.0.1')
+               for port in (5173, 5174, 4173)}
     origins.update(value.strip().rstrip('/') for value in os.getenv('FRONTEND_ORIGIN', '').split(',') if value.strip())
     return sorted(origins)
 

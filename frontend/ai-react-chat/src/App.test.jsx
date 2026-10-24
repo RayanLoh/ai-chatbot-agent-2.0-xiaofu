@@ -48,12 +48,20 @@ it('does not send Enter while an IME composition is active', async () => {
 });
 
 it('shows a persistent retry action when history cannot load', async () => {
+  localStorage.setItem('guest_token', 'returning-guest');
   api.getConversations.mockRejectedValueOnce(new Error('database internal detail'));
   render(<MemoryRouter><LanguageProvider><App /></LanguageProvider></MemoryRouter>);
   await screen.findByRole('button', { name: '重新连接' });
   expect(screen.queryByText('database internal detail')).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: '重新连接' }));
   await waitFor(() => expect(api.getConversations).toHaveBeenCalledTimes(2));
+});
+
+it('does not request history or show a retry error for a first-time guest', async () => {
+  render(<MemoryRouter><LanguageProvider><App /></LanguageProvider></MemoryRouter>);
+  await waitFor(() => expect(screen.getByRole('button', { name: '选择 AI 模型' }).disabled).toBe(false));
+  expect(api.getConversations).not.toHaveBeenCalled();
+  expect(screen.queryByRole('button', { name: '重新连接' })).toBeNull();
 });
 
 
