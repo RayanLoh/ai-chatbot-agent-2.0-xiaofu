@@ -25,6 +25,36 @@ function setup(props) {
 beforeEach(() => { vi.clearAllMocks(); localStorage.clear(); sessionStorage.clear(); });
 
 describe('request isolation', () => {
+  it('restores input immediately if guest authentication failed before sending', async () => {
+    api.generateResponse.mockRejectedValueOnce(Object.assign(new Error('Database operation failed'), {
+      status: 503, requestNotSent: true,
+    }));
+    const { result } = renderHook(setup, { initialProps: { owner: 'guest', conversation: null } });
+    await act(async () => {
+      result.current.inputRef.current = { value: 'My unsent draft', dispatchEvent: vi.fn() };
+      await result.current.sendMessage();
+    });
+    expect(result.current.pendingRecovery).toBeNull();
+    expect(result.current.inputRef.current.value).toBe('My unsent draft');
+    expect(sessionStorage.getItem('xiaofu:pending:guest')).toBeNull();
+    expect(api.recoverGeneration).not.toHaveBeenCalled();
+  });
+
+  it('lets the user restore an old stuck draft without automatically generating again', async () => {
+    const draft = { id: 'old-request', text: 'Restore me', images: [], conversationId: null };
+    sessionStorage.setItem('xiaofu:pending:guest', JSON.stringify(draft));
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    const { result } = renderHook(setup, { initialProps: { owner: 'guest', conversation: null } });
+    act(() => { result.current.inputRef.current = { value: '', dispatchEvent: vi.fn() }; result.current.restorePendingDraft(); });
+    expect(result.current.pendingRecovery).toEqual(draft);
+    confirm.mockReturnValue(true);
+    act(() => result.current.restorePendingDraft());
+    expect(result.current.pendingRecovery).toBeNull();
+    expect(result.current.inputRef.current.value).toBe('Restore me');
+    expect(sessionStorage.getItem('xiaofu:pending:guest')).toBeNull();
+    expect(api.generateResponse).not.toHaveBeenCalled();
+    confirm.mockRestore();
+  });
   it('stopping allows another message and ignores the late old response', async () => {
     const old = deferred();
     api.generateResponse.mockReturnValueOnce(old.promise).mockResolvedValueOnce({ text: 'Second reply' });

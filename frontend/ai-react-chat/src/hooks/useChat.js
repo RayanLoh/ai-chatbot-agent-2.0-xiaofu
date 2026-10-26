@@ -146,6 +146,7 @@ export function useChat({
         data = await api.generateResponse(text, conversationId, aiModel, current.controller.signal, images, id);
       } catch (error) {
         if (error.name === 'AbortError') throw error;
+        if (error.requestNotSent) { error.terminal = true; throw error; }
         if (!error.status || error.status >= 500 || error.code === 'GENERATION_RUNNING') {
           data = await api.recoverGeneration(id, current.controller.signal);
         } else {
@@ -215,9 +216,17 @@ export function useChat({
     }
   };
 
+  const restorePendingDraft = () => {
+    if (!pendingRecovery || active.current) return;
+    if (!window.confirm(t('Restore this draft? The previous request may still finish. Sending again starts a new request.'))) return;
+    const draft = pendingRecovery;
+    rememberPending(null);
+    restoreDraft(draft);
+  };
+
   return {
     aiModel, setAiModel, inputRef, fileInputRef, isGenerating, uploadedImageUrls, isUploading,
     handleImageUpload, removeUploadedImage: (index) => setUploadedImageUrls((prev) => prev.filter((_, i) => i !== index)),
-    resetComposer, stopGenerating, sendMessage, pendingRecovery, resumePendingGeneration,
+    resetComposer, stopGenerating, sendMessage, pendingRecovery, resumePendingGeneration, restorePendingDraft,
   };
 }

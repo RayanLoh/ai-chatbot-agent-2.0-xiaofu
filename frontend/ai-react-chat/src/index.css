@@ -109,3 +109,4 @@ button.retry-history{margin-top:14px;padding:8px 13px;background:var(--surface);
 .welcome .starter-grid{margin-top:30px}.welcome .starter-card{min-height:99px;gap:14px}.welcome .starter-card strong{margin-bottom:0}.welcome .welcome-art{top:-19px}.welcome .welcome-description{font-size:15px}
 @media(max-width:480px){.welcome .starter-grid{margin-top:24px}.welcome .starter-card{min-height:95px;padding:13px 10px}.welcome .welcome-art{top:-40px}.welcome .welcome-description{font-size:13px}}
 
+.recovery-actions{display:flex;gap:8px;flex-shrink:0}.recovery-actions button{min-height:32px;padding:6px 12px;border:1px solid var(--accent-line);border-radius:9px;background:var(--accent-soft);color:var(--accent);font-size:11px;white-space:nowrap;box-shadow:none}.recovery-actions button:hover{background:var(--surface-hover);transform:none}.composer-caption:has(.recovery-actions){gap:10px;flex-wrap:wrap}

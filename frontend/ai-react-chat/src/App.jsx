@@ -121,6 +121,7 @@ function App() {
     sendMessage,
     pendingRecovery,
     resumePendingGeneration,
+    restorePendingDraft,
   } = useChat({
     authScopeKey: user?.sub || 'guest',
     availableModels: modelOptions.filter((option) => option.available !== false).map((option) => option.value),
@@ -502,7 +503,10 @@ const appContent = (
           <div className="composer-shell">
           {pendingRecovery && !isGenerating && <div className="composer-caption" role="status">
             <span>{t('A reply may still be pending.')}</span>
-            <button className="icon-btn" onClick={resumePendingGeneration}>{t('Recover reply')}</button>
+            <div className="recovery-actions">
+              <button type="button" onClick={resumePendingGeneration}>{t('Recover reply')}</button>
+              <button type="button" onClick={restorePendingDraft}>{t('Restore draft')}</button>
+            </div>
           </div>}
           <div className="input-box">
             <div className="input-main-row">

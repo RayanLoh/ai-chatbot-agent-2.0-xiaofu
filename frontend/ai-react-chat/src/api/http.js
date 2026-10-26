@@ -59,9 +59,17 @@ export const buildHeaders = async ({ isJson = true } = {}) => {
 };
 
 export const request = async (path, options = {}, isJson = true, retry = true) => {
+  let headers;
+  try {
+    headers = await buildHeaders({ isJson });
+  } catch (error) {
+    // Authentication failed before the target request was dispatched.
+    error.requestNotSent = true;
+    throw error;
+  }
   const response = await fetch(buildApiUrl(path), {
     ...options,
-    headers: { ...await buildHeaders({ isJson }), ...(options.headers || {}) },
+    headers: { ...headers, ...(options.headers || {}) },
   });
   if (!response.ok) {
     const error = await parseError(response);

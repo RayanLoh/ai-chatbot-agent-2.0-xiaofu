@@ -4,6 +4,14 @@ import { parseError, requestJson } from './http';
 
 beforeEach(() => { localStorage.clear(); vi.restoreAllMocks(); });
 
+it('marks guest-session failures as not dispatched to the target endpoint', async () => {
+  const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(
+    JSON.stringify({ detail: 'Database operation failed' }), { status: 503 }));
+  await expect(requestJson('/generate', { method: 'POST' })).rejects.toMatchObject({ status: 503, requestNotSent: true });
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+  expect(fetchMock.mock.calls[0][0]).toContain('/guest-session');
+});
+
 it('keeps the login token when Google verification is temporarily unavailable', async () => {
   const token = `e30.${btoa(JSON.stringify({ exp: Math.floor(Date.now()/1000)+3600 }))}.signature`;
   localStorage.setItem('auth_token', token);

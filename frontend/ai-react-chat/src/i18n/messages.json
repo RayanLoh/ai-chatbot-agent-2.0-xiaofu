@@ -1,4 +1,6 @@
 {
+  "Restore draft": {"en":"Restore draft","zh":"恢复草稿","ms":"Pulihkan draf"},
+  "Restore this draft? The previous request may still finish. Sending again starts a new request.": {"en":"Restore this draft? The previous request may still finish. Sending again starts a new request.","zh":"恢复这份草稿？之前的请求仍可能完成，再次发送会建立一个新请求。","ms":"Pulihkan draf ini? Permintaan terdahulu mungkin masih selesai. Menghantar semula memulakan permintaan baharu."},
   "Loading sign-in options…": {"en":"Loading sign-in options…","zh":"正在加载登录选项…","ms":"Memuatkan pilihan log masuk…"},
   "Opening your chat…": {"en":"Opening your chat…","zh":"正在进入聊天…","ms":"Membuka sembang anda…"},
   "Sign-in is taking longer than expected.": {"en":"Sign-in is taking longer than expected.","zh":"登录选项加载较慢，请重试。","ms":"Log masuk mengambil masa lebih lama."},
