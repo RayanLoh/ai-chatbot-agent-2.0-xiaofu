@@ -2,6 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from services.request_limits import BodyLimitMiddleware
+from services.observability import RequestContextMiddleware
 from bootstrap import load_app_environment
 load_app_environment()
 
@@ -24,6 +25,7 @@ app.add_middleware(BodyLimitMiddleware)
 app.add_middleware(CORSMiddleware, allow_origins=_build_cors_origins(),
                    allow_credentials=False, allow_methods=['GET', 'POST', 'PUT', 'DELETE'],
                    allow_headers=['Content-Type', 'Authorization', 'X-Guest-Token'])
+app.add_middleware(RequestContextMiddleware)
 
 
 @app.get('/health')

@@ -1,8 +1,12 @@
 import io
 import boto3
+import logging
 from botocore.config import Config as BotoConfig
 from config import Config
 from fastapi import HTTPException
+from services.observability import log_failure
+
+logger = logging.getLogger(__name__)
 
 
 class R2Service:
@@ -20,7 +24,8 @@ class R2Service:
     def write_image(self, key, image_data, mime_type):
         try:
             self.s3_client.upload_fileobj(io.BytesIO(image_data), self.bucket, key, ExtraArgs={'ContentType': mime_type})
-        except Exception:
+        except Exception as error:
+            log_failure(logger, 'storage.write', error)
             raise HTTPException(503, 'Image storage is unavailable') from None
 
     def read_image(self, key):
@@ -35,7 +40,8 @@ class R2Service:
             return content, validate_image(content, result.get('ContentType'))
         except HTTPException:
             raise
-        except Exception:
+        except Exception as error:
+            log_failure(logger, 'storage.read', error)
             raise HTTPException(503, 'Image storage is unavailable') from None
         finally:
             if body is not None:

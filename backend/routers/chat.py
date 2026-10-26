@@ -6,6 +6,7 @@ from dependencies import get_bot_service, get_conversation_manager, get_request_
 from schemas.chat import ChatRequest, StopRequest
 from services.chat_service import generate_chat_response
 from services.guest_usage_service import consume_rate
+from services.observability import log_failure
 
 router = APIRouter(tags=['chat'])
 logger = logging.getLogger(__name__)
@@ -28,6 +29,7 @@ async def generate_api(req: ChatRequest, request: Request, db=Depends(get_conver
     except HTTPException:
         raise
     except errors.APIError as error:
+        log_failure(logger, 'provider.generate', error)
         status = 429 if error.code == 429 else 502
         message = {
             400: 'The AI provider rejected the generation settings or request. Try another model or prompt.',
@@ -37,8 +39,8 @@ async def generate_api(req: ChatRequest, request: Request, db=Depends(get_conver
             429: 'The AI provider quota or rate limit was reached. Check billing or try again later.',
         }.get(error.code, 'AI provider is unavailable or rejected the request. Please retry or choose another model.')
         raise HTTPException(status, message) from None
-    except Exception:
-        logger.error('Unexpected generation failure', exc_info=False)
+    except Exception as error:
+        log_failure(logger, 'chat.generate', error)
         raise HTTPException(500, 'Unable to generate a response. Please retry.') from None
 
 

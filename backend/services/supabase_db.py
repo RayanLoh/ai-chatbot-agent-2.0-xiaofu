@@ -1,9 +1,13 @@
 import asyncio
 import uuid
+import logging
 from datetime import datetime, timezone
 from fastapi import HTTPException
 from supabase import create_client
 from config import Config
+from services.observability import log_failure
+
+logger = logging.getLogger(__name__)
 
 
 class ConversationManager:
@@ -18,6 +22,8 @@ class ConversationManager:
         except Exception as error:
             if getattr(error, 'code', None) in missing_codes:
                 return missing_value
+            operation = getattr(make_query, '__qualname__', 'database').split('.<locals>')[0]
+            log_failure(logger, operation, error)
             # Do not leak database internals or translate failures to empty data.
             raise HTTPException(503, 'Database operation failed. Please retry.') from None
 
