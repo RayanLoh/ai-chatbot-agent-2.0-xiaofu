@@ -34,6 +34,13 @@ class ConversationManager:
         rows = await self._execute(lambda db: db.rpc('list_conversation_summaries', {'p_user_id': user_id}))
         return rows or []
 
+    async def read_owned_history(self, identity, conversation_id=None):
+        return await self._execute(lambda db: db.rpc('read_owned_history', {
+            'p_owner': identity.user_id, 'p_network': identity.network_id,
+            'p_bucket': int(datetime.now(timezone.utc).timestamp()) // 60,
+            'p_conv': conversation_id,
+        }), missing_codes=('PGRST202',))
+
     async def get_conversation(self, conv_id: str, user_id: str):
         rows = await self._execute(lambda db: db.table('conversations').select('id,user_id,title,updated_at,messages').eq('id', conv_id).eq('user_id', user_id).limit(1))
         return rows[0] if rows else None

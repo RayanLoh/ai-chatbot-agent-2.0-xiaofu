@@ -16,6 +16,23 @@ from services.conversation_service import (
 router = APIRouter(tags=["conversations"])
 
 
+async def read_history(db, identity, conversation_id=None):
+    result = await db.read_owned_history(identity, conversation_id)
+    if result is None:
+        # Rolling deploy: preserve the existing protected path until SQL 006.
+        await consume_rate(db, identity, 'conversations', 60)
+        return (await list_conversations(db, identity.user_id) if conversation_id is None
+                else await get_conversation_messages(db, identity.user_id, conversation_id))
+    code = result['code']
+    if code == 'RATE_LIMITED':
+        raise HTTPException(429, {'detail': 'Too many requests. Please try again later.', 'code': code})
+    if code == 'NOT_FOUND':
+        raise HTTPException(404, 'Conversation not found')
+    if code != 'OK':
+        raise HTTPException(503, 'Unable to read conversation history')
+    return {key: value for key, value in result.items() if key != 'code'}
+
+
 class GuestHistoryClaim(BaseModel):
     guest_token: str = Field(min_length=1, max_length=1024)
 
@@ -40,8 +57,7 @@ async def list_conversations_route(
     db=Depends(get_conversation_manager),
     identity=Depends(get_request_identity),
 ):
-    await consume_rate(db, identity, "conversations", 60)
-    return await list_conversations(db, identity.user_id)
+    return await read_history(db, identity)
 
 
 @router.post("/conversations")
@@ -60,8 +76,7 @@ async def get_conversation_route(
     db=Depends(get_conversation_manager),
     identity=Depends(get_request_identity),
 ):
-    await consume_rate(db, identity, "conversations", 60)
-    return await get_conversation_messages(db, identity.user_id, conv_id)
+    return await read_history(db, identity, conv_id)
 
 
 @router.put("/conversations/{conv_id}")
