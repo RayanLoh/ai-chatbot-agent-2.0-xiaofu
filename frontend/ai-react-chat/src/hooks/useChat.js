@@ -3,6 +3,7 @@ import * as api from '../api';
 import { useLanguage } from '../i18n/LanguageProvider';
 
 export function useChat({
+  recoveryEnabled = false,
   authScopeKey, onAuthRequired, onSubscriptionRequired, conversationId, setConversationId,
   messages, setMessages, loadConversations, updateConversationTitle, availableModels,
 }) {
@@ -13,6 +14,7 @@ export function useChat({
   const [pendingRecovery, setPendingRecovery] = useState(null);
   const pendingKey = `xiaofu:pending:${authScopeKey}`;
   const rememberPending = (value) => {
+    if (!recoveryEnabled) return;
     setPendingRecovery(value);
     try {
       if (value) sessionStorage.setItem(pendingKey, JSON.stringify(value));
@@ -36,9 +38,16 @@ export function useChat({
   scopeRef.current = scope;
 
   useEffect(() => {
+    if (!recoveryEnabled) {
+      setPendingRecovery(null);
+      if (recoveryEnabled === false) {
+        try { sessionStorage.removeItem(pendingKey); } catch { /* Storage may be unavailable. */ }
+      }
+      return;
+    }
     try { setPendingRecovery(JSON.parse(sessionStorage.getItem(pendingKey) || 'null')); }
     catch { setPendingRecovery(null); }
-  }, [pendingKey]);
+  }, [pendingKey, recoveryEnabled]);
 
   useEffect(() => {
     if (availableModels.length) {
@@ -148,6 +157,7 @@ export function useChat({
         if (error.name === 'AbortError') throw error;
         if (error.requestNotSent) { error.terminal = true; throw error; }
         if (!error.status || error.status >= 500 || error.code === 'GENERATION_RUNNING') {
+          if (!recoveryEnabled) throw error;
           data = await api.recoverGeneration(id, current.controller.signal);
         } else {
           error.terminal = true;
@@ -173,7 +183,7 @@ export function useChat({
       if (!isCurrent() || error.name === 'AbortError') return;
       if (error.terminal || error.status === 404) {
         rememberPending(null);
-        restoreDraft(draft);
+        if (recoveryEnabled) restoreDraft(draft);
       }
       setMessages((prev) => prev.map((message) => message.id === botId ? {
         ...message, text: t(error.message || 'Unable to get a reply. Please retry.'),
@@ -190,7 +200,7 @@ export function useChat({
   };
 
   const resumePendingGeneration = async () => {
-    if (!pendingRecovery || active.current) return;
+    if (!recoveryEnabled || !pendingRecovery || active.current) return;
     const draft = pendingRecovery;
     const current = { id: draft.id, scope, controller: new AbortController() };
     active.current = current;
@@ -217,7 +227,7 @@ export function useChat({
   };
 
   const restorePendingDraft = () => {
-    if (!pendingRecovery || active.current) return;
+    if (!recoveryEnabled || !pendingRecovery || active.current) return;
     if (!window.confirm(t('Restore this draft? The previous request may still finish. Sending again starts a new request.'))) return;
     const draft = pendingRecovery;
     rememberPending(null);
@@ -227,6 +237,6 @@ export function useChat({
   return {
     aiModel, setAiModel, inputRef, fileInputRef, isGenerating, uploadedImageUrls, isUploading,
     handleImageUpload, removeUploadedImage: (index) => setUploadedImageUrls((prev) => prev.filter((_, i) => i !== index)),
-    resetComposer, stopGenerating, sendMessage, pendingRecovery, resumePendingGeneration, restorePendingDraft,
+    resetComposer, stopGenerating, sendMessage, pendingRecovery: recoveryEnabled ? pendingRecovery : null, resumePendingGeneration, restorePendingDraft,
   };
 }

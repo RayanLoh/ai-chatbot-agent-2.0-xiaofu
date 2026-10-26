@@ -14,6 +14,7 @@ const deferred = () => { let resolve; const promise = new Promise((r) => { resol
 function setup(props) {
   const [messages, setMessages] = useState([]);
   return { messages, ...useChat({
+    recoveryEnabled: 'recoveryEnabled' in props ? props.recoveryEnabled : true,
     authScopeKey: props.owner, conversationId: props.conversation,
     availableModels: models, onAuthRequired: vi.fn(), setConversationId: vi.fn(),
     onSubscriptionRequired: props.onSubscriptionRequired,
@@ -25,6 +26,44 @@ function setup(props) {
 beforeEach(() => { vi.clearAllMocks(); localStorage.clear(); sessionStorage.clear(); });
 
 describe('request isolation', () => {
+  it('clears old guest recovery state and never saves or restores guest drafts', async () => {
+    sessionStorage.setItem('xiaofu:pending:guest', JSON.stringify({ id: 'old', text: 'Old draft' }));
+    api.generateResponse.mockRejectedValueOnce(Object.assign(new Error('Session unavailable'), { status: 503, requestNotSent: true }));
+    const { result } = renderHook(setup, { initialProps: { owner: 'guest', conversation: null, recoveryEnabled: false } });
+    expect(result.current.pendingRecovery).toBeNull();
+    expect(sessionStorage.getItem('xiaofu:pending:guest')).toBeNull();
+    await act(async () => {
+      result.current.inputRef.current = { value: 'Hi', dispatchEvent: vi.fn() };
+      await result.current.sendMessage();
+    });
+    expect(result.current.inputRef.current.value).toBe('');
+    expect(result.current.pendingRecovery).toBeNull();
+    expect(result.current.isGenerating).toBe(false);
+    expect(sessionStorage.getItem('xiaofu:pending:guest')).toBeNull();
+    expect(api.recoverGeneration).not.toHaveBeenCalled();
+  });
+
+  it('keeps subscriber recovery data until the subscription check finishes', () => {
+    const draft = { id: 'old', text: 'Subscriber draft' };
+    sessionStorage.setItem('xiaofu:pending:subscriber', JSON.stringify(draft));
+    const { result, rerender } = renderHook(setup, { initialProps: { owner: 'subscriber', recoveryEnabled: null } });
+    expect(sessionStorage.getItem('xiaofu:pending:subscriber')).not.toBeNull();
+    rerender({ owner: 'subscriber', recoveryEnabled: true });
+    expect(result.current.pendingRecovery).toEqual(draft);
+  });
+
+  it('unlocks free users after a connection failure without recovery or persisted text', async () => {
+    api.generateResponse.mockRejectedValueOnce(new TypeError('Connection lost'));
+    const { result } = renderHook(setup, { initialProps: { owner: 'free-user', recoveryEnabled: false } });
+    await act(async () => {
+      result.current.inputRef.current = { value: 'Free message' };
+      await result.current.sendMessage();
+    });
+    expect(result.current.pendingRecovery).toBeNull();
+    expect(result.current.isGenerating).toBe(false);
+    expect(sessionStorage.getItem('xiaofu:pending:free-user')).toBeNull();
+    expect(api.recoverGeneration).not.toHaveBeenCalled();
+  });
   it('restores input immediately if guest authentication failed before sending', async () => {
     api.generateResponse.mockRejectedValueOnce(Object.assign(new Error('Database operation failed'), {
       status: 503, requestNotSent: true,

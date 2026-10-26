@@ -19,6 +19,7 @@ import { useAuth } from './hooks/useAuth';
 import { useChat } from './hooks/useChat';
 import { useConversations } from './hooks/useConversations';
 import { useTheme } from './hooks/useTheme';
+import { requestJson } from './api/http';
 
 const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 768;
 const MOBILE_TEXTAREA_MIN_HEIGHT = 48;
@@ -80,6 +81,34 @@ function App() {
     user,
   } = useAuth();
 
+  const [recoveryAccess, setRecoveryAccess] = useState(null);
+  const accountId = user?.sub;
+  useEffect(() => {
+    if (!isLoggedIn || !accountId) return;
+    const controller = new AbortController();
+    let expiryTimer;
+    requestJson('/billing/status', { signal: controller.signal }).then((status) => {
+      if (controller.signal.aborted) return;
+      const remaining = new Date(status.valid_until).getTime() - Date.now();
+      const enabled = status.plan === 'pro' && remaining > 0;
+      setRecoveryAccess({ owner: accountId, enabled });
+      if (enabled) {
+        const expiresAt = new Date(status.valid_until).getTime();
+        const expire = () => {
+          const delay = expiresAt - Date.now();
+          if (delay <= 0) setRecoveryAccess({ owner: accountId, enabled: false });
+          else expiryTimer = setTimeout(expire, Math.min(delay, 2147483647));
+        };
+        expire();
+      }
+    }).catch(() => {
+      // A billing outage must not erase a subscriber's saved recovery record.
+      if (!controller.signal.aborted) setRecoveryAccess({ owner: accountId, enabled: null });
+    });
+    return () => { controller.abort(); clearTimeout(expiryTimer); };
+  }, [isLoggedIn, accountId, showSubscription]);
+  const recoveryEnabled = !isLoggedIn ? false : recoveryAccess?.owner === accountId ? recoveryAccess.enabled : null;
+
   const {
     theme,
     handleThemeChange,
@@ -123,6 +152,7 @@ function App() {
     resumePendingGeneration,
     restorePendingDraft,
   } = useChat({
+    recoveryEnabled,
     authScopeKey: user?.sub || 'guest',
     availableModels: modelOptions.filter((option) => option.available !== false).map((option) => option.value),
     onAuthRequired: openLoginModal,
