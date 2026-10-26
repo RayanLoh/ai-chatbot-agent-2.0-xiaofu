@@ -6,6 +6,7 @@ from fastapi import HTTPException
 from supabase import create_client
 from config import Config
 from services.observability import log_failure
+from services.pagination import message_page
 
 logger = logging.getLogger(__name__)
 
@@ -40,16 +41,38 @@ class ConversationManager:
         rows = await self._execute(lambda db: db.rpc('list_conversation_summaries', {'p_user_id': user_id}))
         return rows or []
 
-    async def read_owned_history(self, identity, conversation_id=None):
-        return await self._execute(lambda db: db.rpc('read_owned_history', {
+    async def read_owned_history(self, identity, conversation_id=None, limit=None, before=None):
+        params = {
             'p_owner': identity.user_id, 'p_network': identity.network_id,
             'p_bucket': int(datetime.now(timezone.utc).timestamp()) // 60,
             'p_conv': conversation_id,
-        }), missing_codes=('PGRST202',))
+        }
+        if limit is not None:
+            page = await self._execute(lambda db: db.rpc('read_owned_history_page', {
+                **params, 'p_limit': limit, 'p_before': before,
+            }), missing_codes=('PGRST202',))
+            if page is not None:
+                return page
+        result = await self._execute(lambda db: db.rpc('read_owned_history', params), missing_codes=('PGRST202',))
+        if limit is not None and result is not None and result.get('code') == 'OK':
+            return {'code': 'OK', **message_page(result['messages'], limit, before)}
+        return result
 
-    async def get_conversation(self, conv_id: str, user_id: str):
+    async def get_conversation(self, conv_id: str, user_id: str, *, context_limit=None):
+        if context_limit is not None:
+            missing = object()
+            result = await self._execute(lambda db: db.rpc('read_conversation_context', {
+                'p_conv': conv_id, 'p_owner': user_id, 'p_limit': context_limit,
+            }), missing_codes=('PGRST202',), missing_value=missing)
+            if result is not missing:
+                return result
         rows = await self._execute(lambda db: db.table('conversations').select('id,user_id,title,updated_at,messages').eq('id', conv_id).eq('user_id', user_id).limit(1))
-        return rows[0] if rows else None
+        if not rows:
+            return None
+        result = rows[0]
+        if context_limit is not None:
+            result = {**result, 'messages': result.get('messages', [])[-context_limit:]}
+        return result
 
     async def get_messages(self, conv_id: str, user_id: str):
         conversation = await self.get_conversation(conv_id, user_id)

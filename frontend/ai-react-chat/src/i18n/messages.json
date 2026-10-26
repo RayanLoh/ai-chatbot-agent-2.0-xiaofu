@@ -1,4 +1,6 @@
 {
+  "Load earlier messages": {"en":"Load earlier messages","zh":"加载更早消息","ms":"Muatkan mesej terdahulu"},
+  "Loading earlier messages…": {"en":"Loading earlier messages…","zh":"正在加载更早消息…","ms":"Memuatkan mesej terdahulu…"},
   "Guest history could not be transferred yet.": {"en":"Guest history could not be transferred yet.","zh":"游客历史暂未转移成功。","ms":"Sejarah tetamu belum dapat dipindahkan."},
   "Test access": {"en":"Test access","zh":"测试权限","ms":"Akses ujian"},
   "Restore draft": {"en":"Restore draft","zh":"恢复草稿","ms":"Pulihkan draf"},

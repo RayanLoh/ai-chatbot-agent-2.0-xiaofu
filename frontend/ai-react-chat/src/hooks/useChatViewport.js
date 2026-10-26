@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 const isMobile = () =>
   typeof window !== 'undefined' && window.innerWidth <= 768;
@@ -24,6 +24,7 @@ export function useChatViewport({
   conversationId,
   isLoadingMessages,
   messages,
+  historyPrependVersion = 0,
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => !isMobile());
   const [isMobileViewport, setIsMobileViewport] = useState(() => isMobile());
@@ -38,6 +39,23 @@ export function useChatViewport({
   const imageScrollTimeoutRef = useRef(null);
   const pullStartYRef = useRef(null);
   const isPullingToRefreshRef = useRef(false);
+  const historyAnchor = useRef(null);
+  const skipNextScroll = useRef(false);
+
+  const preserveHistoryPosition = () => {
+    const container = messagesContainerRef.current;
+    if (container) historyAnchor.current = { id: conversationId, top: container.scrollTop, height: container.scrollHeight };
+  };
+  const cancelHistoryPosition = () => { historyAnchor.current = null; };
+  useLayoutEffect(() => {
+    const anchor = historyAnchor.current;
+    historyAnchor.current = null;
+    const container = messagesContainerRef.current;
+    if (anchor && anchor.id === conversationId && container) {
+      container.scrollTop = anchor.top + container.scrollHeight - anchor.height;
+      skipNextScroll.current = true;
+    }
+  }, [historyPrependVersion, conversationId]);
 
   const resetTextareaHeight = (textarea) => {
     if (!textarea) {
@@ -136,6 +154,8 @@ export function useChatViewport({
   };
 
   useEffect(() => {
+    if (skipNextScroll.current) { skipNextScroll.current = false; return; }
+    if (historyAnchor.current) return;
     if (isLoadingMessages || messages.length === 0) {
       return undefined;
     }
@@ -149,7 +169,7 @@ export function useChatViewport({
     return () => {
       window.cancelAnimationFrame(frameId);
     };
-  }, [conversationId, isLoadingMessages, messages]);
+  }, [conversationId, isLoadingMessages, messages, historyPrependVersion]);
 
   useEffect(() => {
     if (isLoadingMessages) {
@@ -232,6 +252,8 @@ export function useChatViewport({
 
   const onImageLoad = (event) => {
     if (!(event.target instanceof HTMLImageElement)) return;
+    const container = messagesContainerRef.current;
+    if (!container || historyAnchor.current || container.scrollHeight - container.clientHeight - container.scrollTop > 160) return;
     clearTimeout(imageScrollTimeoutRef.current);
     imageScrollTimeoutRef.current = setTimeout(
       () => scrollToBottom('smooth'),
@@ -252,5 +274,7 @@ export function useChatViewport({
     handlePullRefreshMove,
     handlePullRefreshEnd,
     onImageLoad,
+    preserveHistoryPosition,
+    cancelHistoryPosition,
   };
 }

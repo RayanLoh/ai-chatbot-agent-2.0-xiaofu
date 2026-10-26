@@ -73,6 +73,46 @@ it('does not auto-delete conversations when loading a list', async () => {
   expect(api.deleteConversation).not.toHaveBeenCalled();
 });
 
+it('loads older history in order without replacing the recent messages', async () => {
+  api.getConversationMessages.mockResolvedValueOnce({ messages: [{ text: 'recent' }], has_more: true, next_before: 50 })
+    .mockResolvedValueOnce({ messages: [{ text: 'older' }], has_more: false, next_before: null });
+  const { result } = renderHook(() => useConversations({ isMounted: true, authScopeKey: 'a' }));
+  await act(async () => { await result.current.selectConversation('chat'); });
+  expect(result.current.hasMoreMessages).toBe(true);
+  await act(async () => { await result.current.loadOlderMessages(); });
+  expect(api.getConversationMessages.mock.calls[1][2]).toEqual({ before: 50 });
+  expect(result.current.messages.map((message) => message.text)).toEqual(['older', 'recent']);
+  expect(result.current.hasMoreMessages).toBe(false);
+  expect(result.current.historyPrependVersion).toBe(1);
+});
+
+it('keeps visible history and cursor available for retry after an older-page failure', async () => {
+  api.getConversationMessages.mockResolvedValueOnce({ messages: [{ text: 'recent' }], has_more: true, next_before: 50 })
+    .mockRejectedValueOnce(new Error('offline'));
+  const { result } = renderHook(() => useConversations({ isMounted: true, authScopeKey: 'a' }));
+  await act(async () => { await result.current.selectConversation('chat'); });
+  await act(async () => { await result.current.loadOlderMessages(); });
+  expect(result.current.messages).toEqual([{ text: 'recent' }]);
+  expect(result.current.hasMoreMessages).toBe(true);
+  expect(result.current.olderError).toBe('offline');
+  expect(result.current.isLoadingOlder).toBe(false);
+});
+
+it('ignores older pages after switching conversations', async () => {
+  const old = deferred();
+  api.getConversationMessages.mockResolvedValueOnce({ messages: [{ text: 'A' }], has_more: true, next_before: 50 })
+    .mockReturnValueOnce(old.promise).mockResolvedValueOnce({ messages: [{ text: 'B' }] });
+  const { result } = renderHook(() => useConversations({ isMounted: true, authScopeKey: 'a' }));
+  await act(async () => { await result.current.selectConversation('a'); });
+  let pending;
+  act(() => { pending = result.current.loadOlderMessages(); });
+  const signal = api.getConversationMessages.mock.calls[1][1];
+  await act(async () => { await result.current.selectConversation('b'); });
+  await act(async () => { old.resolve({ messages: [{ text: 'old A' }] }); await pending; });
+  expect(signal.aborted).toBe(true);
+  expect(result.current.messages).toEqual([{ text: 'B' }]);
+});
+
 it('opens recently loaded history from memory without another request', async () => {
   api.getConversationMessages.mockImplementation(async (id) => ({ messages: [{ text: id }] }));
   const { result } = renderHook(() => useConversations({ isMounted: true, authScopeKey: 'a' }));

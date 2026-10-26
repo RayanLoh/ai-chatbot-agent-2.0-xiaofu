@@ -85,6 +85,12 @@ function App() {
     loadConversations,
     deleteConversation,
     updateConversationTitle,
+    replaceHistory,
+    hasMoreMessages,
+    isLoadingOlder,
+    olderError,
+    loadOlderMessages,
+    historyPrependVersion,
   } = useConversations({
     isMounted,
     authScopeKey: user?.sub || (isLoggedIn ? 'authenticated' : 'guest'),
@@ -111,6 +117,7 @@ function App() {
     setMessages,
     loadConversations,
     updateConversationTitle,
+    replaceHistory,
   });
 
   const { setAiModel, inputRef, resetComposer } = chat;
@@ -128,11 +135,14 @@ function App() {
     handlePullRefreshMove,
     handlePullRefreshEnd,
     onImageLoad,
+    preserveHistoryPosition,
+    cancelHistoryPosition,
   } = useChatViewport({
     inputRef,
     conversationId,
     isLoadingMessages,
     messages,
+    historyPrependVersion,
   });
 
   const showNewConversationHint = !isLoadingMessages && messages.length === 0;
@@ -170,7 +180,7 @@ function App() {
             resetComposer();
             setHasDraft(false);
             selectConversation(id);
-            if (isMobile()) setIsSidebarOpen(false);
+            if (isMobileViewport) setIsSidebarOpen(false);
           }}
           onDeleteConversation={deleteConversation}
           onNewChat={async () => {
@@ -183,7 +193,7 @@ function App() {
               resetTextareaHeight(inputRef.current);
             }
 
-            if (newConversation && isMobile()) {
+            if (newConversation && isMobileViewport) {
               setIsSidebarOpen(false);
             }
           }}
@@ -223,6 +233,13 @@ function App() {
             onTouchCancel={handlePullRefreshEnd}
             onLoadCapture={onImageLoad}
           >
+            {hasMoreMessages && !isLoadingMessages && <div className="history-page-controls">
+              <button className="retry-history" disabled={isLoadingOlder} onClick={async () => {
+                preserveHistoryPosition();
+                if (!await loadOlderMessages()) cancelHistoryPosition();
+              }}>{t(isLoadingOlder ? 'Loading earlier messages…' : 'Load earlier messages')}</button>
+              {olderError && <p role="alert">{t(olderError)}</p>}
+            </div>}
             {isLoadingMessages ? (
               <HistoryLoading />
             ) : showNewConversationHint ? (

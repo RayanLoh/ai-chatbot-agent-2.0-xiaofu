@@ -19,6 +19,7 @@ function setup(props) {
     authScopeKey: props.owner, conversationId: props.conversation,
     availableModels: models, onAuthRequired: vi.fn(), setConversationId: vi.fn(),
     onSubscriptionRequired: props.onSubscriptionRequired,
+    replaceHistory: props.replaceHistory,
     messages, setMessages, loadConversations: vi.fn().mockResolvedValue(),
     updateConversationTitle: vi.fn().mockResolvedValue(),
   }) };
@@ -216,5 +217,20 @@ describe('request isolation', () => {
     expect(result.current.inputRef.current.value).toBe('Keep this question');
     expect(api.recoverGeneration).not.toHaveBeenCalled();
     expect(api.generateResponse).toHaveBeenCalledTimes(1);
+  });
+
+  it('restores recovery pagination through the history owner without duplicating a generation', async () => {
+    const draft = { id: 'pending', text: 'Keep', images: [], conversationId: 'one' };
+    sessionStorage.setItem('xiaofu:pending:a', JSON.stringify(draft));
+    const page = { messages: [{ text: 'recovered' }], has_more: true, next_before: 50 };
+    api.recoverGeneration.mockResolvedValueOnce({ conversation_id: 'one' });
+    api.getConversationMessages.mockResolvedValueOnce(page);
+    const replaceHistory = vi.fn();
+    const { result } = renderHook(setup, { initialProps: { owner: 'a', conversation: 'one', replaceHistory } });
+    await act(async () => { await result.current.resumePendingGeneration(); });
+    expect(replaceHistory).toHaveBeenCalledWith('one', page);
+    expect(result.current.pendingRecovery).toBeNull();
+    expect(result.current.isGenerating).toBe(false);
+    expect(api.generateResponse).not.toHaveBeenCalled();
   });
 });

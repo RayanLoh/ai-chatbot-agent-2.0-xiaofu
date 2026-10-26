@@ -8,7 +8,11 @@ export const createConversation = async (title = 'new conversation') => requestJ
   body: JSON.stringify({ title }),
 });
 
-export const getConversationMessages = async (conversationId, signal) => requestJson(endpoints.conversation(conversationId), { signal });
+export const getConversationMessages = async (conversationId, signal, { before } = {}) => {
+  const query = new URLSearchParams({ limit: '50' });
+  if (before !== undefined && before !== null) query.set('before', String(before));
+  return requestJson(`${endpoints.conversation(conversationId)}?${query}`, { signal });
+};
 
 export const updateConversationTitle = async (conversationId, title) => requestJson(endpoints.conversation(conversationId), {
   method: 'PUT',

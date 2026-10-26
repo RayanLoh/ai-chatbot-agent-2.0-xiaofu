@@ -131,5 +131,7 @@ button.retry-history{margin-top:14px;padding:8px 13px;background:var(--surface);
 .history-skeleton-row:nth-child(even) span{width:55%}
 .history-refresh-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:softPulse 1.4s infinite}
 @keyframes historyShimmer{from{background-position:100% 0}to{background-position:-100% 0}}
+.history-page-controls{display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding-bottom:12px}
+.history-page-controls p{font-size:12px;color:var(--accent);margin:8px 0}
 @media(max-width:600px){.history-skeleton-bubble{width:85%;padding:16px}.history-skeleton-bubble.user{width:48%}.history-skeleton-bubble.short{width:36%}}
 @media(prefers-reduced-motion:reduce){.history-loading,.history-loading-label svg,.history-skeleton span,.history-skeleton i,.history-refresh-dot{animation:none}}

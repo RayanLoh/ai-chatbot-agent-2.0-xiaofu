@@ -41,7 +41,7 @@ async def generate_chat_response(db, bot, storage, identity, request, http_reque
         owned_storage = OwnedStorage(storage, db, identity.user_id, conv_id)
         for url in request.image_urls:
             await owned_storage.check_image(url)
-        conversation = await db.get_conversation(conv_id, identity.user_id) if request.conversation_id else {'messages': []}
+        conversation = await db.get_conversation(conv_id, identity.user_id, context_limit=40) if request.conversation_id else {'messages': []}
         if conversation is None:
             raise HTTPException(404, 'Conversation not found')
         history = [*(conversation.get('messages') or []), {'sender': 'user', 'text': request.prompt, 'images': request.image_urls}]

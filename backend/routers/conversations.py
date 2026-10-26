@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from services.guest_usage_service import verify_guest_token
 
 from dependencies import get_conversation_manager, get_request_identity
 from services.guest_usage_service import consume_rate
 from schemas.conversations import ConversationCreateRequest, ConversationUpdateRequest
+from services.pagination import message_page
 from services.conversation_service import (
     create_conversation,
     delete_conversation,
@@ -16,13 +17,16 @@ from services.conversation_service import (
 router = APIRouter(tags=["conversations"])
 
 
-async def read_history(db, identity, conversation_id=None):
-    result = await db.read_owned_history(identity, conversation_id)
+async def read_history(db, identity, conversation_id=None, limit=None, before=None):
+    result = (await db.read_owned_history(identity, conversation_id) if limit is None else
+              await db.read_owned_history(identity, conversation_id, limit, before))
     if result is None:
         # Rolling deploy: preserve the existing protected path until SQL 006.
         await consume_rate(db, identity, 'conversations', 60)
-        return (await list_conversations(db, identity.user_id) if conversation_id is None
-                else await get_conversation_messages(db, identity.user_id, conversation_id))
+        if conversation_id is None:
+            return await list_conversations(db, identity.user_id)
+        result = await get_conversation_messages(db, identity.user_id, conversation_id)
+        return result if limit is None else message_page(result['messages'], limit, before)
     code = result['code']
     if code == 'RATE_LIMITED':
         raise HTTPException(429, {'detail': 'Too many requests. Please try again later.', 'code': code})
@@ -73,10 +77,14 @@ async def create_conversation_route(
 @router.get("/conversations/{conv_id}")
 async def get_conversation_route(
     conv_id: str,
+    limit: int | None = Query(default=None, ge=1, le=100),
+    before: int | None = Query(default=None, ge=0, le=2147483647),
     db=Depends(get_conversation_manager),
     identity=Depends(get_request_identity),
 ):
-    return await read_history(db, identity, conv_id)
+    if before is not None and limit is None:
+        raise HTTPException(422, 'A page limit is required with a cursor')
+    return await read_history(db, identity, conv_id, limit, before)
 
 
 @router.put("/conversations/{conv_id}")

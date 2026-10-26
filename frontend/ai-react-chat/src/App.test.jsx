@@ -27,6 +27,16 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
+it('opens a conversation with older-page controls without undefined viewport helpers', async () => {
+  localStorage.setItem('guest_token', 'returning');
+  api.getConversations.mockResolvedValue({ conversations: [{ id: 'chat', title: 'History' }] });
+  api.getConversationMessages.mockResolvedValue({ messages: [{ id: 'message', sender: 'user', text: 'Recent message' }], has_more: true, next_before: 50 });
+  render(<MemoryRouter><LanguageProvider><App /></LanguageProvider></MemoryRouter>);
+  fireEvent.click(await screen.findByRole('button', { name: 'History' }));
+  expect(await screen.findByText('Recent message')).toBeTruthy();
+  expect(screen.getByRole('button', { name: '加载更早消息' })).toBeTruthy();
+});
+
 it('fills the image starter without sending and selects the image model', async () => {
   render(<MemoryRouter><LanguageProvider><App /></LanguageProvider></MemoryRouter>);
   await waitFor(() => expect(screen.getByRole('button', { name: '选择 AI 模型' }).disabled).toBe(false));

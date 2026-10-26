@@ -6,7 +6,7 @@ export function useChat({
   recoveryEnabled = false,
   isLoadingHistory = false,
   authScopeKey, onAuthRequired, onSubscriptionRequired, conversationId, setConversationId,
-  messages, setMessages, loadConversations, updateConversationTitle, availableModels,
+  messages, setMessages, loadConversations, updateConversationTitle, availableModels, replaceHistory,
 }) {
   const { t } = useLanguage();
   const [isGenerating, setIsGenerating] = useState(false);
@@ -214,12 +214,14 @@ export function useChat({
     try {
       const result = await api.recoverGeneration(draft.id, current.controller.signal);
       if (active.current !== current || scopeRef.current !== current.scope) return;
-      const data = await api.getConversationMessages(result.conversation_id);
+      const data = await api.getConversationMessages(result.conversation_id, current.controller.signal);
       if (active.current !== current || scopeRef.current !== current.scope) return;
       rememberPending(null);
-      setMessages(data.messages || []);
-      await loadConversations().catch(() => {});
-      if (active.current === current && scopeRef.current === current.scope) setConversationId(result.conversation_id);
+      active.current = null;
+      setIsGenerating(false);
+      if (replaceHistory) replaceHistory(result.conversation_id, data);
+      else { setMessages(data.messages || []); setConversationId(result.conversation_id); }
+      void loadConversations().catch(() => {});
     } catch (error) {
       if (active.current !== current || scopeRef.current !== current.scope || error.name === 'AbortError') return;
       if (error.terminal || error.status === 404) {
