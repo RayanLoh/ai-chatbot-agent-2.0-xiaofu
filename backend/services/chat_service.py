@@ -12,10 +12,12 @@ logger = logging.getLogger(__name__)
 
 
 async def _watch_cancel(db, identity, request_id):
+    delay = 0.5
     while True:
         if not await db.generation_active(request_id, identity.user_id):
             return
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(delay)
+        delay = min(delay * 2, 2.0)
 
 
 async def generate_chat_response(db, bot, storage, identity, request, http_request):
