@@ -66,6 +66,7 @@ class VerifiedGoogleUser:
     sub: str
     email: str | None = None
     name: str | None = None
+    email_verified: bool = False
 
 
 def extract_bearer_token(auth_header: str | None) -> str | None:
@@ -139,4 +140,5 @@ def verify_google_id_token(token: str) -> VerifiedGoogleUser:
         sub=subject,
         email=claims.get("email"),
         name=claims.get("name"),
+        email_verified=claims.get("email_verified") is True,
     )

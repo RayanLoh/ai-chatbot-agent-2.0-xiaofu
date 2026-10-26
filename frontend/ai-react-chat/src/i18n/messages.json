@@ -1,4 +1,6 @@
 {
+  "Guest history could not be transferred yet.": {"en":"Guest history could not be transferred yet.","zh":"游客历史暂未转移成功。","ms":"Sejarah tetamu belum dapat dipindahkan."},
+  "Test access": {"en":"Test access","zh":"测试权限","ms":"Akses ujian"},
   "Restore draft": {"en":"Restore draft","zh":"恢复草稿","ms":"Pulihkan draf"},
   "Restore this draft? The previous request may still finish. Sending again starts a new request.": {"en":"Restore this draft? The previous request may still finish. Sending again starts a new request.","zh":"恢复这份草稿？之前的请求仍可能完成，再次发送会建立一个新请求。","ms":"Pulihkan draf ini? Permintaan terdahulu mungkin masih selesai. Menghantar semula memulakan permintaan baharu."},
   "Loading sign-in options…": {"en":"Loading sign-in options…","zh":"正在加载登录选项…","ms":"Memuatkan pilihan log masuk…"},

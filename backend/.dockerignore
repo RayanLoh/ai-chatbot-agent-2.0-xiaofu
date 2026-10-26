@@ -10,3 +10,4 @@
 tests
 *-audit.json
 *.log
+.local

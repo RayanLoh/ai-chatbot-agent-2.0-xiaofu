@@ -38,4 +38,6 @@ jobs:
           psql -h localhost -U postgres -d xiaofu_test -v ON_ERROR_STOP=1 -f tests/subscriptions.sql
           psql -h localhost -U postgres -d xiaofu_test -v ON_ERROR_STOP=1 -f migrations/004_backend_reliability.sql
           psql -h localhost -U postgres -d xiaofu_test -v ON_ERROR_STOP=1 -f tests/backend_fixes.sql
+          psql -h localhost -U postgres -d xiaofu_test -v ON_ERROR_STOP=1 -f migrations/005_trials_and_guest_history.sql
+          psql -h localhost -U postgres -d xiaofu_test -v ON_ERROR_STOP=1 -f tests/trials_and_guest_history.sql
       - run: uv run pip-audit --disable-pip --no-deps -r requirements.txt

@@ -10,12 +10,14 @@ class ConversationManager:
     def __init__(self):
         self.supabase = create_client(Config.SUPABASE_URL, Config.SUPABASE_KEY) if Config.SUPABASE_URL and Config.SUPABASE_KEY else None
 
-    async def _execute(self, make_query):
+    async def _execute(self, make_query, *, missing_codes=(), missing_value=None):
         if self.supabase is None:
             raise HTTPException(503, 'Database is not configured')
         try:
             return (await asyncio.to_thread(lambda: make_query(self.supabase).execute())).data
-        except Exception:
+        except Exception as error:
+            if getattr(error, 'code', None) in missing_codes:
+                return missing_value
             # Do not leak database internals or translate failures to empty data.
             raise HTTPException(503, 'Database operation failed. Please retry.') from None
 
@@ -80,6 +82,20 @@ class ConversationManager:
             'p_owner': user_id, 'p_free': Config.FREE_TRIAL_LIMIT,
             'p_pro': Config.PRO_DAILY_LIMIT, 'p_period': Config.FREE_TRIAL_PERIOD,
         }))
+
+    async def bind_tester_account(self, user_id, email):
+        # Keep existing logins working during the migration rollout. Missing
+        # allowlist RPC never grants test access; all other failures propagate.
+        await self._execute(lambda db: db.rpc('bind_tester_account', {'p_user': user_id, 'p_email': email}),
+            missing_codes=('PGRST202',))
+
+    async def guest_history_claimed(self, guest_id):
+        rows = await self._execute(lambda db: db.table('guest_history_claims').select('guest_id').eq('guest_id', guest_id).limit(1),
+            missing_codes=('PGRST205', '42P01'), missing_value=[])
+        return bool(rows)
+
+    async def claim_guest_history(self, guest_id, user_id):
+        return await self._execute(lambda db: db.rpc('claim_guest_history', {'p_guest': guest_id, 'p_user': user_id}))
 
     async def reserve_budget(self, request_id, user_id, cost, model_name, network_id=None):
         result = await self._execute(lambda db: db.rpc('admit_plan_generation', {

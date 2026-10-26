@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from services.guest_usage_service import verify_guest_token
 
 from dependencies import get_conversation_manager, get_request_identity
 from services.guest_usage_service import consume_rate
@@ -12,6 +14,25 @@ from services.conversation_service import (
 )
 
 router = APIRouter(tags=["conversations"])
+
+
+class GuestHistoryClaim(BaseModel):
+    guest_token: str = Field(min_length=1, max_length=1024)
+
+
+@router.post('/conversations/claim-guest')
+async def claim_guest_history_route(req: GuestHistoryClaim,
+    db=Depends(get_conversation_manager), identity=Depends(get_request_identity)):
+    if identity.is_guest:
+        raise HTTPException(401, 'Sign in to claim guest history')
+    guest = verify_guest_token(req.guest_token)
+    result = await db.claim_guest_history(guest, identity.user_id)
+    status = result.get('status')
+    if status != 'claimed':
+        raise HTTPException(403 if status == 'subscription_required' else 409,
+            {'code': 'GUEST_CLAIM_' + str(status).upper(),
+             'detail': 'Guest history cannot be transferred yet. Please retry.'})
+    return result
 
 
 @router.get("/conversations")

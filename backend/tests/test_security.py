@@ -155,6 +155,7 @@ def test_generate_route_keeps_404_and_returns_persisted_reply():
     from dependencies import get_bot_service
     db = SimpleNamespace(
         consume_usage=AsyncMock(return_value=True),
+        guest_history_claimed=AsyncMock(return_value=False),
         get_conversation=AsyncMock(return_value=None),
         start_job=AsyncMock(return_value={'status': 'started', 'conversation_id': 'test-conversation'}),
         complete_job=AsyncMock(return_value={'text':'Hello','images':[],'conversation_id':'test-conversation'}),

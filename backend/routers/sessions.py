@@ -11,6 +11,7 @@ router = APIRouter(tags=['sessions'])
 
 def plan_catalog():
     return {'free_models': list(Config.FREE_MODELS), 'pro_limit': Config.PRO_DAILY_LIMIT,
+        'guest_limit': 5,
         'free_limit': Config.FREE_TRIAL_LIMIT, 'free_period': Config.FREE_TRIAL_PERIOD,
         'checkout_available': False, 'template_only': True,
         'price': Config.PRO_PRICE_USD, 'currency': 'USD', 'payment_provider': 'paypal'}

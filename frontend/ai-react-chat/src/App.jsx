@@ -20,6 +20,7 @@ import { useChat } from './hooks/useChat';
 import { useConversations } from './hooks/useConversations';
 import { useTheme } from './hooks/useTheme';
 import { requestJson } from './api/http';
+import { useGuestHistoryClaim } from './hooks/useGuestHistoryClaim';
 
 const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 768;
 const MOBILE_TEXTAREA_MIN_HEIGHT = 48;
@@ -133,6 +134,10 @@ function App() {
     isLoggedIn,
     isMounted,
     authScopeKey: user?.sub || (isLoggedIn ? 'authenticated' : 'guest'),
+  });
+
+  const { claimError, retryClaim } = useGuestHistoryClaim({
+    enabled: recoveryEnabled === true, owner: accountId, onClaimed: loadConversations,
   });
 
   const {
@@ -531,6 +536,10 @@ const appContent = (
             </div>
           )}
           <div className="composer-shell">
+          {claimError && <div className="composer-caption" role="status">
+            <span>{t('Guest history could not be transferred yet.')}</span>
+            <button type="button" onClick={retryClaim}>{t('Retry')}</button>
+          </div>}
           {pendingRecovery && !isGenerating && <div className="composer-caption" role="status">
             <span>{t('A reply may still be pending.')}</span>
             <div className="recovery-actions">

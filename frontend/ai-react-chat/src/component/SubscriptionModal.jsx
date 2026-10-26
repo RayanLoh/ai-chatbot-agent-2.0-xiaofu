@@ -61,7 +61,7 @@ export default function SubscriptionModal({ onClose, onSignIn, isLoggedIn }) {
       {!data ? !error && <p role="status">{t('Loading your plan…')}</p>
         : <>
           {data.plan && <div className="subscription-usage" role="status">
-            <strong>{data.plan === 'pro' ? 'Pro' : data.plan === 'guest' ? t('Guest trial') : t('Free')}</strong>
+            <strong>{data.is_tester ? t('Test access') : data.plan === 'pro' ? 'Pro' : data.plan === 'guest' ? t('Guest trial') : t('Free')}</strong>
             <span>{t('{remaining} of {limit} messages left', { remaining: data.remaining, limit: data.limit })}</span>
             <progress max={Math.max(1, data.limit)} value={Math.min(data.limit, data.used)} aria-label={t('Messages used')} />
             {data.resets_at && <small>{t('Resets at {time}', { time: new Date(data.resets_at).toLocaleString(language) })}</small>}

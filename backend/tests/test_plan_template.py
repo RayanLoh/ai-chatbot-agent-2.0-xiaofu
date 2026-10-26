@@ -6,6 +6,7 @@ def test_catalog_has_requested_trial_and_draft_price_but_no_checkout():
     with TestClient(app) as client:
         data=client.get('/billing/plans').json()
     assert data['free_limit']==20
+    assert data['guest_limit']==5
     assert data['free_period']=='lifetime'
     assert data['price']=='4.99' and data['currency']=='USD'
     assert data['template_only'] is True

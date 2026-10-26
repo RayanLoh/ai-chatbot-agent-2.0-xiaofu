@@ -26,3 +26,4 @@ tests/
 .pytest_cache/
 *-audit.json
 *.log
+.local/

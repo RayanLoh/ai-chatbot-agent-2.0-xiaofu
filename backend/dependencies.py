@@ -28,10 +28,15 @@ async def get_request_identity(request: Request, manager=Depends(get_conversatio
             raise HTTPException(429, {'detail': 'Too many sign-in checks. Please retry.', 'code': 'RATE_LIMITED'})
         user = await run_in_threadpool(verify_google_id_token, bearer)
         identity = RequestIdentity(f'user:{user.sub}', False, network)
+        if getattr(user, 'email_verified', False) and user.email:
+            await manager.bind_tester_account(identity.user_id, user.email)
     else:
         token = request.headers.get('X-Guest-Token')
         if not token:
             raise HTTPException(401, {'detail': 'A guest session is required.', 'code': 'GUEST_SESSION_REQUIRED'})
         identity = RequestIdentity(verify_guest_token(token), True, network)
     await consume_rate(manager, identity, 'request', 120)
+    if identity.is_guest and await manager.guest_history_claimed(identity.user_id):
+        raise HTTPException(401, {'detail': 'Guest history is now owned by your signed-in account.',
+            'code': 'INVALID_GUEST_TOKEN'})
     return identity
