@@ -78,15 +78,6 @@ class ConversationManager:
         conversation = await self.get_conversation(conv_id, user_id)
         return conversation.get('messages', []) if conversation else None
 
-    async def add_message(self, conv_id: str, user_id: str, sender: str, text: str, images=None, request_id=None):
-        message = {'id': str(uuid.uuid4()), 'sender': sender, 'text': text, 'images': images or [], 'timestamp': datetime.now(timezone.utc).isoformat()}
-        saved = await self._execute(lambda db: db.rpc('append_conversation_message', {
-            'p_conv_id': conv_id, 'p_user_id': user_id, 'p_message': message,
-            'p_request_id': request_id,
-        }))
-        if not saved:
-            raise HTTPException(409, 'Conversation was removed or generation was cancelled')
-        return True
 
     async def update_title(self, conv_id: str, user_id: str, new_title: str):
         rows = await self._execute(lambda db: db.table('conversations').update({
@@ -190,10 +181,6 @@ class ConversationManager:
     async def consume_usage(self, key: str, limit: int):
         return bool(await self._execute(lambda db: db.rpc('consume_usage', {'p_key': key, 'p_limit': limit})))
 
-    async def begin_generation(self, request_id: str, conv_id: str, user_id: str):
-        return bool(await self._execute(lambda db: db.rpc('begin_generation', {
-            'p_request_id': request_id, 'p_conv_id': conv_id, 'p_user_id': user_id,
-        })))
 
     async def generation_active(self, request_id: str, user_id: str):
         rows = await self._execute(lambda db: db.table('generation_requests').select('request_id').eq('request_id', request_id).eq('user_id', user_id).eq('active', True).gt('expires_at', datetime.now(timezone.utc).isoformat()))

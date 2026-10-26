@@ -32,7 +32,7 @@ Copy-Item .env.example .env.local
 npm run dev -- --port 5174 --strictPort
 ```
 
-前端 `VITE_API_BASE=http://localhost:8080`，后端 `FRONTEND_ORIGIN=http://localhost:5174`。首次安装时按[后端说明](backend/README.md)配置服务，并依序执行 001～005 五份数据库迁移；已有数据库无需因本次代码整理重新执行。
+前端 `VITE_API_BASE=http://localhost:8080`，后端 `FRONTEND_ORIGIN=http://localhost:5174`。首次安装时按[后端说明](backend/README.md)配置服务，并依序执行 001～007 七份数据库迁移；已经执行 001～005 的项目只需新增 006、007，无需重复执行旧迁移。
 
 代码结构和维护约定见 [架构说明](docs/ARCHITECTURE.md)。旧 IndexedDB 文档已移到 `docs/archive/indexeddb/`，不再作为当前操作指南。
 

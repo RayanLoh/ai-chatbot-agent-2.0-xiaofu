@@ -75,7 +75,6 @@ async def test_model_failure_does_not_commit_half_a_turn():
     with pytest.raises(HTTPException):
         await generate_chat_response(db, bot, None, identity, req, http)
     db.complete_job.assert_not_called()
-    db.add_message.assert_not_called()
 
 
 @pytest.mark.parametrize('rates', [{}, {'m': {'input': -1, 'output': 4}},

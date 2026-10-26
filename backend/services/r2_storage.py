@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 class R2Service:
     def __init__(self):
         self.bucket = Config.R2_BUCKET
-        self.public_url = Config.R2_PUBLIC_URL
         self.s3_client = None
         if all((Config.R2_ENDPOINT, Config.R2_ID, Config.R2_SECRET, self.bucket)):
             self.s3_client = boto3.client(

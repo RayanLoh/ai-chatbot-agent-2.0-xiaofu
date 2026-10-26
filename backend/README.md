@@ -47,6 +47,8 @@ uv run pytest -q
 
 ## 部署
 
+历史读取优化与分页需要在 005 后执行迁移 006、007；详情见 [BACKEND_OPTIMIZATIONS.md](BACKEND_OPTIMIZATIONS.md)。新代码保留缺失 RPC 时的兼容路径，但减少数据库往返与数据库内分页要在新 SQL 执行后生效。旧 `R2_PUBLIC_URL` 配置已不再使用，图片继续通过私有资产接口读取。
+
 新增迁移 `005_trials_and_guest_history.sql`：在 001～004 后执行，启用游客 5 次额度、私有测试账号与升级后的历史继承。操作说明见 [TRIALS_AND_HISTORY.md](TRIALS_AND_HISTORY.md)。
 
 部署顺序：备份/测试数据库迁移，然后新后端配置与发布，最后新前端构建与发布。此次接口需要前后端配套升级。

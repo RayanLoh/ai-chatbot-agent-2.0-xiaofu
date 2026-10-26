@@ -13,7 +13,6 @@ class Config:
     R2_ID = os.getenv('R2_ACCESS_KEY_ID')
     R2_SECRET = os.getenv('R2_SECRET_ACCESS_KEY')
     R2_BUCKET = os.getenv('R2_BUCKET_NAME')
-    R2_PUBLIC_URL = os.getenv('R2_PUBLIC_URL', '')
     MAX_IMAGE_BYTES = 10 * 1024 * 1024
     GENERATION_TIMEOUT = 120
     MAX_INPUT_TOKENS = int(os.getenv('MAX_INPUT_TOKENS', '16000'))

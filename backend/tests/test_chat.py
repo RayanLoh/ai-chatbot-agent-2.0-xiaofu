@@ -17,7 +17,7 @@ def fixtures():
         get_conversation=AsyncMock(return_value={'messages': [{'sender': 'user', 'text': 'My name is Rayan'}]}),
         start_job=AsyncMock(return_value={'status': 'started', 'conversation_id': 'existing'}), consume_usage=AsyncMock(return_value=True),
         complete_job=AsyncMock(return_value={'text': 'Hi Rayan', 'images': [], 'conversation_id': 'existing'}),
-        generation_active=AsyncMock(return_value=True), add_message=AsyncMock(return_value=True),
+        generation_active=AsyncMock(return_value=True),
         finish_generation=AsyncMock(return_value=True))
     bot = SimpleNamespace(get_response=AsyncMock(return_value={'text': 'Hi Rayan', 'images': []}))
     request = ChatRequest(prompt='What is my name?', conversation_id='existing', request_id=uuid4())

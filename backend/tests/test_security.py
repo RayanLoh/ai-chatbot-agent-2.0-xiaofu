@@ -2,7 +2,7 @@ import io
 import time
 from uuid import uuid4
 from types import SimpleNamespace
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock
 import pytest
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
@@ -13,7 +13,8 @@ from main import app
 from dependencies import get_conversation_manager
 from services.auth_service import extract_bearer_token
 from services.guest_usage_service import issue_guest_token, verify_guest_token, RequestIdentity
-from services.image_security import validate_image_url, validate_image, fetch_image
+from services.image_security import validate_image
+from services.asset_service import asset_id, OwnedStorage
 from schemas.chat import ChatRequest
 
 URL = 'https://images.example.com/images/12345678-1234-1234-1234-123456789abc.png'
@@ -34,17 +35,17 @@ def test_expired_guest_rejected(monkeypatch):
         verify_guest_token(token)
 
 
-@pytest.mark.parametrize('value', ['http://127.0.0.1/admin', 'https://images.example.com.evil.com/images/x.png',
+@pytest.mark.parametrize('value', [URL, 'http://127.0.0.1/admin', 'https://images.example.com.evil.com/images/x.png',
     'https://images.example.com@127.0.0.1/a', 'https://images.example.com/images/../secret',
     URL + '?redirect=http://localhost', URL + '#x', URL.replace('https:', 'http:'),
     URL.replace('/images/', '/images/%2e%2e/'), URL.replace('.com/', '.com:8443/')])
 def test_untrusted_image_urls_rejected(value):
     with pytest.raises(HTTPException):
-        validate_image_url(value)
+        asset_id(value)
 
 
 def test_storage_url_and_image_validation():
-    assert validate_image_url(URL) == URL
+    assert asset_id('/assets/12345678-1234-1234-1234-123456789abc') == '12345678-1234-1234-1234-123456789abc'
     data = io.BytesIO()
     Image.new('RGB', (2, 2)).save(data, format='PNG')
     assert validate_image(data.getvalue(), 'image/png') == 'image/png'
@@ -53,11 +54,14 @@ def test_storage_url_and_image_validation():
             validate_image(payload, mime)
 
 
-def test_private_dns_address_is_rejected(monkeypatch):
-    monkeypatch.setattr('services.image_security.socket.getaddrinfo', lambda *a, **k: [(None, None, None, None, ('127.0.0.1', 443))])
+async def test_public_image_reference_never_reaches_database_or_storage():
+    db = SimpleNamespace(get_asset=AsyncMock())
+    storage = SimpleNamespace(read_image=Mock())
     with pytest.raises(HTTPException) as error:
-        fetch_image(URL)
+        await OwnedStorage(storage, db, 'user:owner').fetch_image(URL)
     assert error.value.status_code == 400
+    db.get_asset.assert_not_awaited()
+    storage.read_image.assert_not_called()
 
 
 @pytest.mark.parametrize('overrides', [{'prompt': {}}, {'prompt': ' '}, {'prompt': 'x'*20001},
@@ -160,7 +164,6 @@ def test_generate_route_keeps_404_and_returns_persisted_reply():
         start_job=AsyncMock(return_value={'status': 'started', 'conversation_id': 'test-conversation'}),
         complete_job=AsyncMock(return_value={'text':'Hello','images':[],'conversation_id':'test-conversation'}),
         generation_active=AsyncMock(return_value=True),
-        add_message=AsyncMock(return_value=True),
         finish_generation=AsyncMock(return_value=True),
     )
     bot = SimpleNamespace(get_response=AsyncMock(return_value={'text': 'Hello', 'images': []}))
