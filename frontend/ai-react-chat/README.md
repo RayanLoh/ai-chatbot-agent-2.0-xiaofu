@@ -1,6 +1,8 @@
 # 小芙聊天前端
 
-React + Vite 静态 SPA，对接独立 Python API。需要 Node.js 22.12+，建议 Node.js 24。
+React 19 + Vite 8 静态 SPA，对接独立 Python API。本地与 Vercel 统一使用 Node.js 24；`.node-version` 与 `package.json` 均已固定主版本。
+
+SPA 唯一入口为 `src/main.jsx`。消息、输入器、滚动手势和恢复权限各自独立；设置页与 Markdown 渲染器按需加载。结构和维护说明见 [ARCHITECTURE.md](../../docs/ARCHITECTURE.md)。
 
 ## 启动
 

@@ -1,3 +1,5 @@
+> 历史资料，已归档。这里描述的 IndexedDB 模块早已移除，命令和结论不适用于当前版本。当前实现见仓库 README 和 docs/ARCHITECTURE.md。
+
 # 📦 IndexedDB 完整解决方案 - 文件总结
 
 > ✨ 专业级 IndexedDB 集成：自动分离图片存储，永远不限空间

@@ -1,5 +1,5 @@
 import { useLanguage } from '../i18n/LanguageProvider';
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Settings.css";
 import {
@@ -29,8 +29,8 @@ const menuItems = [
   { id: "account", label: "账户", icon: <KeyRound size={18} /> },
 ];
 
-function Settings({ theme, onThemeChange }) {
-  const { t, language } = useLanguage();
+function Settings({ theme, resolvedTheme, onThemeChange }) {
+  const { t } = useLanguage();
   const [selected, setSelected] = useState("general");
   const [desktopNotificationsEnabled, setDesktopNotificationsEnabled] = useState(false);
   const [islandNotificationsEnabled, setIslandNotificationsEnabled] = useState(true);
@@ -70,7 +70,7 @@ function Settings({ theme, onThemeChange }) {
     return theme;
   };
 
-  const effectiveTheme = getEffectiveTheme();
+  const effectiveTheme = resolvedTheme || getEffectiveTheme();
 
   const permissionLabel = useMemo(() => {
     if (notificationPermission === "granted") return "Browser notifications allowed";

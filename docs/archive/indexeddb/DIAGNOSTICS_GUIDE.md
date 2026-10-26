@@ -1,3 +1,5 @@
+> 历史资料，已归档。这里描述的 IndexedDB 模块早已移除，命令和结论不适用于当前版本。当前实现见仓库 README 和 docs/ARCHITECTURE.md。
+
 # 🔍 IndexedDB 诊断工具使用指南
 
 ## 快速开始
