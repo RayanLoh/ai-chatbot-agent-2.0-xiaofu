@@ -1,6 +1,5 @@
 import { useLanguage } from '../i18n/LanguageProvider';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { MessageCircle, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import HistoryLoading from './HistoryLoading';
@@ -45,9 +44,6 @@ export default function SlideBar({
               <button aria-label={`${t('删除')} ${item.title || t('新对话')}`} className="delete-btn" onClick={() => setPending(item)}><Trash2 size={13} /></button>
             </div>
           </div>)}
-      </div>
-      <div className="sidebar-bottom">
-        <Link className="sidebar-settings" to="/settings"><span>{t("偏好设置")}</span></Link>
       </div>
     </aside>
     <DeleteConfirmModal isOpen={Boolean(pending)} conversationTitle={pending?.title || '新对话'} isDeleting={deleting}
