@@ -173,11 +173,6 @@ export function useChat({
       if (!isCurrent()) return;
       await loadConversations().catch(() => {});
       if (!isCurrent()) return;
-      window.dispatchEvent(new CustomEvent('xiaofu:dynamic-island', { detail: {
-        title: data.images?.length ? 'AI image generated' : 'New reply received',
-        subtitle: 'Conversation updated', message: (data.text || 'Image ready').slice(0, 120),
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      } }));
       if (resolvedId && resolvedId !== conversationId) setConversationId(resolvedId);
     } catch (error) {
       if (!isCurrent() || error.name === 'AbortError') return;
