@@ -127,6 +127,32 @@ async def test_image_generation_without_storage_never_calls_provider(monkeypatch
     client.assert_not_called()
 
 
+@pytest.mark.parametrize('reason,status,message', [
+    ('IMAGE_SAFETY', 422, 'safety reasons'),
+    ('MAX_TOKENS', 502, 'output limit'),
+    ('NO_IMAGE', 502, 'could not produce an image'),
+])
+async def test_image_failures_report_provider_finish_reason(monkeypatch, reason, status, message):
+    class Client:
+        def __init__(self, **kwargs): self.aio=self; self.models=self
+        async def __aenter__(self): return self
+        async def __aexit__(self, *args): pass
+        count_tokens=AsyncMock(return_value=types.CountTokensResponse(total_tokens=10))
+        generate_content=AsyncMock(return_value=types.GenerateContentResponse(
+            candidates=[types.Candidate(finish_reason=reason)]))
+    monkeypatch.setattr('core.agent.genai.Client', Client)
+    model='gemini-3-pro-image'
+    monkeypatch.setattr(Config, 'MODEL_BUDGETS', {model: {'input': 2, 'output': 12, 'image_micro_usd': 300000}})
+    monkeypatch.setattr(Config, 'R2_PRIVATE_BUCKET_CONFIRMED', True)
+    storage=SimpleNamespace(s3_client=object(), upload_image=AsyncMock())
+    with pytest.raises(HTTPException) as error:
+        await XiaofuAgent('test', 'system').get_response([{'text': 'Draw a cat'}], model, storage, AsyncMock())
+    assert error.value.status_code == status
+    detail=error.value.detail
+    assert message in (detail['detail'] if isinstance(detail, dict) else detail)
+    storage.upload_image.assert_not_called()
+
+
 def test_readiness_is_explicitly_configuration_only(monkeypatch):
     monkeypatch.setattr(Config,'GEMINI_API_KEY',None)
     with TestClient(app) as client:

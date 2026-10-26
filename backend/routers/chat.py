@@ -29,7 +29,14 @@ async def generate_api(req: ChatRequest, request: Request, db=Depends(get_conver
         raise
     except errors.APIError as error:
         status = 429 if error.code == 429 else 502
-        raise HTTPException(status, 'AI provider is unavailable or rejected the request. Please retry or choose another model.') from None
+        message = {
+            400: 'The AI provider rejected the generation settings or request. Try another model or prompt.',
+            401: 'The AI provider credentials are invalid. Please contact the administrator.',
+            403: 'The AI provider denied access. Check API permissions and billing.',
+            404: 'This model is not available for the configured API account. Please choose another model.',
+            429: 'The AI provider quota or rate limit was reached. Check billing or try again later.',
+        }.get(error.code, 'AI provider is unavailable or rejected the request. Please retry or choose another model.')
+        raise HTTPException(status, message) from None
     except Exception:
         logger.error('Unexpected generation failure', exc_info=False)
         raise HTTPException(500, 'Unable to generate a response. Please retry.') from None

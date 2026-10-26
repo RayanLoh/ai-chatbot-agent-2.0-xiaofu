@@ -86,6 +86,14 @@ class XiaofuAgent:
                 raise HTTPException(413, 'Conversation exceeds the input token limit. Start a new conversation.')
             await reserve_budget(maximum_cost(model_name, tokens))
             response = await client.models.generate_content(model=model_name, contents=contents, config=config)
+        blocked = {'SAFETY', 'IMAGE_SAFETY', 'PROHIBITED_CONTENT', 'IMAGE_PROHIBITED_CONTENT', 'BLOCKLIST', 'SPII'}
+        feedback = response.prompt_feedback
+        block_reason = getattr(feedback, 'block_reason', None)
+        finish_reasons = {getattr(candidate.finish_reason, 'value', candidate.finish_reason)
+                          for candidate in (response.candidates or [])[:1]}
+        if getattr(block_reason, 'value', block_reason) in blocked or finish_reasons & blocked:
+            raise HTTPException(422, {'code': 'CONTENT_BLOCKED',
+                'detail': 'The AI provider blocked this request for safety reasons. Please use a different prompt.'})
         text, images = [], []
         for candidate in (response.candidates or [])[:1]:
             for part in candidate.content.parts if candidate.content else []:
@@ -99,6 +107,10 @@ class XiaofuAgent:
                         raise HTTPException(503, 'Generated image could not be saved')
                     images.append(url)
         if not text and not images:
+            if 'MAX_TOKENS' in finish_reasons:
+                raise HTTPException(502, 'The model reached its output limit without returning content. Try a simpler request.')
+            if 'NO_IMAGE' in finish_reasons or 'IMAGE_OTHER' in finish_reasons:
+                raise HTTPException(502, 'The image model could not produce an image. Try a different prompt or image model.')
             raise HTTPException(502, 'The model returned no content. Please retry or choose another model.')
         usage = response.usage_metadata
         return {'text': ''.join(text).strip(), 'images': images, 'warnings': sorted(warnings),

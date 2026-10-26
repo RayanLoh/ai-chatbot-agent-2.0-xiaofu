@@ -158,6 +158,20 @@ describe('request isolation', () => {
     expect(api.recoverGeneration).not.toHaveBeenCalled();
   });
 
+  it('keeps the server image failure when recovery confirms the job failed', async () => {
+    api.generateResponse.mockRejectedValueOnce(Object.assign(new Error('Generated image could not be saved'), { status: 503 }));
+    api.recoverGeneration.mockRejectedValueOnce(Object.assign(new Error('Generation failed. Your draft has been restored.'), { terminal: true }));
+    const { result } = renderHook(setup, { initialProps: { owner: 'a', conversation: 'one' } });
+    await act(async () => {
+      result.current.inputRef.current = { value: 'Draw a cat', dispatchEvent: vi.fn() };
+      await result.current.sendMessage();
+    });
+    expect(result.current.messages.some((message) => message.isError && message.text === 'Generated image could not be saved')).toBe(true);
+    expect(result.current.inputRef.current.value).toBe('Draw a cat');
+    expect(result.current.pendingRecovery).toBeNull();
+    expect(api.generateResponse).toHaveBeenCalledTimes(1);
+  });
+
   it('persists uncertain requests across reload and blocks another paid call', async () => {
     api.generateResponse.mockRejectedValueOnce(new TypeError('offline'));
     api.recoverGeneration.mockRejectedValueOnce(new TypeError('offline'));

@@ -908,5 +908,55 @@
     "en": "Private image storage is not configured",
     "zh": "私有图片存储尚未配置",
     "ms": "Storan imej peribadi belum dikonfigurasi"
+  },
+  "The AI provider blocked this request for safety reasons. Please use a different prompt.": {
+    "en": "The AI provider blocked this request for safety reasons. Please use a different prompt.",
+    "zh": "AI 服务因安全限制拦截了此请求，请更换提示词。",
+    "ms": "Permintaan disekat atas sebab keselamatan. Sila gunakan arahan lain."
+  },
+  "The model reached its output limit without returning content. Try a simpler request.": {
+    "en": "The model reached its output limit without returning content. Try a simpler request.",
+    "zh": "模型达到输出上限，未返回内容。请尝试更简单的请求。",
+    "ms": "Model mencapai had output tanpa kandungan. Cuba permintaan yang lebih ringkas."
+  },
+  "The image model could not produce an image. Try a different prompt or image model.": {
+    "en": "The image model could not produce an image. Try a different prompt or image model.",
+    "zh": "图片模型未能生成图片，请更换提示词或图片模型。",
+    "ms": "Model tidak dapat menghasilkan imej. Cuba arahan atau model imej lain."
+  },
+  "Generated image could not be saved": {
+    "en": "Generated image could not be saved",
+    "zh": "生成的图片保存失败，请检查图片存储。",
+    "ms": "Imej yang dijana tidak dapat disimpan."
+  },
+  "The model returned no content. Please retry or choose another model.": {
+    "en": "The model returned no content. Please retry or choose another model.",
+    "zh": "模型未返回内容，请重试或更换模型。",
+    "ms": "Model tidak mengembalikan kandungan. Cuba lagi atau pilih model lain."
+  },
+  "The AI provider rejected the generation settings or request. Try another model or prompt.": {
+    "en": "The AI provider rejected the generation settings or request. Try another model or prompt.",
+    "zh": "AI 服务拒绝了生成设置或请求，请更换模型或提示词。",
+    "ms": "Penyedia AI menolak tetapan atau permintaan. Cuba model atau arahan lain."
+  },
+  "The AI provider credentials are invalid. Please contact the administrator.": {
+    "en": "The AI provider credentials are invalid. Please contact the administrator.",
+    "zh": "AI 服务凭据无效，请联系管理员。",
+    "ms": "Kelayakan penyedia AI tidak sah. Hubungi pentadbir."
+  },
+  "The AI provider denied access. Check API permissions and billing.": {
+    "en": "The AI provider denied access. Check API permissions and billing.",
+    "zh": "AI 服务拒绝访问，请检查 API 权限和结算状态。",
+    "ms": "Akses AI ditolak. Semak kebenaran API dan pengebilan."
+  },
+  "This model is not available for the configured API account. Please choose another model.": {
+    "en": "This model is not available for the configured API account. Please choose another model.",
+    "zh": "当前 API 账号无法使用此模型，请选择其他模型。",
+    "ms": "Model ini tidak tersedia untuk akaun API ini. Pilih model lain."
+  },
+  "The AI provider quota or rate limit was reached. Check billing or try again later.": {
+    "en": "The AI provider quota or rate limit was reached. Check billing or try again later.",
+    "zh": "已达到 AI 服务配额或速率限制，请检查结算状态或稍后重试。",
+    "ms": "Had kuota atau kadar AI dicapai. Semak pengebilan atau cuba lagi kemudian."
   }
 }

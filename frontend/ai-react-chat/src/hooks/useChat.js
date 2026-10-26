@@ -158,7 +158,17 @@ export function useChat({
         if (error.requestNotSent) { error.terminal = true; throw error; }
         if (!error.status || error.status >= 500 || error.code === 'GENERATION_RUNNING') {
           if (!recoveryEnabled) throw error;
-          data = await api.recoverGeneration(id, current.controller.signal);
+          try {
+            data = await api.recoverGeneration(id, current.controller.signal);
+          } catch (recoveryError) {
+            // A confirmed failed job must not hide the original server error.
+            // Uncertain jobs retain recovery so we do not send a second paid call.
+            if (recoveryError.terminal && error.status >= 500) {
+              error.terminal = true;
+              throw error;
+            }
+            throw recoveryError;
+          }
         } else {
           error.terminal = true;
           throw error;
