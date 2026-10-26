@@ -5,7 +5,7 @@ export function useConversations({ isMounted, authScopeKey }) {
   const [conversationError, setConversationError] = useState('');
   const [conversationId, setConversationId] = useState(null);
   const [conversations, setConversations] = useState([]);
-  const [messages, setMessages] = useState([]);
+  const [messages, updateMessages] = useState([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const scope = useRef(authScopeKey);
@@ -14,6 +14,13 @@ export function useConversations({ isMounted, authScopeKey }) {
   const listVersion = useRef(0);
   const selected = useRef(null);
   const mounted = useRef(true);
+  const historyCache = useRef(new Map());
+  const historyRequest = useRef(null);
+  // Mutations from chat/recovery invalidate server snapshots, including drafts.
+  const setMessages = useCallback((value) => {
+    historyCache.current.delete(selected.current);
+    updateMessages(value);
+  }, []);
 
   const loadConversations = useCallback(async () => {
     const version = ++listVersion.current;
@@ -43,25 +50,49 @@ export function useConversations({ isMounted, authScopeKey }) {
   }, [authScopeKey]);
 
   const selectConversation = useCallback(async (id) => {
+    if (selected.current === id && historyRequest.current?.owner === authScopeKey) return;
+    historyRequest.current?.controller.abort();
     const version = ++selection.current;
     const owner = authScopeKey;
     selected.current = id;
     setConversationId(id);
-    setMessages([]);
+    const cached = historyCache.current.get(id);
+    if (cached?.owner === owner && Date.now() - cached.time < 30000) {
+      historyRequest.current = null;
+      updateMessages(cached.messages);
+      setIsLoadingMessages(false);
+      return;
+    }
+    const current = { owner, controller: new AbortController() };
+    historyRequest.current = current;
+    updateMessages([]);
     setIsLoadingMessages(true);
     try {
-      const data = await api.getConversationMessages(id);
-      if (mounted.current && scope.current === owner && version === selection.current) setMessages(data.messages || []);
-    } catch (error) {
+      const data = await api.getConversationMessages(id, current.controller.signal);
       if (mounted.current && scope.current === owner && version === selection.current) {
-        setMessages([{ id: `error:${id}`, sender: 'bot', text: error.message, isError: true }]);
+        const loaded = data.messages || [];
+        historyCache.current.delete(id);
+        historyCache.current.set(id, { owner, time: Date.now(), messages: loaded });
+        if (historyCache.current.size > 10) historyCache.current.delete(historyCache.current.keys().next().value);
+        updateMessages(loaded);
+      }
+    } catch (error) {
+      if (error.name !== 'AbortError' && mounted.current && scope.current === owner && version === selection.current) {
+        historyCache.current.delete(id);
+        updateMessages([{ id: `error:${id}`, sender: 'bot', text: error.message, isError: true }]);
       }
     } finally {
+      if (historyRequest.current === current) historyRequest.current = null;
       if (mounted.current && scope.current === owner && version === selection.current) setIsLoadingMessages(false);
     }
   }, [authScopeKey]);
 
   const createNewChat = useCallback(async (switchFocus = true) => {
+    if (switchFocus) {
+      historyRequest.current?.controller.abort();
+      historyRequest.current = null;
+      setIsLoadingMessages(false);
+    }
     const owner = authScopeKey;
     const version = switchFocus ? ++selection.current : selection.current;
     try {
@@ -86,6 +117,7 @@ export function useConversations({ isMounted, authScopeKey }) {
     try {
       await api.deleteConversation(id);
       if (!mounted.current || scope.current !== owner) return;
+      historyCache.current.delete(id);
       setConversations((prev) => prev.filter((item) => item.id !== id));
       if (selected.current === id) {
         ++selection.current;
@@ -115,6 +147,7 @@ export function useConversations({ isMounted, authScopeKey }) {
 
   useEffect(() => {
     mounted.current = true;
+    historyCache.current.clear();
     ++selection.current;
     ++listVersion.current;
     selected.current = null;
@@ -124,6 +157,9 @@ export function useConversations({ isMounted, authScopeKey }) {
     setIsLoadingMessages(false);
     if (isMounted) void loadConversations();
     return () => {
+      historyRequest.current?.controller.abort();
+      historyRequest.current = null;
+      historyCache.current.clear();
       mounted.current = false;
       ++selection.current;
       ++listVersion.current;
@@ -131,9 +167,12 @@ export function useConversations({ isMounted, authScopeKey }) {
   }, [authScopeKey, isMounted, loadConversations]);
 
   const chooseId = useCallback((id) => {
+    historyRequest.current?.controller.abort();
+    historyRequest.current = null;
     ++selection.current;
     selected.current = id;
     setConversationId(id);
+    setIsLoadingMessages(false);
   }, []);
 
   return {

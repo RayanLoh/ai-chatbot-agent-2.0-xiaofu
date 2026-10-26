@@ -15,6 +15,7 @@ function setup(props) {
   const [messages, setMessages] = useState([]);
   return { messages, ...useChat({
     recoveryEnabled: 'recoveryEnabled' in props ? props.recoveryEnabled : true,
+    isLoadingHistory: props.isLoadingHistory,
     authScopeKey: props.owner, conversationId: props.conversation,
     availableModels: models, onAuthRequired: vi.fn(), setConversationId: vi.fn(),
     onSubscriptionRequired: props.onSubscriptionRequired,
@@ -119,6 +120,16 @@ describe('request isolation', () => {
     await act(async () => { old.resolve({ text: 'Private reply' }); await first; });
     expect(result.current.messages.some((message) => message.text === 'Private reply')).toBe(false);
     expect(result.current.isGenerating).toBe(false);
+  });
+
+  it('waits for history before sending so the history response cannot overwrite a new message', async () => {
+    const { result } = renderHook(setup, { initialProps: { owner: 'a', conversation: 'one', isLoadingHistory: true } });
+    await act(async () => {
+      result.current.inputRef.current = { value: 'Wait for history' };
+      await result.current.sendMessage();
+    });
+    expect(api.generateResponse).not.toHaveBeenCalled();
+    expect(result.current.inputRef.current.value).toBe('Wait for history');
   });
 
   it('blocks sending while an image upload is pending', async () => {

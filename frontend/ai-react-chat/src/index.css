@@ -110,3 +110,26 @@ button.retry-history{margin-top:14px;padding:8px 13px;background:var(--surface);
 @media(max-width:480px){.welcome .starter-grid{margin-top:24px}.welcome .starter-card{min-height:95px;padding:13px 10px}.welcome .welcome-art{top:-40px}.welcome .welcome-description{font-size:13px}}
 
 .recovery-actions{display:flex;gap:8px;flex-shrink:0}.recovery-actions button{min-height:32px;padding:6px 12px;border:1px solid var(--accent-line);border-radius:9px;background:var(--accent-soft);color:var(--accent);font-size:11px;white-space:nowrap;box-shadow:none}.recovery-actions button:hover{background:var(--surface-hover);transform:none}.composer-caption:has(.recovery-actions){gap:10px;flex-wrap:wrap}
+
+/* History appears in place, without an overlay or an artificial delay. */
+.history-loading{width:100%;padding:12px 0;animation:arrive .2s ease}
+.history-loading-label{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:12px;margin-bottom:28px}
+.history-loading-label svg{color:var(--accent);animation:softPulse 1.8s ease-in-out infinite}
+.history-skeleton{display:flex;flex-direction:column;gap:28px}
+.history-skeleton-bubble{position:relative;width:75%;display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:18px;background:var(--surface);border:1px solid var(--line)}
+.history-skeleton-bubble.user{align-self:flex-end;width:34%;background:var(--accent-soft);border-color:var(--accent-line)}
+.history-skeleton-bubble.short{width:24%}
+.history-skeleton span,.history-skeleton i{display:block;height:9px;border-radius:8px;background:linear-gradient(100deg,var(--line) 20%,var(--accent-soft) 45%,var(--line) 70%);background-size:250% 100%;animation:historyShimmer 1.8s ease-in-out infinite}
+.history-skeleton-bubble>i{width:27px;height:27px;border-radius:9px;margin-bottom:8px}
+.history-skeleton-bubble>span:last-child{width:62%}
+.history-loading.compact{padding:10px 12px;box-sizing:border-box}
+.history-loading.compact .history-loading-label{font-size:11px;margin-bottom:22px;gap:7px}
+.history-loading.compact .history-skeleton{gap:20px}
+.history-skeleton-row{display:flex;align-items:center;gap:12px;height:26px}
+.history-skeleton-row i{width:18px;height:18px;border-radius:6px;flex-shrink:0}
+.history-skeleton-row span{width:75%;height:10px}
+.history-skeleton-row:nth-child(even) span{width:55%}
+.history-refresh-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:softPulse 1.4s infinite}
+@keyframes historyShimmer{from{background-position:100% 0}to{background-position:-100% 0}}
+@media(max-width:600px){.history-skeleton-bubble{width:85%;padding:16px}.history-skeleton-bubble.user{width:48%}.history-skeleton-bubble.short{width:36%}}
+@media(prefers-reduced-motion:reduce){.history-loading,.history-loading-label svg,.history-skeleton span,.history-skeleton i,.history-refresh-dot{animation:none}}

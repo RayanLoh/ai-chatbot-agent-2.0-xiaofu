@@ -8,7 +8,7 @@ export const createConversation = async (title = 'new conversation') => requestJ
   body: JSON.stringify({ title }),
 });
 
-export const getConversationMessages = async (conversationId) => requestJson(endpoints.conversation(conversationId));
+export const getConversationMessages = async (conversationId, signal) => requestJson(endpoints.conversation(conversationId), { signal });
 
 export const updateConversationTitle = async (conversationId, title) => requestJson(endpoints.conversation(conversationId), {
   method: 'PUT',

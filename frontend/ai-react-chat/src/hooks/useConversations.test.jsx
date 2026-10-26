@@ -72,3 +72,55 @@ it('does not auto-delete conversations when loading a list', async () => {
   await waitFor(() => expect(result.current.conversations).toHaveLength(1));
   expect(api.deleteConversation).not.toHaveBeenCalled();
 });
+
+it('opens recently loaded history from memory without another request', async () => {
+  api.getConversationMessages.mockImplementation(async (id) => ({ messages: [{ text: id }] }));
+  const { result } = renderHook(() => useConversations({ isMounted: true, authScopeKey: 'a' }));
+  await act(async () => { await result.current.selectConversation('one'); });
+  await act(async () => { await result.current.selectConversation('two'); });
+  await act(async () => { await result.current.selectConversation('one'); });
+  expect(api.getConversationMessages).toHaveBeenCalledTimes(2);
+  expect(result.current.messages).toEqual([{ text: 'one' }]);
+  expect(result.current.isLoadingMessages).toBe(false);
+});
+
+it('invalidates cached history after chat changes and after the freshness window', async () => {
+  api.getConversationMessages.mockResolvedValue({ messages: [{ text: 'server' }] });
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(1000);
+  const { result } = renderHook(() => useConversations({ isMounted: true, authScopeKey: 'a' }));
+  await act(async () => { await result.current.selectConversation('one'); });
+  act(() => result.current.setMessages([{ text: 'new reply' }]));
+  await act(async () => { await result.current.selectConversation('one'); });
+  expect(api.getConversationMessages).toHaveBeenCalledTimes(2);
+  clock.mockReturnValue(32000);
+  await act(async () => { await result.current.selectConversation('one'); });
+  expect(api.getConversationMessages).toHaveBeenCalledTimes(3);
+  clock.mockRestore();
+});
+
+it('cancels superseded requests and avoids duplicate clicks during loading', async () => {
+  const slow = deferred();
+  api.getConversationMessages.mockReturnValueOnce(slow.promise).mockResolvedValueOnce({ messages: [] });
+  const { result } = renderHook(() => useConversations({ isMounted: true, authScopeKey: 'a' }));
+  let first;
+  act(() => { first = result.current.selectConversation('one'); });
+  const signal = api.getConversationMessages.mock.calls[0][1];
+  await act(async () => { await result.current.selectConversation('one'); });
+  expect(api.getConversationMessages).toHaveBeenCalledTimes(1);
+  await act(async () => { await result.current.selectConversation('two'); });
+  expect(signal.aborted).toBe(true);
+  await act(async () => { slow.resolve({ messages: [{ text: 'late' }] }); await first; });
+  expect(result.current.messages).toEqual([]);
+});
+
+it('does not reuse another account history cache', async () => {
+  api.getConversationMessages.mockResolvedValueOnce({ messages: [{ text: 'private A' }] })
+    .mockResolvedValueOnce({ messages: [{ text: 'B' }] });
+  const { result, rerender } = renderHook(({ owner }) => useConversations({ isMounted: true, authScopeKey: owner }),
+    { initialProps: { owner: 'a' } });
+  await act(async () => { await result.current.selectConversation('same'); });
+  rerender({ owner: 'b' });
+  await act(async () => { await result.current.selectConversation('same'); });
+  expect(api.getConversationMessages).toHaveBeenCalledTimes(2);
+  expect(result.current.messages).toEqual([{ text: 'B' }]);
+});

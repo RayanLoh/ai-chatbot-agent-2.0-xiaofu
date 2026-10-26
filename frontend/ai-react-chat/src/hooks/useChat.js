@@ -4,6 +4,7 @@ import { useLanguage } from '../i18n/LanguageProvider';
 
 export function useChat({
   recoveryEnabled = false,
+  isLoadingHistory = false,
   authScopeKey, onAuthRequired, onSubscriptionRequired, conversationId, setConversationId,
   messages, setMessages, loadConversations, updateConversationTitle, availableModels,
 }) {
@@ -131,7 +132,7 @@ export function useChat({
 
   const sendMessage = async () => {
     const text = inputRef.current?.value.trim();
-    if (!text || active.current || pendingRecovery || upload.current || !availableModels.includes(aiModel)) return;
+    if (!text || isLoadingHistory || active.current || pendingRecovery || upload.current || !availableModels.includes(aiModel)) return;
     if (text.length > 20000) { alert(t('Messages must be at most 20,000 characters.')); return; }
     const id = crypto.randomUUID();
     const botId = `${id}:bot`;

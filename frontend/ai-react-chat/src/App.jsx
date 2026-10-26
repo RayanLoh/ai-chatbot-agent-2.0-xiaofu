@@ -18,6 +18,7 @@ import { downloadImage, getModels } from './api';
 import { useAuth } from './hooks/useAuth';
 import { useChat } from './hooks/useChat';
 import { useConversations } from './hooks/useConversations';
+import HistoryLoading from './component/HistoryLoading';
 import { useTheme } from './hooks/useTheme';
 import { requestJson } from './api/http';
 import { useGuestHistoryClaim } from './hooks/useGuestHistoryClaim';
@@ -158,6 +159,7 @@ function App() {
     restorePendingDraft,
   } = useChat({
     recoveryEnabled,
+    isLoadingHistory: isLoadingMessages,
     authScopeKey: user?.sub || 'guest',
     availableModels: modelOptions.filter((option) => option.available !== false).map((option) => option.value),
     onAuthRequired: openLoginModal,
@@ -432,7 +434,7 @@ const appContent = (
           }}
         >
           {isLoadingMessages ? (
-            <div className="msg bot loading"><p>{t("Loading messages...")}</p></div>
+            <HistoryLoading />
           ) : showNewConversationHint ? (
             <section className="welcome">
               <div className="welcome-art" aria-hidden="true"><span className="welcome-orbit" /><Sparkles size={68} strokeWidth={1} /></div>
@@ -552,7 +554,7 @@ const appContent = (
               <textarea ref={inputRef} aria-label={t("发送给小芙的消息")} placeholder={t("有个想法？和小芙聊聊…")} rows="1" className="chat-textarea"
                 onInput={(event) => { autoResizeTextarea(event.target); setHasDraft(Boolean(event.target.value.trim())); }}
                 onKeyDown={(event) => {
-                  if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing && !isGenerating) {
+                  if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing && !isGenerating && !isLoadingMessages) {
                     event.preventDefault(); sendMessage(); setHasDraft(Boolean(inputRef.current?.value.trim())); resetTextareaHeight(event.target);
                   }
                 }} />
@@ -566,7 +568,7 @@ const appContent = (
                 <div className="input-actions">
                   <span className="composer-keyboard"><kbd>Enter</kbd> {t("发送")} · <kbd>Shift + Enter</kbd> {t("换行")}</span>
                   {isGenerating ? <button onClick={stopGenerating} className="stop-btn" aria-label={t("停止生成")} title={t("停止生成")}><Square size={13} fill="currentColor" /></button>
-                    : <button onClick={() => { sendMessage(); setHasDraft(Boolean(inputRef.current?.value.trim())); resetTextareaHeight(inputRef.current); }} disabled={!hasDraft || isUploading || !modelOptions.some((option) => option.available !== false) || Boolean(pendingRecovery)} className="send-btn" aria-label={t("发送消息")} title={t("发送消息")}><ArrowUp size={19} /></button>}
+                    : <button onClick={() => { sendMessage(); setHasDraft(Boolean(inputRef.current?.value.trim())); resetTextareaHeight(inputRef.current); }} disabled={!hasDraft || isLoadingMessages || isUploading || !modelOptions.some((option) => option.available !== false) || Boolean(pendingRecovery)} className="send-btn" aria-label={t("发送消息")} title={t("发送消息")}><ArrowUp size={19} /></button>}
                 </div>
               </div>
             </div>

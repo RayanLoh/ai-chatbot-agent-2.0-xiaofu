@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import HistoryLoading from './HistoryLoading';
 import '../styles/SlideBar.css';
 
 export default function SlideBar({
@@ -23,9 +24,9 @@ export default function SlideBar({
         <button className="new-chat-btn" onClick={onNewChat}><Plus size={18} /><span>{t("开启新对话")}</span></button>
         <label className="search-box"><Search size={16} /><input aria-label={t("搜索对话")} placeholder={t("搜索") } value={search} onChange={(event) => setSearch(event.target.value)} /></label>
       </div>
-      <div className="history-heading"><span>{t("最近对话")}</span></div>
-      <div className="conversation-list">
-        {isLoading && !conversations.length ? <div className="sidebar-empty"><span className="loading-dots">•••</span><p>{t("正在找回你的对话…")}</p></div>
+      <div className="history-heading"><span>{t("最近对话")}</span>{isLoading && conversations.length > 0 && <span className="history-refresh-dot" role="status" aria-label={t('正在找回你的对话…')} />}</div>
+      <div className="conversation-list" aria-busy={isLoading}>
+        {isLoading && !conversations.length ? <HistoryLoading compact />
           : error ? <div className="sidebar-empty"><p>{t("暂时连接不上对话")}</p><button className="retry-history" onClick={onRetry}>{t("重新连接")}</button></div>
           : !filtered.length ? <div className="sidebar-empty"><p>{search ? t("暂时没有找到") : t("暂无对话")}</p></div>
           : filtered.map((item) => <div key={item.id} className={`conversation-item ${item.id === currentConversationId ? 'active' : ''}`}>
